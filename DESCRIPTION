@@ -1,12 +1,16 @@
 Package: golem
-Title: What the Package Does (One Line, Title Case)
+Title: Generalized Linear Models for Big Data
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Johan",
+           family = "Larsson",
            role = c("aut", "cre"),
-           email = "first.last@example.com")
-Description: What the package does (one paragraph).
-License: What license it uses
+           email = "mail@larssonjohan.com",
+           comment = c(ORCID = "0000-0002-4029-5945"))
+Description: Fast implementations of penalized Generalized Linear Models (GLM)
+    suited to big data.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+URL: https://github.com/jolars/golem
+BugReports: https://github.com/jolars/golem/issues
