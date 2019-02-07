@@ -10,7 +10,21 @@ Authors@R:
 Description: Fast implementations of penalized Generalized Linear Models (GLM)
     suited to big data.
 License: MIT + file LICENSE
-Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 3.3.0)
+Imports: 
+    Rcpp
+LinkingTo:
+    Rcpp (>= 0.12.12),
+    RcppArmadillo (>= 0.7.600.1.0)
+Suggests: 
+    covr,
+    spelling,
+    testthat
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.1.1
+Language: en-US
+Encoding: UTF-8
 URL: https://github.com/jolars/golem
 BugReports: https://github.com/jolars/golem/issues
