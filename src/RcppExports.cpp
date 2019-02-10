@@ -6,21 +6,54 @@
 
 using namespace Rcpp;
 
-// what
-double what(double x, double y);
-RcppExport SEXP _golem_what(SEXP xSEXP, SEXP ySEXP) {
+// denseGolem
+Rcpp::List denseGolem(arma::mat X, arma::vec y, Rcpp::List control);
+RcppExport SEXP _golem_denseGolem(SEXP XSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type x(xSEXP);
-    Rcpp::traits::input_parameter< double >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(what(x, y));
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(denseGolem(X, y, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// prox_slope_cpp
+arma::vec prox_slope_cpp(arma::vec y, const arma::vec lambda);
+RcppExport SEXP _golem_prox_slope_cpp(SEXP ySEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::vec >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(prox_slope_cpp(y, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// slope_solver
+Rcpp::List slope_solver(const arma::mat X, const arma::vec y, const arma::vec lambda, arma::uword max_iter, arma::uword grad_iter, arma::uword opt_iter, double tol_infeas, double tol_rel_gap);
+RcppExport SEXP _golem_slope_solver(SEXP XSEXP, SEXP ySEXP, SEXP lambdaSEXP, SEXP max_iterSEXP, SEXP grad_iterSEXP, SEXP opt_iterSEXP, SEXP tol_infeasSEXP, SEXP tol_rel_gapSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::vec >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type grad_iter(grad_iterSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type opt_iter(opt_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol_infeas(tol_infeasSEXP);
+    Rcpp::traits::input_parameter< double >::type tol_rel_gap(tol_rel_gapSEXP);
+    rcpp_result_gen = Rcpp::wrap(slope_solver(X, y, lambda, max_iter, grad_iter, opt_iter, tol_infeas, tol_rel_gap));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_golem_what", (DL_FUNC) &_golem_what, 2},
+    {"_golem_denseGolem", (DL_FUNC) &_golem_denseGolem, 3},
+    {"_golem_prox_slope_cpp", (DL_FUNC) &_golem_prox_slope_cpp, 2},
+    {"_golem_slope_solver", (DL_FUNC) &_golem_slope_solver, 8},
     {NULL, NULL, 0}
 };
 
