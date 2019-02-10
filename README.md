@@ -11,3 +11,9 @@ status](https://ci.appveyor.com/api/projects/status/github/jolars/golem?branch=m
 status](https://codecov.io/gh/jolars/golem/branch/master/graph/badge.svg)](https://codecov.io/github/jolars/golem?branch=master)
 
 Fast implementations of glms for big data.
+
+## Code of conduct
+
+Please note that the ‘golem’ project is released with a [Contributor
+Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project,
+you agree to abide by its terms.
