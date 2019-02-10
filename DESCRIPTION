@@ -2,25 +2,27 @@ Package: golem
 Title: Generalized Linear Models for Big Data
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Johan",
-           family = "Larsson",
-           role = c("aut", "cre"),
-           email = "mail@larssonjohan.com",
-           comment = c(ORCID = "0000-0002-4029-5945"))
+    c(person("Johan",
+             "Larsson",
+             role = c("aut", "cre"),
+             email = "mail@larssonjohan.com",
+             comment = c(ORCID = "0000-0002-4029-5945")))
 Description: Fast implementations of penalized Generalized Linear Models (GLM)
     suited to big data.
-License: MIT + file LICENSE
+License: GPL-3
 LazyData: true
 Depends:
-    R (>= 3.3.0)
+    R (>= 3.4.0)
 Imports: 
     Rcpp
 LinkingTo:
-    Rcpp (>= 0.12.12),
-    RcppArmadillo (>= 0.7.600.1.0)
+    Rcpp (>= 1.0.0),
+    RcppArmadillo (>= 0.9.200.7.0)  
 Suggests: 
     covr,
+    isotone,
     spelling,
+    SLOPE,
     testthat
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
