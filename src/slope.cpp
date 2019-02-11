@@ -1,11 +1,20 @@
 #include <RcppArmadillo.h>
-#include "prox.h"
+#include "proxes.h"
+#include "families.h"
 
 std::unique_ptr<Prox>
-selectProx(std::string prox_choice,
-           arma::vec lambda)
+setupProx(const std::string& prox_choice,
+          const arma::vec& lambda)
 {
   return std::unique_ptr<SLOPE>(new SLOPE{lambda});
+}
+
+std::unique_ptr<Family>
+setupFamily(const std::string& family_choice,
+            const arma::mat& X,
+            const arma::vec& y)
+{
+  return std::unique_ptr<Gaussian>(new Gaussian(X, y));
 }
 
 // [[Rcpp::export]]
@@ -24,7 +33,10 @@ slope_solver(const arma::mat X,
   uword n = X.n_cols;
 
   // select prox
-  auto prox = selectProx("slope", lambda);
+  auto prox = setupProx("slope", lambda);
+
+  // select family
+  auto family = setupFamily("gaussian", X, y);
 
   // lower bound on Lipschitz constant
   vec x = Rcpp::rnorm(n);
@@ -53,16 +65,16 @@ slope_solver(const arma::mat X,
   double obj_dual = 0.0;
 
   while (iter <= max_iter) {
-    vec r(n);
+    vec lin_pred(n);
 
     // compute gradient at f(beta)
     if (iter & grad_iter == 0)
-      r = X*beta - y;
+      lin_pred = X*beta;
     else
-      r = (X_beta_tilde + ((t_prev - 1.0)/t) * (X_beta_tilde - X_beta_tilde_prev)) - y;
+      lin_pred = (X_beta_tilde + ((t_prev - 1.0)/t) * (X_beta_tilde - X_beta_tilde_prev));
 
-    vec g = X.t()*r;
-    double f = dot(r, r)/2.0;
+    vec g = family->gradient(lin_pred);
+    double f = family->loss(lin_pred);
 
     iter++;
 
@@ -74,7 +86,7 @@ slope_solver(const arma::mat X,
 
       // compute primal and dual objective
       obj_primal =  f + dot(lambda, beta_sorted);
-      obj_dual   = -f - dot(r, y);
+      obj_dual   = -f - dot(lin_pred - y, y);
 
       // check primal-dual gap
       if ((std::abs(obj_primal - obj_dual)/std::max(1.0, obj_primal) < tol_rel_gap) &&
@@ -100,8 +112,7 @@ slope_solver(const arma::mat X,
 
       vec d = beta_tilde - beta;
       X_beta_tilde = X*beta_tilde;
-      r = X_beta_tilde - y;
-      f = dot(r, r)/2.0;
+      f = family->loss(X_beta_tilde);
       double q = f_prev + dot(d, g) + (L/2.0)*dot(d, d);
 
       if (q < f*(1.0 - 1e-12))
