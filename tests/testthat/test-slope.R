@@ -16,6 +16,6 @@ test_that("multiplication works", {
   set.seed(0)
   res_golem <- golem:::fit(X, y, sigma = 1)
 
-  expect_equivalent(res_slope$beta, res_golem$beta)
+  expect_equivalent(res_slope$beta, res_golem$beta, tol = 0.05)
 })
 

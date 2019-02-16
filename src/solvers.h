@@ -71,7 +71,7 @@ private:
   const std::unique_ptr<Family>& family;
   const std::unique_ptr<Penalty>& penalty;
   const arma::uword max_iter = 1e4;
-  double tol = 1e-3;
+  double tol = 1e-4;
 };
 
 #endif /* GOLEM_SOLVERS_ */
