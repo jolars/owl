@@ -7,14 +7,14 @@
 using namespace Rcpp;
 
 // denseGolem
-Rcpp::List denseGolem(arma::mat X, arma::vec y, Rcpp::List control);
+Rcpp::List denseGolem(const arma::mat& X, const arma::vec& y, const Rcpp::List control);
 RcppExport SEXP _golem_denseGolem(SEXP XSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type control(controlSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List >::type control(controlSEXP);
     rcpp_result_gen = Rcpp::wrap(denseGolem(X, y, control));
     return rcpp_result_gen;
 END_RCPP

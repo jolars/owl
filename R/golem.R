@@ -87,7 +87,14 @@ fit <- function(X,
 # Helper function for invoking the SLOPE solver.
 SLOPE_solver_call <- function(X, y, lambda) {
 
-  result = slope_solver(X, y, lambda)
+  args <- list(family_choice = "gaussian",
+               penalty_choice = "slope",
+               solver_choice = "fista",
+               lambda = lambda)
+
+  result = denseGolem(X, y, args)
+
+  # result = slope_solver(X, y, lambda)
   beta = result$x
   tol = 0 # Our solver sets un-selected beta's to *exactly* zero.
 

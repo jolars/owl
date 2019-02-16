@@ -1,21 +1,6 @@
 #include <RcppArmadillo.h>
-#include "proxes.h"
+#include "penalties.h"
 #include "families.h"
-
-std::unique_ptr<Prox>
-setupProx(const std::string& prox_choice,
-          const arma::vec& lambda)
-{
-  return std::unique_ptr<SLOPE>(new SLOPE{lambda});
-}
-
-std::unique_ptr<Family>
-setupFamily(const std::string& family_choice,
-            const arma::mat& X,
-            const arma::vec& y)
-{
-  return std::unique_ptr<Gaussian>(new Gaussian(X, y));
-}
 
 // [[Rcpp::export]]
 Rcpp::List
@@ -32,8 +17,8 @@ slope_solver(const arma::mat X,
 
   uword n = X.n_cols;
 
-  // select prox
-  auto prox = setupProx("slope", lambda);
+  // select penalty
+  auto penalty = setupPenalty("slope", lambda);
 
   // select family
   auto family = setupFamily("gaussian", X, y);
@@ -85,7 +70,7 @@ slope_solver(const arma::mat X,
       infeas = std::max(cumsum(g_sorted - lambda).max(), 0.0);
 
       // compute primal and dual objective
-      obj_primal =  f + dot(lambda, beta_sorted);
+      obj_primal =  f + penalty->loss(beta_sorted);
       obj_dual   = -f - dot(lin_pred - y, y);
 
       // check primal-dual gap
@@ -108,7 +93,8 @@ slope_solver(const arma::mat X,
     // Lipschitz search
     while (true) {
       // compute prox mapping
-      beta_tilde = prox->eval(beta - (1.0/L)*g, L);
+      beta_tilde = beta - (1.0/L)*g;
+      beta_tilde = penalty->eval(beta_tilde, L);
 
       vec d = beta_tilde - beta;
       X_beta_tilde = X*beta_tilde;
