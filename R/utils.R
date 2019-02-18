@@ -1,28 +1,13 @@
 # Compute the usual unbiased estimate of the variance in a linear model.
 estimate_noise <- function(X, y, intercept = TRUE) {
-  n = nrow(X)
+  n <- nrow(X)
   if (intercept)
-    X = cbind(rep(1, n), X)
-  p = ncol(X)
+    X <- cbind(rep(1, n), X)
+  p <- ncol(X)
   stopifnot(n > p)
 
-  fit = lm.fit(X, y)
+  fit <- lm.fit(X, y)
   sqrt(sum(fit$residuals^2) / (n-p))
-}
-
-# A variant of the built-in function 'scale' that using L2-normalization for
-# the scaling.
-normalize <- function(X, center = TRUE, scale = TRUE) {
-  X <- as.matrix(X)
-  if (center) {
-    means <- colMeans(X, na.rm = TRUE)
-    X <- sweep(X, 2, means)
-  }
-  if (scale) {
-    scales <- apply(X, 2, function (x) sqrt(sum(x^2)))
-    X <- sweep(X, 2, scales, "/")
-  }
-  X
 }
 
 # Generate a random synthetic model and data. Used for testing.

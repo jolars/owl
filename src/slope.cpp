@@ -4,8 +4,8 @@
 
 // [[Rcpp::export]]
 Rcpp::List
-slope_solver(const arma::mat X,
-             const arma::vec y,
+slope_solver(arma::mat X,
+             arma::vec y,
              const arma::vec lambda,
              arma::uword max_iter = 1e4,
              arma::uword grad_iter = 20,

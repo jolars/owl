@@ -1,16 +1,31 @@
 #ifndef GOLEM_UTILS
 #define GOLEM_UTILS
 
-template <typename T>
-double
-squaredNorm(const T& a)
+inline
+arma::vec
+sigmoid(const arma::vec& x)
 {
-  auto squared_norm = 0.0;
+  return 1.0/(1.0 + arma::exp(-x));
+}
 
-  for (const auto& a_i : a)
-    squared_norm += a_i*a_i;
+inline
+double
+sigmoid(const double x)
+{
+  return 1.0/(1.0 + std::exp(-x));
+}
 
-  return squared_norm;
+//' Clamp a value to [min, max]
+//' @param x value to clamp
+//' @param min min
+//' @param max max
+//' @noRd
+template <typename T>
+inline
+T
+clamp(const T& x, const T& min, const T& max)
+{
+  return x > max ? max : (x < min ? min : x);
 }
 
 class ConvergenceCheck {
@@ -36,5 +51,65 @@ private:
   arma::vec beta_old;
   const double tol;
 };
+
+template <typename T>
+std::pair<arma::rowvec, arma::rowvec>
+preprocessFeatures(T& X, const std::string& standardize)
+{
+  using namespace arma;
+
+  auto p = X.n_cols;
+
+  rowvec X_scale(p);
+  rowvec X_center(p);
+
+  // always center features to make fitting intercept easier
+  // TODO(jolars): adapt for sparse input later
+
+  if (standardize == "both" || standardize == "features") {
+    X_center = mean(X);
+
+    for (decltype(p) j = 0; j < p; ++j) {
+      double Xi_norm = norm(X.col(j), 2);
+      X_scale(j) = Xi_norm != 0.0 ? Xi_norm : 1.0;
+
+      X.col(j) -= X_center(j);
+      X.col(j) /= X_scale(j);
+    }
+  } else {
+    X_center.zeros();
+    X_scale.ones();
+  }
+
+  return std::make_pair(X_center, X_scale);
+}
+
+inline
+std::pair<double, arma::vec>
+unstandardize(double&& intercept,
+              arma::vec&& beta,
+              const arma::rowvec& X_center,
+              const arma::rowvec& X_scale,
+              const double y_center,
+              const double y_scale,
+              const bool fit_intercept)
+{
+  using namespace arma;
+
+  uword m = beta.n_cols;
+  uword p = beta.n_rows;
+
+  arma::vec X_bar_beta_sum(p, fill::zeros);
+
+  for (decltype(p) j = 0; j < m; ++j) {
+    beta.col(j) *= y_scale/X_scale(j);
+    X_bar_beta_sum += X_center(j)*beta.col(j);
+  }
+
+  if (fit_intercept)
+    intercept = intercept*y_scale + y_center - X_bar_beta_sum(0);
+
+  return std::make_pair(intercept, beta);
+}
 
 #endif /* GOLEM_UTILS */

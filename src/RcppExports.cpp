@@ -6,16 +6,16 @@
 
 using namespace Rcpp;
 
-// denseGolem
-Rcpp::List denseGolem(const arma::mat& X, const arma::vec& y, const Rcpp::List control);
-RcppExport SEXP _golem_denseGolem(SEXP XSEXP, SEXP ySEXP, SEXP controlSEXP) {
+// golemDense
+Rcpp::List golemDense(arma::mat& X, arma::vec& y, const Rcpp::List control);
+RcppExport SEXP _golem_golemDense(SEXP XSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Rcpp::List >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(denseGolem(X, y, control));
+    rcpp_result_gen = Rcpp::wrap(golemDense(X, y, control));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -32,13 +32,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // slope_solver
-Rcpp::List slope_solver(const arma::mat X, const arma::vec y, const arma::vec lambda, arma::uword max_iter, arma::uword grad_iter, arma::uword opt_iter, double tol_infeas, double tol_rel_gap);
+Rcpp::List slope_solver(arma::mat X, arma::vec y, const arma::vec lambda, arma::uword max_iter, arma::uword grad_iter, arma::uword opt_iter, double tol_infeas, double tol_rel_gap);
 RcppExport SEXP _golem_slope_solver(SEXP XSEXP, SEXP ySEXP, SEXP lambdaSEXP, SEXP max_iterSEXP, SEXP grad_iterSEXP, SEXP opt_iterSEXP, SEXP tol_infeasSEXP, SEXP tol_rel_gapSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
     Rcpp::traits::input_parameter< const arma::vec >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type grad_iter(grad_iterSEXP);
@@ -51,7 +51,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_golem_denseGolem", (DL_FUNC) &_golem_denseGolem, 3},
+    {"_golem_golemDense", (DL_FUNC) &_golem_golemDense, 3},
     {"_golem_prox_slope_cpp", (DL_FUNC) &_golem_prox_slope_cpp, 2},
     {"_golem_slope_solver", (DL_FUNC) &_golem_slope_solver, 8},
     {NULL, NULL, 0}

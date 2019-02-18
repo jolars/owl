@@ -17,7 +17,7 @@
 #'
 #' @rdname lambda
 #' @export
-create_lambda <- function(n, p, fdr=0.20, method=c('bhq','gaussian')) {
+create_lambda <- function(n, p, fdr=0.20, method = c("bhq", "gaussian")) {
   impl = switch(match.arg(method),
                 bhq = create_lambda_bhq,
                 gaussian = create_lambda_gaussian_truncated)
