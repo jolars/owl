@@ -41,8 +41,7 @@ public:
   double
   loss(const arma::vec& lin_pred)
   {
-    arma::vec residual = lin_pred - y;
-    return 0.5*arma::dot(residual, residual);
+    return 0.5*std::pow(arma::norm(lin_pred - y, 2), 2);
   }
 
   arma::vec
@@ -67,17 +66,12 @@ public:
   std::pair<double, double>
   preprocessResponse(const std::string& standardize)
   {
-    double y_center = 0.0;
-    double y_scale = 1.0;
+    // always standardize gaussian responses
+    double y_center = arma::mean(y);
+    double y_scale = arma::stddev(y);
 
-    // always standardize Gaussian responses
-    if (standardize == "response" || standardize == "both") {
-      y_center = arma::mean(y);
-      y_scale = arma::norm(y);
-
-      y -= y_center;
-      y /= y_scale;
-    }
+    y -= y_center;
+    y /= y_scale;
 
     return std::make_pair(y_center, y_scale);
   }

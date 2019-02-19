@@ -3,14 +3,70 @@
 
 class Penalty {
 public:
-  virtual arma::vec eval(arma::vec y, const double L) = 0;
+  virtual
+  arma::vec
+  eval(arma::vec y, const double L) = 0;
 
-  virtual double loss(const arma::vec& beta) = 0;
+  virtual
+  double
+  loss(const arma::vec& beta) = 0;
+
+  virtual
+  double
+  getSigma() = 0;
+
+  virtual
+  void
+  setSigma(const double) = 0;
+
+  virtual
+  arma::vec
+  getLambda() = 0;
 };
 
 class SLOPE : public Penalty {
+private:
+  arma::vec lambda;
+  double sigma;
+
 public:
-  SLOPE(const arma::vec& lambda) : lambda(lambda) {};
+  SLOPE(const arma::vec& lambda_,
+        const std::string& lambda_type,
+        const double sigma_,
+        const std::string& sigma_type,
+        const arma::uword n,
+        const arma::uword p,
+        const double fdr)
+        : lambda(lambda_),
+          sigma(sigma_)
+  {
+    using namespace arma;
+
+    if (lambda_type == "bhq" || lambda_type == "gaussian") {
+      // begin creating the BHQ sequence
+      vec q = regspace<vec>(1, p) * fdr/(2.0*p);
+
+      for (uword i = 0; i < p; ++i)
+        lambda(i) = R::qnorm(1.0 - q(i), 0.0, 1.0, 1, 0);
+
+      if (lambda_type == "gaussian") {
+        // first entry corresponds to the BHQ sequence
+
+        if (p >= 2) {
+          double sum_sq = 0;
+          for (uword i = 1; i < p; ++i) {
+            sum_sq += std::pow(lambda(i - 1), 2);
+            double w = std::max(1.0, static_cast<double>(n - i - 1));
+            lambda(i) *= std::sqrt(1.0 + sum_sq/w);
+          }
+        }
+
+        auto lambda_min_index = lambda.index_min();
+        auto lambda_min = lambda.min();
+        lambda.tail(p - lambda_min_index).fill(lambda_min);
+      }
+    }
+  };
 
   arma::vec
   eval(arma::vec beta, const double L)
@@ -37,7 +93,7 @@ public:
     for (uword i = 0; i < p; i++) {
       idx_i(k) = i;
       idx_j(k) = i;
-      s(k)     = beta(i) - lambda(i)/L;
+      s(k)     = beta(i) - sigma*lambda(i)/L;
       w(k)     = s(k);
 
       while ((k > 0) && (w[k-1] <= w(k))) {
@@ -66,21 +122,50 @@ public:
   double
   loss(const arma::vec& beta)
   {
-    return arma::dot(lambda, arma::sort(arma::abs(beta), "descending"));
+    using namespace arma;
+    return dot(sigma*lambda, sort(abs(beta), "descending"));
   }
 
-private:
-  const arma::vec& lambda;
+  double
+  getSigma()
+  {
+    return sigma;
+  }
+
+  void
+  setSigma(const double sigma_new)
+  {
+    sigma = sigma_new;
+  }
+
+  arma::vec
+  getLambda()
+  {
+    return lambda;
+  }
 };
 
 
-// helper to choose prox
+// helper to choose penalty
 inline
 std::unique_ptr<Penalty>
 setupPenalty(const std::string& penalty_choice,
-             const arma::vec& lambda)
+             const arma::vec& lambda,
+             const std::string& lambda_type,
+             const double sigma,
+             const std::string& sigma_type,
+             const arma::uword n,
+             const arma::uword p,
+             const double fdr)
 {
-  return std::unique_ptr<SLOPE>(new SLOPE{lambda});
+  return std::unique_ptr<SLOPE>(new SLOPE{lambda,
+                                          lambda_type,
+                                          sigma,
+                                          sigma_type,
+                                          n,
+                                          p,
+                                          fdr});
 }
+
 
 #endif /* GOLEM_PENALTIES_ */

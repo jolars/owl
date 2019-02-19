@@ -3,7 +3,6 @@
 S3method(predict,Golem)
 S3method(predict,GolemBinomial)
 S3method(predict,GolemGaussian)
-export(create_lambda)
 export(golem)
 importFrom(Rcpp,sourceCpp)
 useDynLib(golem, .registration = TRUE)

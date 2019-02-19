@@ -6,8 +6,8 @@
 \usage{
 golem(x, y, family = c("gaussian", "binomial"), penalty = "SLOPE",
   solver = "auto", intercept = TRUE, lambda = "gaussian",
-  sigma = 1, fdr = 0.2, standardize = c("features", "response",
-  "both", "none"), max_passes = 1000, tol = 1e-04, ...)
+  sigma = NULL, fdr = 0.2, standardize = c("features", "response",
+  "both", "none"), max_passes = 1000, tol = 1e-06, ...)
 }
 \arguments{
 \item{x}{asdf}

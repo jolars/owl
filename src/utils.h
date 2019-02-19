@@ -70,8 +70,8 @@ preprocessFeatures(T& X, const std::string& standardize)
     X_center = mean(X);
 
     for (decltype(p) j = 0; j < p; ++j) {
-      double Xi_norm = norm(X.col(j), 2);
-      X_scale(j) = Xi_norm != 0.0 ? Xi_norm : 1.0;
+      double Xi_sd = stddev(X.col(j));
+      X_scale(j) = Xi_sd != 0.0 ? Xi_sd : 1.0;
 
       X.col(j) -= X_center(j);
       X.col(j) /= X_scale(j);
@@ -86,8 +86,8 @@ preprocessFeatures(T& X, const std::string& standardize)
 
 inline
 std::pair<double, arma::vec>
-unstandardize(double&& intercept,
-              arma::vec&& beta,
+unstandardize(double intercept,
+              arma::vec beta,
               const arma::rowvec& X_center,
               const arma::rowvec& X_scale,
               const double y_center,
@@ -99,15 +99,13 @@ unstandardize(double&& intercept,
   uword m = beta.n_cols;
   uword p = beta.n_rows;
 
-  arma::vec X_bar_beta_sum(p, fill::zeros);
+  for (decltype(p) j = 0; j < p; ++j)
+    beta(j) *= y_scale/X_scale(j);
 
-  for (decltype(p) j = 0; j < m; ++j) {
-    beta.col(j) *= y_scale/X_scale(j);
-    X_bar_beta_sum += X_center(j)*beta.col(j);
-  }
+  double X_bar_beta_sum = as_scalar(X_center * beta);
 
   if (fit_intercept)
-    intercept = intercept*y_scale + y_center - X_bar_beta_sum(0);
+    intercept = intercept*y_scale + y_center - X_bar_beta_sum;
 
   return std::make_pair(intercept, beta);
 }

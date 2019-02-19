@@ -9,7 +9,3 @@ prox_slope_cpp <- function(y, lambda) {
     .Call(`_golem_prox_slope_cpp`, y, lambda)
 }
 
-slope_solver <- function(X, y, lambda, max_iter = 1e4L, grad_iter = 20L, opt_iter = 1L, tol_infeas = 1e-6, tol_rel_gap = 1e-6) {
-    .Call(`_golem_slope_solver`, X, y, lambda, max_iter, grad_iter, opt_iter, tol_infeas, tol_rel_gap)
-}
-

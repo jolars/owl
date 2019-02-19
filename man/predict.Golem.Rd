@@ -7,13 +7,13 @@
 \title{Title}
 \usage{
 \method{predict}{Golem}(object, newdata = NULL, type = c("link",
-  "response", "terms"), ...)
+  "response"), ...)
 
 \method{predict}{GolemGaussian}(object, newdata = NULL,
-  type = c("link", "response", "terms"), ...)
+  type = c("link", "response"), ...)
 
 \method{predict}{GolemBinomial}(object, newdata = NULL,
-  type = c("link", "response", "terms", "class"), ...)
+  type = c("link", "response", "class"), ...)
 }
 \arguments{
 \item{...}{}

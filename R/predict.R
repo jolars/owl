@@ -11,31 +11,30 @@
 #' @examples
 predict.Golem <- function(object,
                           newdata = NULL,
-                          type = c("link", "response", "terms"),
+                          type = c("link", "response"),
                           ...) {
-
-  beta <- object$beta
-  intercept <- object$intercept
-  if (is.null(intercept))
-    intercept <- 0
-
   if (is.null(newdata)) {
     if (type %in% c("link", "response", "class"))
       stop("you need to supply a value for 'newdata' for type = '", type, "'")
-  } else {
-    if (inherits(newdata, "sparseMatrix"))
-      newdata <- methods::as(newdata, "dgCMatrix")
-    if (inherits(newdata, "data.frame"))
-      newdata <- as.matrix(newdata)
-
-    lin_pred <- newdata %*% beta + intercept
   }
+
+  beta <- coef(object)
+
+  if (inherits(newdata, "sparseMatrix"))
+    newdata <- methods::as(newdata, "dgCMatrix")
+  if (inherits(newdata, "data.frame"))
+    newdata <- as.matrix(newdata)
+
+  if (names(beta)[1] == ("Intercept")) {
+    newdata <- methods::cbind2(1, newdata)
+  }
+
+  lin_pred <- newdata %*% beta
 
   switch(type,
          link = lin_pred,
          response = lin_pred,
-         terms = rbind(intercept, beta),
-         fit)
+         lin_pred)
 }
 
 #' @inherit predict.Golem
@@ -45,8 +44,7 @@ predict.Golem <- function(object,
 predict.GolemGaussian <- function(object,
                                   newdata = NULL,
                                   type = c("link",
-                                           "response",
-                                           "terms"),
+                                           "response"),
                                   ...) {
   type <- match.arg(type)
   NextMethod("predict", type = type)
@@ -60,13 +58,13 @@ predict.GolemBinomial <- function(object,
                                   newdata = NULL,
                                   type = c("link",
                                            "response",
-                                           "terms",
                                            "class"),
                                   ...) {
   type <- match.arg(type)
   fit <- NextMethod("predict", type = type)
   switch(
     type,
+    link = fit,
     response = 1 / (1 + exp(-fit)),
     class = {
       cnum <- ifelse(fit > 0, 2, 1)

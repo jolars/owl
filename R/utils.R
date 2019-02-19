@@ -22,3 +22,8 @@ random_problem <- function(n, p, k=NULL, amplitude=3, sigma=1) {
   list(X = X, y = y, beta = beta)
 }
 
+
+firstUpper <- function(x) {
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x
+}
