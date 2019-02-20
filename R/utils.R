@@ -6,22 +6,21 @@ estimate_noise <- function(X, y, intercept = TRUE) {
   p <- ncol(X)
   stopifnot(n > p)
 
-  fit <- lm.fit(X, y)
+  fit <- stats::lm.fit(X, y)
   sqrt(sum(fit$residuals^2) / (n-p))
 }
 
 # Generate a random synthetic model and data. Used for testing.
-random_problem <- function(n, p, k=NULL, amplitude=3, sigma=1) {
+random_problem <- function(n, p, k = NULL, amplitude = 3, sigma = 1) {
   if (is.null(k))
-    k = max(1, as.integer(p/5))
+    k <- max(1, as.integer(p/5))
 
-  X = matrix(rnorm(n*p), n, p)
-  nonzero = sample(p, k)
-  beta = amplitude * (1:p %in% nonzero)
-  y = X %*% beta + rnorm(n, sd = sigma)
+  X <- matrix(stats::rnorm(n*p), n, p)
+  nonzero <- sample(p, k)
+  beta <- amplitude * (1:p %in% nonzero)
+  y <- X %*% beta + stats::rnorm(n, sd = sigma)
   list(X = X, y = y, beta = beta)
 }
-
 
 firstUpper <- function(x) {
   substr(x, 1, 1) <- toupper(substr(x, 1, 1))

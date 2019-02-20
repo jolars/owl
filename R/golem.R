@@ -1,40 +1,67 @@
-#' Golem
+#' Employ a Golem: a Regularized Generalized Linear Model
 #'
-#' @param x asdf
-#' @param y
-#' @param family
-#' @param penalty
-#' @param solver
-#' @param intercept
-#' @param lambda
-#' @param sigma
-#' @param fdr
-#' @param standardize
-#' @param max_passes
-#' @param tol
-#' @param ...
+#' This functions fits a generalized linear model (GLM) using efficient
+#' optimization routines suitable to big data problems.
 #'
-#' @return wef
+#' @section Regularization penalties:
+#' There is a multitude of ways to penalize the models created by
+#' [golem::golem()], currently they are:
+#'
+#' * [golem::slope()]
+#'
+#' These functions are in fact only parameter packs for the actual
+#' implementations of the penalties and will be passed on to
+#' the respective C++ creator functions, where the magic happens.
+#'
+#' Do *not* attempt to create your own penalty functions using this interface.
+#' Such attempts will most likely be caught in assertions before anything bad
+#' happens, but all bets are off if you are able to sneak them through
+#' the various cheks.
+#'
+#' @param x input matrix
+#' @param y response variable
+#' @param family reponse type, one of `'gaussian'`, `'binomial'`,
+#'   `'multinomial'`, or `'mgaussian'`. See **Supported families** for details.
+#' @param penalty the regularization penalty to use, either in the
+#'   form of the output from one of this package's penalty functions,
+#'   the function itself, or a character vector specifying one such function.
+#'   Each function has its respective set of parameters, such as the
+#'   regularization strength. Please see
+#'   *Regularization Penalties* for more information.
+#' @param solver the solver to use to optimize the loss function (objective).
+#'   Just like the `penalty` parameter, this argument may be
+#'   either a function, the function's output, or a character vector.
+#'   Control arguments (such as convergence threshold) are set in the
+#'   solver function itself. Please see **Solvers** for more information.
+#' @param intercept whether to fit an intercept or not
+#' @param standardize the type of standardization to carry out. Note that
+#'   currently, standardization of response has no real effect. The
+#'   response is always standardized for Gaussian responses and never
+#'   for binomial
+#' @param ... currently ignored
+#'
+#' @return The result of fitting
 #' @export
 #'
 #' @examples
-#' fit(3)
+#' X <- with(mtcars, cbind(cyl, wt, disp, hp, drat))
+#' y <- mtcars$mpg
+#'
+#' golem_fit <- golem::golem(X, y, family = "gaussian")
 golem <- function(x,
                   y,
-                  family = c("gaussian",
-                             "binomial"),
-                  penalty = "SLOPE",
-                  solver = "auto",
+                  family = c("gaussian", "binomial"),
+                  penalty = slope(),
+                  solver = fista(),
                   intercept = TRUE,
-                  lambda = "gaussian",
-                  sigma = NULL,
-                  fdr = 0.2,
                   standardize = c("features", "response", "both", "none"),
-                  max_passes = 1000,
-                  tol = 1e-6,
                   ...) {
   # collect the call so we can use it in update() later on
   ocall <- match.call()
+
+  n <- NROW(x)
+  p <- NCOL(x)
+  m <- NCOL(y)
 
   # collect settings
   if (isFALSE(standardize)) {
@@ -45,9 +72,31 @@ golem <- function(x,
     standardize <- match.arg(standardize)
   }
 
+  # setup penalty settings
+  if (is.character(penalty))
+    penalty_args <- match.fun(penalty)()
+  else if (is.function(penalty))
+    penalty_args <- do.call(penalty, list())
+  else
+    penalty_args <- penalty
+
+  penalty_args <- utils::modifyList(penalty_args,
+                                    list(n = n,
+                                         p = p))
+
+  # setup solver settings
+  if (is.character(solver))
+    solver_args <- match.fun(solver)()
+  else if (is.function(penalty))
+    solver_args <- do.call(penalty, list())
+  else
+    solver_args <- solver
+
+  stopifnot(inherits(solver_args, "solver"),
+            inherits(penalty_args, "penalty"))
+
   family <- match.arg(family)
   fit_intercept <- intercept
-  lambda_type <- lambda
 
   # collect options
   debug <- isTRUE(getOption("golem.debug"))
@@ -55,10 +104,6 @@ golem <- function(x,
   n_samples <- NROW(x)
   n_features <- NCOL(x)
   n_targets <- NCOL(y)
-
-  n <- NROW(x)
-  p <- NCOL(x)
-  m <- NCOL(y)
 
   stopifnot(is.logical(intercept),
             is.logical(debug))
@@ -77,31 +122,6 @@ golem <- function(x,
     x <- methods::as(x, "dgCMatrix")
   } else {
     x <- as.matrix(x)
-  }
-
-  # lambda (regularization strength)
-  if (is.character(lambda)) {
-    lambda_type <- lambda
-    lambda <- rep.int(0, p)
-    stopifnot(lambda_type %in% c("gaussian", "bhq"))
-  } else {
-    lambda_type <- "user"
-    lambda <- as.double(lambda)
-    stopifnot(length(lambda) == p)
-
-    if (is.unsorted(rev(lambda)))
-      stop("lambda sequence must be non-increasing")
-  }
-
-  if (is.null(sigma)) {
-    sigma <- 1 # temporarily set sigma to 1
-    if (n >= p + 30) {
-      sigma_type <- "residuals"
-    } else {
-      sigma_type <- "iterative"
-    }
-  } else {
-    sigma_type <- "user"
   }
 
   # collect response and variable names (if they are given) and otherwise
@@ -154,19 +174,12 @@ golem <- function(x,
   y <- as.matrix(y)
 
   control <- list(debug = debug,
-                  sigma = sigma,
-                  sigma_type = sigma_type,
                   family_choice = family,
-                  penalty_choice = penalty,
-                  solver_choice = solver,
+                  penalty_args = penalty_args,
+                  solver_args = solver_args,
                   fit_intercept = intercept,
                   is_sparse = is_sparse,
-                  lambda = lambda,
-                  lambda_type = lambda_type,
-                  fdr = fdr,
-                  max_passes = max_passes,
-                  standardize = standardize,
-                  tol = tol)
+                  standardize = standardize)
 
   # run the solver, perhaps iteratively
   # if (is.null(sigma)) {

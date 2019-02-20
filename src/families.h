@@ -6,96 +6,96 @@
 
 class Family {
 public:
-  Family(arma::mat& X, arma::vec& y) : X(X), y(y) {}
-
   virtual
   double
-  loss(const arma::vec& lin_pred) = 0;
+  loss(const arma::vec& lin_pred, const arma::vec& y) = 0;
 
   // this is not really the true gradient, and needs to multiplied by X'
   virtual
   arma::vec
-  gradient(const arma::vec& lin_pred) = 0;
+  gradient(const arma::vec& lin_pred, const arma::vec& y) = 0;
 
   virtual
   double
-  link(double y) = 0;
+  link(const double y) = 0;
 
   virtual
   double
-  lipschitzConstant() = 0;
+  lipschitzConstant(const arma::mat& X) = 0;
 
   virtual
-  std::pair<double, double>
-  preprocessResponse(const std::string& standardize) = 0;
-
-protected:
-  arma::mat& X;
-  arma::vec& y;
+  void
+  preprocessResponse(arma::vec& y,
+                     double& y_center,
+                     double& y_scale,
+                     const std::string& standardize) = 0;
 };
 
 class Gaussian : public Family {
 public:
-  Gaussian(arma::mat& X, arma::vec& y) : Family(X, y) {}
+  Gaussian() {};
 
   double
-  loss(const arma::vec& lin_pred)
+  loss(const arma::vec& lin_pred, const arma::vec& y)
   {
-    return 0.5*std::pow(arma::norm(lin_pred - y, 2), 2);
+    const arma::vec residual = lin_pred - y;
+    return 0.5*arma::dot(residual, residual);
   }
 
   arma::vec
-  gradient(const arma::vec& lin_pred)
+  gradient(const arma::vec& lin_pred, const arma::vec& y)
   {
     return lin_pred - y;
   }
 
   double
-  link(double y)
+  link(const double y)
   {
     return y;
   }
 
   double
-  lipschitzConstant()
+  lipschitzConstant(const arma::mat& X)
   {
     // maximum eigenvalue of X'X
+    // TODO(johan): account for the intercept
     return (arma::eig_sym(X.t() * X)).max();
   }
 
-  std::pair<double, double>
-  preprocessResponse(const std::string& standardize)
+  void
+  preprocessResponse(arma::vec& y,
+                     double& y_center,
+                     double& y_scale,
+                     const std::string& standardize)
   {
     // always standardize gaussian responses
-    double y_center = arma::mean(y);
-    double y_scale = arma::stddev(y);
+    y_center = arma::mean(y);
+    y_scale = arma::stddev(y);
 
     y -= y_center;
     y /= y_scale;
-
-    return std::make_pair(y_center, y_scale);
   }
 };
 
 class Binomial : public Family {
 public:
-  Binomial(arma::mat& X, arma::vec& y) : Family(X, y) {}
+  Binomial() {};
 
   double
-  loss(const arma::vec& lin_pred)
+  loss(const arma::vec& lin_pred, const arma::vec& y)
   {
     using namespace arma;
     return accu(-y % sigmoid(lin_pred) - (1.0 - y) % sigmoid(-lin_pred));
   }
 
   arma::vec
-  gradient(const arma::vec& lin_pred)
+  gradient(const arma::vec& lin_pred, const arma::vec& y)
   {
     return sigmoid(lin_pred) - y;
   }
 
   double
-  link(double y)
+  link(const double y)
   {
     // TODO(johan): consider letting the user choose this
     double pmin = 1e-9;
@@ -106,32 +106,34 @@ public:
   }
 
   double
-  lipschitzConstant()
+  lipschitzConstant(const arma::mat& X)
   {
     // maximum eigenvalue of X'X
     // TODO(johan): check that this is actually true for the binomial family
     return 0.25*(arma::eig_sym(X.t() * X)).max();
   }
 
-  std::pair<double, double>
-  preprocessResponse(const std::string& standardize)
+  void
+  preprocessResponse(arma::vec& y,
+                     double& y_center,
+                     double& y_scale,
+                     const std::string& standardize)
   {
     // no preprocessing for binomial response
-    return std::make_pair(0.0, 1.0);
+    y_center = 0;
+    y_scale = 1;
   }
 };
 
 // helper to choose family
 inline
 std::unique_ptr<Family>
-setupFamily(const std::string& family_choice,
-            arma::mat& X,
-            arma::vec& y)
+setupFamily(const std::string& family_choice)
 {
   if (family_choice == "binomial")
-    return std::unique_ptr<Binomial>(new Binomial{X, y});
+    return std::unique_ptr<Binomial>(new Binomial{});
   else
-    return std::unique_ptr<Gaussian>(new Gaussian{X, y});
+    return std::unique_ptr<Gaussian>(new Gaussian{});
 }
 
 

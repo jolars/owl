@@ -30,20 +30,23 @@ private:
   double sigma;
 
 public:
-  SLOPE(const arma::vec& lambda_,
-        const std::string& lambda_type,
-        const double sigma_,
-        const std::string& sigma_type,
-        const arma::uword n,
-        const arma::uword p,
-        const double fdr)
-        : lambda(lambda_),
-          sigma(sigma_)
+  SLOPE(const Rcpp::List& args)
   {
     using namespace arma;
+    using Rcpp::as;
+
+    lambda = as<arma::vec>(args["lambda"]);
+    sigma = as<double>(args["sigma"]);
+
+    auto lambda_type = as<std::string>(args["lambda_type"]);
+    auto sigma_type  = as<std::string>(args["sigma_type"]);
+    auto fdr         = as<double>(args["fdr"]);
+    auto n           = as<uword>(args["n"]);
+    auto p           = as<uword>(args["p"]);
 
     if (lambda_type == "bhq" || lambda_type == "gaussian") {
       // begin creating the BHQ sequence
+      lambda.set_size(p);
       vec q = regspace<vec>(1, p) * fdr/(2.0*p);
 
       for (uword i = 0; i < p; ++i)
@@ -66,6 +69,10 @@ public:
         lambda.tail(p - lambda_min_index).fill(lambda_min);
       }
     }
+
+    if (lambda.n_elem != p)
+      Rcpp::stop("lambda sequence must be as long as there are variables");
+
   };
 
   arma::vec
@@ -149,22 +156,11 @@ public:
 // helper to choose penalty
 inline
 std::unique_ptr<Penalty>
-setupPenalty(const std::string& penalty_choice,
-             const arma::vec& lambda,
-             const std::string& lambda_type,
-             const double sigma,
-             const std::string& sigma_type,
-             const arma::uword n,
-             const arma::uword p,
-             const double fdr)
+setupPenalty(const Rcpp::List& args)
 {
-  return std::unique_ptr<SLOPE>(new SLOPE{lambda,
-                                          lambda_type,
-                                          sigma,
-                                          sigma_type,
-                                          n,
-                                          p,
-                                          fdr});
+  //auto name = Rcpp::as<std::string>(args["name"]);
+
+  return std::unique_ptr<SLOPE>(new SLOPE{args});
 }
 
 

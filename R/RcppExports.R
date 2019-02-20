@@ -5,7 +5,7 @@ golemDense <- function(X, y, control) {
     .Call(`_golem_golemDense`, X, y, control)
 }
 
-prox_slope_cpp <- function(y, lambda) {
-    .Call(`_golem_prox_slope_cpp`, y, lambda)
+prox_slope_cpp <- function(y, args) {
+    .Call(`_golem_prox_slope_cpp`, y, args)
 }
 

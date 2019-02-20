@@ -7,39 +7,44 @@
 
 class Solver {
 public:
-  virtual Rcpp::List fit() = 0;
+  virtual
+  Rcpp::List
+  fit(const arma::mat& X,
+      const arma::vec& y,
+      const std::unique_ptr<Family>& family,
+      const std::unique_ptr<Penalty>& penalty,
+      const bool fit_intercept) = 0;
 };
 
 class FISTA : public Solver {
+private:
+  arma::uword max_passes;
+  double tol;
+
 public:
-  FISTA(const arma::mat& X,
-        const arma::vec& y,
-        const arma::vec& lambda,
-        const std::unique_ptr<Family>& family,
-        const std::unique_ptr<Penalty>& penalty,
-        const bool fit_intercept,
-        const double tol,
-        const arma::uword max_passes)
-        : X(X),
-          y(y),
-          lambda(lambda),
-          family(family),
-          penalty(penalty),
-          fit_intercept(fit_intercept),
-          tol(tol),
-          max_passes(max_passes) {}
+  FISTA(const Rcpp::List& args)
+  {
+    using Rcpp::as;
+
+    max_passes = as<arma::uword>(args["max_passes"]);
+    tol = as<double>(args["tol"]);
+  }
 
   Rcpp::List
-  fit()
+  fit(const arma::mat& X,
+      const arma::vec& y,
+      const std::unique_ptr<Family>& family,
+      const std::unique_ptr<Penalty>& penalty,
+      const bool fit_intercept)
   {
     using namespace arma;
 
     uword n = X.n_rows;
     uword p = X.n_cols;
 
-    double intercept{0};
-    double intercept_tilde{0};
-    double intercept_tilde_old{0};
+    double intercept = 0;
+    double intercept_tilde = 0;
+    double intercept_tilde_old = 0;
 
     vec beta(p, fill::zeros);
     vec beta_tilde(beta);
@@ -47,20 +52,20 @@ public:
 
     vec g(p, fill::zeros);
     vec pseudo_g{g};
-    double g_intercept{0};
+    double g_intercept = 0;
 
-    double L = family->lipschitzConstant();
+    double L = family->lipschitzConstant(X);
     double t = 1;
     double t_old = t;
 
-    uword i{0};
+    uword i = 0;
     bool accepted = false;
 
     ConvergenceCheck convergenceCheck{beta, tol};
 
     while (!accepted && i < max_passes) {
       // gradient
-      pseudo_g = family->gradient((X * beta) + intercept);
+      pseudo_g = family->gradient((X * beta) + intercept, y);
       g = X.t() * pseudo_g;
       g_intercept = mean(pseudo_g);
 
@@ -96,16 +101,6 @@ public:
       Rcpp::Named("lipschitz")  = L
     );
   }
-
-private:
-  const arma::mat& X;
-  const arma::vec& y;
-  const arma::vec& lambda;
-  const std::unique_ptr<Family>& family;
-  const std::unique_ptr<Penalty>& penalty;
-  const bool fit_intercept;
-  const arma::uword max_passes;
-  const double tol;
 };
 
 #endif /* GOLEM_SOLVERS_ */

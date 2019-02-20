@@ -4,10 +4,10 @@
 \alias{predict.Golem}
 \alias{predict.GolemGaussian}
 \alias{predict.GolemBinomial}
-\title{Title}
+\title{Make Predictions from Golem Models}
 \usage{
-\method{predict}{Golem}(object, newdata = NULL, type = c("link",
-  "response"), ...)
+\method{predict}{Golem}(object, newdata, type = c("link", "response"),
+  ...)
 
 \method{predict}{GolemGaussian}(object, newdata = NULL,
   type = c("link", "response"), ...)
@@ -16,8 +16,26 @@
   type = c("link", "response", "class"), ...)
 }
 \arguments{
-\item{...}{}
+\item{object}{an object of class "Golem"}
+
+\item{newdata}{new data to make predictions for}
+
+\item{type}{type of predictions. \code{"link"} returns the linear predictors,
+\code{"response"} returns the response after applying the link functions,
+and \code{"class"} returns the predicted class (for the binomial family).}
+
+\item{...}{ignored.}
+}
+\value{
+A vector of predictions.
 }
 \description{
-Title
+Make Predictions from Golem Models
+}
+\examples{
+x <- as.matrix(with(Puromycin, cbind(conc, rate)))
+y <- Puromycin$state
+
+fit <- golem(x, y, family = "binomial")
+predict(fit, x, "class")
 }

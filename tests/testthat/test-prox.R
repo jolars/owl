@@ -25,9 +25,12 @@ test_that("prox_sorted_L1 agrees with isotone package", {
   y <- sort(abs(rnorm(n, mean = mu)), decreasing = TRUE)
   lambda <- n:1
 
-  expect_equivalent(golem:::prox_slope_cpp(y, lambda),
+  args <- list(lambda = lambda, n = n, p = n, fdr = 0.2, sigma = 1,
+               sigma_type = "user", lambda_type = "user")
+
+  expect_equivalent(golem:::prox_slope_cpp(y, args),
                     prox_slope_isotone(y, lambda))
-  expect_equivalent(golem:::prox_slope_cpp(y, lambda),
+  expect_equivalent(golem:::prox_slope_cpp(y, args),
                     SLOPE:::prox_sorted_L1(y, lambda))
 })
 

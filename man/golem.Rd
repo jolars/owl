@@ -2,24 +2,70 @@
 % Please edit documentation in R/golem.R
 \name{golem}
 \alias{golem}
-\title{Golem}
+\title{Employ a Golem: a Regularized Generalized Linear Model}
 \usage{
-golem(x, y, family = c("gaussian", "binomial"), penalty = "SLOPE",
-  solver = "auto", intercept = TRUE, lambda = "gaussian",
-  sigma = NULL, fdr = 0.2, standardize = c("features", "response",
-  "both", "none"), max_passes = 1000, tol = 1e-06, ...)
+golem(x, y, family = c("gaussian", "binomial"), penalty = slope(),
+  solver = fista(), intercept = TRUE, standardize = c("features",
+  "response", "both", "none"), ...)
 }
 \arguments{
-\item{x}{asdf}
+\item{x}{input matrix}
 
-\item{...}{}
+\item{y}{response variable}
+
+\item{family}{reponse type, one of \code{'gaussian'}, \code{'binomial'},
+\code{'multinomial'}, or \code{'mgaussian'}. See \strong{Supported families} for details.}
+
+\item{penalty}{the regularization penalty to use, either in the
+form of the output from one of this package's penalty functions,
+the function itself, or a character vector specifying one such function.
+Each function has its respective set of parameters, such as the
+regularization strength. Please see
+\emph{Regularization Penalties} for more information.}
+
+\item{solver}{the solver to use to optimize the loss function (objective).
+Just like the \code{penalty} parameter, this argument may be
+either a function, the function's output, or a character vector.
+Control arguments (such as convergence threshold) are set in the
+solver function itself. Please see \strong{Solvers} for more information.}
+
+\item{intercept}{whether to fit an intercept or not}
+
+\item{standardize}{the type of standardization to carry out. Note that
+currently, standardization of response has no real effect. The
+response is always standardized for Gaussian responses and never
+for binomial}
+
+\item{...}{currently ignored}
 }
 \value{
-wef
+The result of fitting
 }
 \description{
-Golem
+This functions fits a generalized linear model (GLM) using efficient
+optimization routines suitable to big data problems.
 }
+\section{Regularization penalties}{
+
+There is a multitude of ways to penalize the models created by
+\code{\link[golem:golem]{golem::golem()}}, currently they are:
+\itemize{
+\item \code{\link[golem:slope]{golem::slope()}}
+}
+
+These functions are in fact only parameter packs for the actual
+implementations of the penalties and will be passed on to
+the respective C++ creator functions, where the magic happens.
+
+Do \emph{not} attempt to create your own penalty functions using this interface.
+Such attempts will most likely be caught in assertions before anything bad
+happens, but all bets are off if you are able to sneak them through
+the various cheks.
+}
+
 \examples{
-fit(3)
+X <- with(mtcars, cbind(cyl, wt, disp, hp, drat))
+y <- mtcars$mpg
+
+golem_fit <- golem::golem(X, y, family = "gaussian")
 }

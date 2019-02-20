@@ -53,26 +53,27 @@ private:
 };
 
 template <typename T>
-std::pair<arma::rowvec, arma::rowvec>
-preprocessFeatures(T& X, const std::string& standardize)
+void
+preprocessFeatures(T& X,
+                   arma::rowvec& X_center,
+                   arma::rowvec& X_scale,
+                   const std::string& standardize)
 {
   using namespace arma;
 
   auto p = X.n_cols;
 
-  rowvec X_scale(p);
-  rowvec X_center(p);
+  X_center.set_size(p);
+  X_scale.set_size(p);
 
-  // always center features to make fitting intercept easier
   // TODO(jolars): adapt for sparse input later
 
   if (standardize == "both" || standardize == "features") {
     X_center = mean(X);
+    X_scale = stddev(X);
+    X_scale.replace(0, 1); // avoid scaling by 0
 
     for (decltype(p) j = 0; j < p; ++j) {
-      double Xi_sd = stddev(X.col(j));
-      X_scale(j) = Xi_sd != 0.0 ? Xi_sd : 1.0;
-
       X.col(j) -= X_center(j);
       X.col(j) /= X_scale(j);
     }
@@ -80,14 +81,12 @@ preprocessFeatures(T& X, const std::string& standardize)
     X_center.zeros();
     X_scale.ones();
   }
-
-  return std::make_pair(X_center, X_scale);
 }
 
 inline
 std::pair<double, arma::vec>
-unstandardize(double intercept,
-              arma::vec beta,
+unstandardize(double&& intercept,
+              arma::vec&& beta,
               const arma::rowvec& X_center,
               const arma::rowvec& X_scale,
               const double y_center,
@@ -96,7 +95,6 @@ unstandardize(double intercept,
 {
   using namespace arma;
 
-  uword m = beta.n_cols;
   uword p = beta.n_rows;
 
   for (decltype(p) j = 0; j < p; ++j)
@@ -107,7 +105,8 @@ unstandardize(double intercept,
   if (fit_intercept)
     intercept = intercept*y_scale + y_center - X_bar_beta_sum;
 
-  return std::make_pair(intercept, beta);
+  return std::make_pair(std::move(intercept),
+                        std::move(beta));
 }
 
 #endif /* GOLEM_UTILS */

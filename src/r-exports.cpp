@@ -3,10 +3,9 @@
 
 // [[Rcpp::export]]
 arma::vec
-prox_slope_cpp(arma::vec y,
-               const arma::vec lambda)
+prox_slope_cpp(const arma::vec& y, const Rcpp::List& args)
 {
-  SLOPE penalty(lambda, "user", 1, "user", y.n_elem, 1, 0.2);
+  SLOPE penalty{args};
 
   return penalty.eval(y, 1.0);
 }

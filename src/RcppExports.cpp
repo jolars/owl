@@ -20,14 +20,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // prox_slope_cpp
-arma::vec prox_slope_cpp(arma::vec y, const arma::vec lambda);
-RcppExport SEXP _golem_prox_slope_cpp(SEXP ySEXP, SEXP lambdaSEXP) {
+arma::vec prox_slope_cpp(const arma::vec& y, const Rcpp::List& args);
+RcppExport SEXP _golem_prox_slope_cpp(SEXP ySEXP, SEXP argsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::vec >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(prox_slope_cpp(y, lambda));
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type args(argsSEXP);
+    rcpp_result_gen = Rcpp::wrap(prox_slope_cpp(y, args));
     return rcpp_result_gen;
 END_RCPP
 }
