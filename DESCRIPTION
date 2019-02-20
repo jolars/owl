@@ -13,21 +13,24 @@ License: GPL-3
 LazyData: true
 Depends:
     R (>= 3.4.0)
-Imports: 
+Imports:
     Rcpp,
     methods
 LinkingTo:
     Rcpp (>= 1.0.0),
-    RcppArmadillo (>= 0.9.200.7.0)  
-Suggests: 
+    RcppArmadillo (>= 0.9.200.7.0)
+Suggests:
     covr,
     isotone,
     spelling,
     SLOPE,
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Language: en-US
 Encoding: UTF-8
 URL: https://github.com/jolars/golem
 BugReports: https://github.com/jolars/golem/issues
+VignetteBuilder: knitr
