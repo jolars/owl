@@ -14,8 +14,9 @@ LazyData: true
 Depends:
     R (>= 3.4.0)
 Imports:
-    Rcpp,
-    methods
+    lattice,
+    methods,
+    Rcpp
 LinkingTo:
     Rcpp (>= 1.0.0),
     RcppArmadillo (>= 0.9.200.7.0)
