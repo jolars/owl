@@ -1,0 +1,70 @@
+---
+title: "The SLOPE Penalty"
+author: "Johan Larsson"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{The SLOPE Penalty}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Sorted L-One Penalized Estimation (SLOPE)
+
+The SLOPE penalty attempts to control
+the false discovery rate (FDR) of non-zero coefficients (feature weights)
+in the model. It is in many ways analogous to the
+Benjamini--Hochberg procedure for multiple comparisons.
+
+Let's set up a simple experiment to see how SLOPE controls the FDR.
+
+```{r}
+# proportion of real signals
+q <- seq(0.05, 0.5, length.out = 20)
+fdr <- double(length(q))
+
+for (i in seq_along(q)) {
+  n <- 1000
+  p <- n/2
+  k <- floor(q[i]*p)
+  sigma <- 1
+  problem <- golem:::random_problem(n, p, k, sigma = 1)
+  
+  X <- problem$X
+  y <- problem$y
+  signals <- problem$nonzero
+  
+  fit <- golem::golem(X, y, penalty = slope(lambda = "bhq", sigma = 1),
+                      intercept = FALSE)
+  # slope_fit <- SLOPE::SLOPE(X, y, lambda = "bhq", sigma = 1)
+  
+  selected_golem <- which(coef(fit) > 0)
+  # selected_slope <- slope_fit$selected
+  #length(selected_golem)/length(selected_golem)
+  V <- length(setdiff(selected_golem, signals))
+  R <- length(selected_golem)
+  fdr[i] <- V/R
+}
+
+library(lattice)
+xyplot(fdr ~ q, type = "b",
+       panel = function(...) {
+         panel.refline(h = 0.2, lty = 2, col = "dark grey")
+         panel.xyplot(...)
+       })
+```
+
+Next, we compute the FDR.
+
+```{r}
+
+```
+
+
