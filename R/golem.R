@@ -166,8 +166,8 @@ golem <- function(x,
 
       class_names <- names(y_table)
 
-      # Transform response to {0, 1}, which is used internally
-      y <- as.numeric(as.factor(y)) - 1
+      # Transform response to {-1, 1}, which is used internally
+      y <- ifelse(as.numeric(as.factor(y)) == 1, -1, 1)
     }
   )
 

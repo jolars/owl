@@ -86,14 +86,13 @@ public:
   double
   loss(const arma::vec& lin_pred, const arma::vec& y)
   {
-    using namespace arma;
-    return accu(-y % sigmoid(lin_pred) - (1.0 - y) % sigmoid(-lin_pred));
+    return arma::accu(arma::log(1.0 + arma::exp(-y % lin_pred)));
   }
 
   arma::vec
   gradient(const arma::vec& lin_pred, const arma::vec& y)
   {
-    return sigmoid(lin_pred) - y;
+    return -y/(arma::exp(y%lin_pred) + 1.0);
   }
 
   double
@@ -104,7 +103,7 @@ public:
     double pmax = 1.0 - pmin;
     double z = clamp(y, pmin, pmax);
 
-    return std::log(z / (1.0 - z));
+    return std::log((y + 1.0)/2 / (1.0 - z));
   }
 
   double
