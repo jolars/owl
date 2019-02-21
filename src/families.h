@@ -2,6 +2,7 @@
 #define GOLEM_FAMILIES_
 
 #include <RcppArmadillo.h>
+#include <memory.h>
 #include "utils.h"
 
 class Family {
@@ -68,9 +69,10 @@ public:
                      double& y_scale,
                      const std::string& standardize)
   {
-    // always standardize gaussian responses
+    // always center gaussian responses
     y_center = arma::mean(y);
-    y_scale = arma::stddev(y);
+    // y_scale = arma::stddev(y);
+    y_scale = 1.0;
 
     y -= y_center;
     y /= y_scale;

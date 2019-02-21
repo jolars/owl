@@ -70,13 +70,14 @@ preprocessFeatures(T& X,
 
   if (standardize == "both" || standardize == "features") {
     X_center = mean(X);
-    X_scale = stddev(X);
+    for (decltype(p) j = 0; j < p; ++j)
+      X_scale(j) = norm(X.col(j));
+
     X_scale.replace(0, 1); // avoid scaling by 0
 
-    for (decltype(p) j = 0; j < p; ++j) {
-      X.col(j) -= X_center(j);
-      X.col(j) /= X_scale(j);
-    }
+    for (decltype(p) j = 0; j < p; ++j)
+      X.col(j) = (X.col(j) - X_center(j))/X_scale(j);
+
   } else {
     X_center.zeros();
     X_scale.ones();

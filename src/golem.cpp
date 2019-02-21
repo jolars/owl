@@ -1,4 +1,5 @@
 #include <RcppArmadillo.h>
+#include <memory.h>
 #include "solvers.h"
 #include "penalties.h"
 #include "families.h"

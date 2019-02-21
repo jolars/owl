@@ -1,6 +1,8 @@
 #ifndef GOLEM_PENALTY_
 #define GOLEM_PENALTY_
 
+#include <memory.h>
+
 class Penalty {
 public:
   virtual
@@ -9,7 +11,15 @@ public:
 
   virtual
   double
-  loss(const arma::vec& beta) = 0;
+  primal(const arma::vec& beta) = 0;
+
+  virtual
+  double
+  dual(const arma::vec& grad, const arma::vec& beta) = 0;
+
+  virtual
+  double
+  infeasibility(const arma::vec& grad) = 0;
 
   virtual
   double
@@ -127,10 +137,26 @@ public:
   };
 
   double
-  loss(const arma::vec& beta)
+  primal(const arma::vec& beta)
   {
     using namespace arma;
     return dot(sigma*lambda, sort(abs(beta), "descending"));
+  }
+
+  double
+  dual(const arma::vec& grad, const arma::vec& beta)
+  {
+    using namespace arma;
+    return dot(grad, log(grad));
+  }
+
+  double
+  infeasibility(const arma::vec& grad)
+  {
+    using namespace arma;
+
+    vec grad_sorted = sort(abs(grad), "descending");
+    return std::max(cumsum(grad_sorted - sigma*lambda).max(), 0.0);
   }
 
   double
