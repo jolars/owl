@@ -2,18 +2,19 @@
 % Please edit documentation in R/golem.R
 \name{golem}
 \alias{golem}
-\title{Employ a Golem: a Regularized Generalized Linear Model}
+\title{Regularized Generalized Linear Models}
 \usage{
-golem(x, y, family = c("gaussian", "binomial"), penalty = slope(),
-  solver = fista(), intercept = TRUE, standardize = c("features",
-  "response", "both", "none"), ...)
+golem(x, y, family = c("gaussian", "binomial"),
+  penalty = golem::slope(), solver = golem::fista(),
+  intercept = TRUE, standardize = c("features", "response", "both",
+  "none"), ...)
 }
 \arguments{
 \item{x}{input matrix}
 
 \item{y}{response variable}
 
-\item{family}{reponse type, one of \code{'gaussian'}, \code{'binomial'},
+\item{family}{response type, one of \code{'gaussian'}, \code{'binomial'},
 \code{'multinomial'}, or \code{'mgaussian'}. See \strong{Supported families} for details.}
 
 \item{penalty}{the regularization penalty to use, either in the
@@ -45,7 +46,7 @@ The result of fitting
 This functions fits a generalized linear model (GLM) using efficient
 optimization routines suitable to big data problems.
 }
-\section{Regularization penalties}{
+\section{Regularization Penalties}{
 
 There is a multitude of ways to penalize the models created by
 \code{\link[golem:golem]{golem::golem()}}, currently they are:
@@ -60,7 +61,15 @@ the respective C++ creator functions, where the magic happens.
 Do \emph{not} attempt to create your own penalty functions using this interface.
 Such attempts will most likely be caught in assertions before anything bad
 happens, but all bets are off if you are able to sneak them through
-the various cheks.
+the various checks.
+}
+
+\section{Solvers}{
+
+There is currently a single solver available for \link[golem:golem]{golem::golem}, namely
+\itemize{
+\item \code{\link[golem:fista]{golem::fista()}}
+}
 }
 
 \examples{
