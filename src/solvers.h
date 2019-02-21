@@ -89,7 +89,7 @@ public:
         if (fit_intercept)
           intercept_tilde = intercept - (1.0/L)*g_intercept;
 
-        f = family->loss(X*beta_tilde + intercept, y);
+        f = family->loss(X*beta_tilde + intercept_tilde, y);
         double q = f_old + dot(d, g) + 0.5*L*dot(d, d);
 
         if (q >= f*(1 - 1e-12))
@@ -103,7 +103,8 @@ public:
       beta = beta_tilde + (t_old - 1.0)/t * (beta_tilde - beta_tilde_old);
 
       if (fit_intercept)
-        intercept = intercept_tilde + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
+        intercept = intercept_tilde
+                    + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
 
       accepted = convergenceCheck(intercept, beta);
 
