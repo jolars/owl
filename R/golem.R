@@ -1,9 +1,9 @@
-#' Employ a Golem: a Regularized Generalized Linear Model
+#' Regularized Generalized Linear Models
 #'
 #' This functions fits a generalized linear model (GLM) using efficient
 #' optimization routines suitable to big data problems.
 #'
-#' @section Regularization penalties:
+#' @section Regularization Penalties:
 #' There is a multitude of ways to penalize the models created by
 #' [golem::golem()], currently they are:
 #'
@@ -16,11 +16,16 @@
 #' Do *not* attempt to create your own penalty functions using this interface.
 #' Such attempts will most likely be caught in assertions before anything bad
 #' happens, but all bets are off if you are able to sneak them through
-#' the various cheks.
+#' the various checks.
+#'
+#' @section Solvers:
+#' There is currently a single solver available for [golem::golem], namely
+#'
+#' * [golem::fista()]
 #'
 #' @param x input matrix
 #' @param y response variable
-#' @param family reponse type, one of `'gaussian'`, `'binomial'`,
+#' @param family response type, one of `'gaussian'`, `'binomial'`,
 #'   `'multinomial'`, or `'mgaussian'`. See **Supported families** for details.
 #' @param penalty the regularization penalty to use, either in the
 #'   form of the output from one of this package's penalty functions,
@@ -51,8 +56,8 @@
 golem <- function(x,
                   y,
                   family = c("gaussian", "binomial"),
-                  penalty = slope(),
-                  solver = fista(),
+                  penalty = golem::slope(),
+                  solver = golem::fista(),
                   intercept = TRUE,
                   standardize = c("features", "response", "both", "none"),
                   ...) {
