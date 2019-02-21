@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sorted L-One Penalized Estimation (SLOPE) — slope • golem</title>
+<title>Student Performance — student • golem</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,12 @@
 
 
 
-<meta property="og:title" content="Sorted L-One Penalized Estimation (SLOPE) — slope" />
+<meta property="og:title" content="Student Performance — student" />
 
-<meta property="og:description" content="Sorted L-One Penalized Estimation (SLOPE)" />
+<meta property="og:description" content="A data set of the attributes of 382 students in secondary education
+collected from two schools. The goal is to predict the
+grade in math and portugese at the end of the third period. See the
+cited sources for additional information." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -117,48 +120,87 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Sorted L-One Penalized Estimation (SLOPE)</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/penalties.R'><code>R/penalties.R</code></a></small>
-    <div class="hidden name"><code>slope.Rd</code></div>
+    <h1>Student Performance</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/data.R'><code>R/data.R</code></a></small>
+    <div class="hidden name"><code>student.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Sorted L-One Penalized Estimation (SLOPE)</p>
+    <p>A data set of the attributes of 382 students in secondary education
+collected from two schools. The goal is to predict the
+grade in math and portugese at the end of the third period. See the
+cited sources for additional information.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>slope</span>(<span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"bhq"</span>), <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>lambda</th>
-      <td><p>penalty strength</p></td>
-    </tr>
-    <tr>
-      <th>sigma</th>
-      <td><p>estimate of signal noise</p></td>
-    </tr>
-    <tr>
-      <th>fdr</th>
-      <td><p>target for false discovery rate (FDR)</p></td>
-    </tr>
-    </table>
-    
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <pre class="usage"><span class='no'>student</span></pre>
+        
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>A parameter pack for the SLOPE penalty.</p>
+    <p>382 observations from 13 variables represented as a list consisting
+of a binary factor response matrix <code>y</code> with two responses: <code>portugese</code> and
+<code>math</code> for the final scores in period three for the respective subjects.
+The list also contains <code>x</code>: a sparse feature matrix of class
+'dgCMatrix' with the following variables:</p><dl class='dl-horizontal'>
+<dt>school_ms</dt><dd><p>student's primary school, 1 for Mousinho da Silveira and 0
+for Gabriel Pereira</p></dd>
+<dt>sex</dt><dd><p>sex of student, 1 for male</p></dd>
+<dt>age</dt><dd><p>age of student</p></dd>
+<dt>urban</dt><dd><p>urban (1) or rural (0) home address</p></dd>
+<dt>large_family</dt><dd><p>whether the family size is larger than 3</p></dd>
+<dt>cohabitation</dt><dd><p>whether parents live together</p></dd>
+<dt>Medu</dt><dd><p>mother's level of education (ordered)</p></dd>
+<dt>Fedu</dt><dd><p>fathers's level of education (ordered)</p></dd>
+<dt>Mjob_health</dt><dd><p>whether the mother was employed in health care</p></dd>
+<dt>Mjob_other</dt><dd><p>whether the mother was employed as something other than
+the specified job roles</p></dd>
+<dt>Mjob_services</dt><dd><p>whether the mother was employed in the service sector</p></dd>
+<dt>Mjob_teacher</dt><dd><p>whether the mother was employed as a teacher</p></dd>
+<dt>Fjob_health</dt><dd><p>whether the father was employed in health care</p></dd>
+<dt>Fjob_other</dt><dd><p>whether the father was employed as something other than
+the specified job roles</p></dd>
+<dt>Fjob_services</dt><dd><p>whether the father was employed in the service sector</p></dd>
+<dt>Fjob_teacher</dt><dd><p>whether the father was employed as a teacher</p></dd>
+<dt>reason_home</dt><dd><p>school chosen for being close to home</p></dd>
+<dt>reason_other</dt><dd><p>school chosen for another reason</p></dd>
+<dt>reason_rep</dt><dd><p>school chosen for its reputation</p></dd>
+<dt>nursery</dt><dd><p>whether the student attended nursery school</p></dd>
+<dt>internet</dt><dd><p>Pwhether the student has internet access at home</p></dd>
+</dl>
+    
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p>P. Cortez and A. Silva. Using Data Mining to Predict Secondary School
+Student Performance. In A. Brito and J. Teixeira Eds., Proceedings of 5th
+FUture BUsiness TEChnology Conference (FUBUTEC 2008) pp. 5-12, Porto,
+Portugal, April, 2008, EUROSIS, ISBN 978-9077381-39-7.
+<a href='http://www3.dsi.uminho.pt/pcortez/student.pdf'>http://www3.dsi.uminho.pt/pcortez/student.pdf</a></p>
+<p>Dua, D. and Karra Taniskidou, E. (2017). UCI Machine Learning Repository
+<a href='http://archive.ics.uci.edu/ml'>http://archive.ics.uci.edu/ml</a>. Irvine, CA: University of California,
+School of Information and Computer Science.</p>
+    
+    <h2 class="hasAnchor" id="preprocessing"><a class="anchor" href="#preprocessing"></a>Preprocessing</h2>
+
+    
+    <p>All of the grade-specific predictors were droppped from the data set.
+(Note that it is not clear from the source why some of these predictors are
+specific to each grade, such as which parent is the student's guardian.)
+The categorical variables were dummy-coded. Only the final grades (G3)
+were kept as dependent variables, whilst the
+first and second period grades were dropped.</p>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#value">Value</a></li>
+      <li><a href="#format">Format</a></li>
+
+      <li><a href="#source">Source</a></li>
+
+      <li><a href="#preprocessing">Preprocessing</a></li>
           </ul>
 
   </div>

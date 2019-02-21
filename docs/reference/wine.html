@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sorted L-One Penalized Estimation (SLOPE) — slope • golem</title>
+<title>Wine Cultivars — wine • golem</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,10 @@
 
 
 
-<meta property="og:title" content="Sorted L-One Penalized Estimation (SLOPE) — slope" />
+<meta property="og:title" content="Wine Cultivars — wine" />
 
-<meta property="og:description" content="Sorted L-One Penalized Estimation (SLOPE)" />
+<meta property="og:description" content="A data set of results from chemical analysis of wines grown in Italy
+from three different cultivars." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -117,48 +118,59 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Sorted L-One Penalized Estimation (SLOPE)</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/penalties.R'><code>R/penalties.R</code></a></small>
-    <div class="hidden name"><code>slope.Rd</code></div>
+    <h1>Wine Cultivars</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/data.R'><code>R/data.R</code></a></small>
+    <div class="hidden name"><code>wine.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Sorted L-One Penalized Estimation (SLOPE)</p>
+    <p>A data set of results from chemical analysis of wines grown in Italy
+from three different cultivars.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>slope</span>(<span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"bhq"</span>), <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>lambda</th>
-      <td><p>penalty strength</p></td>
-    </tr>
-    <tr>
-      <th>sigma</th>
-      <td><p>estimate of signal noise</p></td>
-    </tr>
-    <tr>
-      <th>fdr</th>
-      <td><p>target for false discovery rate (FDR)</p></td>
-    </tr>
-    </table>
-    
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <pre class="usage"><span class='no'>wine</span></pre>
+        
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>A parameter pack for the SLOPE penalty.</p>
+    <p>178 observations from 13 variables represented as a list consisting
+of a binary factor response vector <code>y</code>
+with three levels: <em>A</em>, <em>B</em>, and <em>C</em> representing different
+cultivars of wine as well as <code>x</code>: a sparse feature matrix of class
+'dgCMatrix' with the following variables:</p><dl class='dl-horizontal'>
+<dt>alcohol</dt><dd><p>alcoholic content</p></dd>
+<dt>malic</dt><dd><p>malic acid</p></dd>
+<dt>ash</dt><dd><p>ash</p></dd>
+<dt>alcalinity</dt><dd><p>alcalinity of ash</p></dd>
+<dt>magnesium</dt><dd><p>magnemium</p></dd>
+<dt>phenols</dt><dd><p>total phenols</p></dd>
+<dt>flavanoids</dt><dd><p>flavanoids</p></dd>
+<dt>nonflavanoids</dt><dd><p>nonflavanoid phenols</p></dd>
+<dt>proanthocyanins</dt><dd><p>proanthocyanins</p></dd>
+<dt>color</dt><dd><p>color intensity</p></dd>
+<dt>hue</dt><dd><p>hue</p></dd>
+<dt>dilution</dt><dd><p>OD280/OD315 of diluted wines</p></dd>
+<dt>proline</dt><dd><p>proline</p></dd>
+</dl>
+    
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p>Dua, D. and Karra Taniskidou, E. (2017). UCI Machine Learning Repository
+<a href='http://archive.ics.uci.edu/ml'>http://archive.ics.uci.edu/ml</a>. Irvine, CA: University of California,
+School of Information and Computer Science.</p>
+<p><a href='https://raw.githubusercontent.com/hadley/rminds/master/1-data/wine.csv'>https://raw.githubusercontent.com/hadley/rminds/master/1-data/wine.csv</a></p>
+<p><a href='https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass.html#wine'>https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass.html#wine</a></p>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#value">Value</a></li>
+      <li><a href="#format">Format</a></li>
+
+      <li><a href="#source">Source</a></li>
           </ul>
 
   </div>

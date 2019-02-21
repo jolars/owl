@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sorted L-One Penalized Estimation (SLOPE) — slope • golem</title>
+<title>Abalone — abalone • golem</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,12 @@
 
 
 
-<meta property="og:title" content="Sorted L-One Penalized Estimation (SLOPE) — slope" />
+<meta property="og:title" content="Abalone — abalone" />
 
-<meta property="og:description" content="Sorted L-One Penalized Estimation (SLOPE)" />
+<meta property="og:description" content="This data set contains observations of abalones, the common
+name for any of a group of sea snails. The goal is to predict the
+age of an individual abalone given physical measurements such as
+sex, weight, and height." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -117,48 +120,52 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Sorted L-One Penalized Estimation (SLOPE)</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/penalties.R'><code>R/penalties.R</code></a></small>
-    <div class="hidden name"><code>slope.Rd</code></div>
+    <h1>Abalone</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/data.R'><code>R/data.R</code></a></small>
+    <div class="hidden name"><code>abalone.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Sorted L-One Penalized Estimation (SLOPE)</p>
+    <p>This data set contains observations of abalones, the common
+name for any of a group of sea snails. The goal is to predict the
+age of an individual abalone given physical measurements such as
+sex, weight, and height.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>slope</span>(<span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"bhq"</span>), <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>lambda</th>
-      <td><p>penalty strength</p></td>
-    </tr>
-    <tr>
-      <th>sigma</th>
-      <td><p>estimate of signal noise</p></td>
-    </tr>
-    <tr>
-      <th>fdr</th>
-      <td><p>target for false discovery rate (FDR)</p></td>
-    </tr>
-    </table>
-    
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <pre class="usage"><span class='no'>abalone</span></pre>
+        
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>A parameter pack for the SLOPE penalty.</p>
+    <p>A list with two items representing 20,640 observations from
+9 variables</p><dl class='dl-horizontal'>
+<dt>sex</dt><dd><p>sex of abalone, 1 for female</p></dd>
+<dt>infant</dt><dd><p>indicates that the person is an infant</p></dd>
+<dt>length</dt><dd><p>longest shell measurement in mm</p></dd>
+<dt>diameter</dt><dd><p>perpendicular to length in mm</p></dd>
+<dt>height</dt><dd><p>height in mm including meat in shell</p></dd>
+<dt>weight_whole</dt><dd><p>weight of entire abalone</p></dd>
+<dt>weight_shucked</dt><dd><p>weight of meat</p></dd>
+<dt>weight_viscera</dt><dd><p>weight of viscera</p></dd>
+<dt>weight_shell</dt><dd><p>weight of shell</p></dd>
+<dt>rings</dt><dd><p>rings. +1.5 gives the age in years</p></dd>
+</dl>
+    
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p>Pace, R. Kelley and Ronald Barry, Sparse Spatial Autoregressions,
+Statistics and Probability Letters, 33 (1997) 291-297.</p>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#value">Value</a></li>
+      <li><a href="#format">Format</a></li>
+
+      <li><a href="#source">Source</a></li>
           </ul>
 
   </div>

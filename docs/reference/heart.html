@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sorted L-One Penalized Estimation (SLOPE) — slope • golem</title>
+<title>Heart Disease — heart • golem</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="Sorted L-One Penalized Estimation (SLOPE) — slope" />
+<meta property="og:title" content="Heart Disease — heart" />
 
-<meta property="og:description" content="Sorted L-One Penalized Estimation (SLOPE)" />
+<meta property="og:description" content="Diagnostic attributes of patients classified as having heart disease or not." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -117,48 +117,77 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Sorted L-One Penalized Estimation (SLOPE)</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/penalties.R'><code>R/penalties.R</code></a></small>
-    <div class="hidden name"><code>slope.Rd</code></div>
+    <h1>Heart Disease</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/data.R'><code>R/data.R</code></a></small>
+    <div class="hidden name"><code>heart.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Sorted L-One Penalized Estimation (SLOPE)</p>
+    <p>Diagnostic attributes of patients classified as having heart disease or not.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>slope</span>(<span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"bhq"</span>), <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>lambda</th>
-      <td><p>penalty strength</p></td>
-    </tr>
-    <tr>
-      <th>sigma</th>
-      <td><p>estimate of signal noise</p></td>
-    </tr>
-    <tr>
-      <th>fdr</th>
-      <td><p>target for false discovery rate (FDR)</p></td>
-    </tr>
-    </table>
-    
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <pre class="usage"><span class='no'>heart</span></pre>
+        
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>A parameter pack for the SLOPE penalty.</p>
+    <p>270 observations from 17 variables represented as a list consisting
+of a binary factor response vector <code>y</code>,
+with levels 'absence' and 'presence' indicating the absence or presence of
+heart disease and <code>x</code>: a sparse feature matrix of class 'dgCMatrix' with the
+following variables:</p><dl class='dl-horizontal'>
+<dt>age</dt><dd><p>age</p></dd>
+<dt>bp</dt><dd><p>diastolic blood pressure</p></dd>
+<dt>chol</dt><dd><p>serum cholesterol in mg/dl</p></dd>
+<dt>hr</dt><dd><p>maximum heart rate achieved</p></dd>
+<dt>old_peak</dt><dd><p>ST depression induced by exercise relative to rest</p></dd>
+<dt>vessels</dt><dd><p>the number of major blood vessels (0 to 3) that were
+colored by fluoroscopy</p></dd>
+<dt>sex</dt><dd><p>sex of the participant: 0 for male, 1 for female</p></dd>
+<dt>angina</dt><dd><p>a dummy variable indicating whether the person suffered
+angina-pectoris during exercise</p></dd>
+<dt>glucose_high</dt><dd><p>indicates a fasting blood sugar over 120 mg/dl</p></dd>
+<dt>cp_typical</dt><dd><p>typical angina</p></dd>
+<dt>cp_atypical</dt><dd><p>atypical angina</p></dd>
+<dt>cp_nonanginal</dt><dd><p>non-anginal pain</p></dd>
+<dt>ecg_abnormal</dt><dd><p>indicates a ST-T wave abnormality
+(T wave inversions and/or ST elevation or depression of
+&gt; 0.05 mV)</p></dd>
+<dt>ecg_estes</dt><dd><p>probable or definite left ventricular hypertrophy by
+Estes' criteria</p></dd>
+<dt>slope_flat</dt><dd><p>a flat ST curve during peak exercise</p></dd>
+<dt>slope_downsloping</dt><dd><p>a downwards-sloping ST curve during peak exercise</p></dd>
+<dt>thal_reversible</dt><dd><p>reversible defect</p></dd>
+<dt>thal_fixed</dt><dd><p>fixed defect</p></dd>
+</dl>
+    
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p>Dua, D. and Karra Taniskidou, E. (2017). UCI Machine Learning Repository
+<a href='http://archive.ics.uci.edu/ml'>http://archive.ics.uci.edu/ml</a>. Irvine, CA: University of California,
+School of Information and Computer Science.</p>
+<p><a href='https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html#heart'>https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html#heart</a></p>
+    
+    <h2 class="hasAnchor" id="preprocessing"><a class="anchor" href="#preprocessing"></a>Preprocessing</h2>
+
+    
+    <p>The original dataset contained 13 variables. The nominal of these were
+dummycoded, removing the first category. No precise information regarding
+variables <code>chest_pain</code>, <code>thal</code> and <code>ecg</code> could be found, which explains
+their obscure definitions here.</p>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#value">Value</a></li>
+      <li><a href="#format">Format</a></li>
+
+      <li><a href="#source">Source</a></li>
+
+      <li><a href="#preprocessing">Preprocessing</a></li>
           </ul>
 
   </div>
