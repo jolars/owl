@@ -1,6 +1,8 @@
 #ifndef GOLEM_UTILS
 #define GOLEM_UTILS
 
+#include <RcppArmadillo.h>
+
 inline
 arma::vec
 sigmoid(const arma::vec& x)

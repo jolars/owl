@@ -1,7 +1,8 @@
 #ifndef GOLEM_PENALTY_
 #define GOLEM_PENALTY_
 
-#include <memory.h>
+#include <RcppArmadillo.h>
+#include <memory>
 
 class Penalty {
 public:

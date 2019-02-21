@@ -1,6 +1,8 @@
 #ifndef GOLEM_SOLVERS_
 #define GOLEM_SOLVERS_
 
+#include <RcppArmadillo.h>
+#include <memory>
 #include "penalties.h"
 #include "families.h"
 #include "utils.h"

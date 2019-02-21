@@ -2,7 +2,7 @@
 #define GOLEM_FAMILIES_
 
 #include <RcppArmadillo.h>
-#include <memory.h>
+#include <memory>
 #include "utils.h"
 
 class Family {
