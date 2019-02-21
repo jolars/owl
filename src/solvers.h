@@ -1,5 +1,4 @@
-#ifndef GOLEM_SOLVERS_
-#define GOLEM_SOLVERS_
+#pragma once
 
 #include <RcppArmadillo.h>
 #include <memory>
@@ -22,6 +21,7 @@ class FISTA : public Solver {
 private:
   arma::uword max_passes;
   double tol;
+  const double eta = 2.0;
 
 public:
   FISTA(const Rcpp::List& args)
@@ -57,41 +57,55 @@ public:
     double g_intercept = 0;
 
     double L = family->lipschitzConstant(X);
+    //double L = 1.0;
     double t = 1;
-    double t_old = t;
 
     uword i = 0;
     bool accepted = false;
 
-    ConvergenceCheck convergenceCheck{beta, tol};
+    ConvergenceCheck convergenceCheck{intercept, beta, tol};
 
     while (!accepted && i < max_passes) {
-      // gradient
-      pseudo_g = family->gradient((X * beta) + intercept, y);
+      // loss and gradient
+      double f = family->loss(X*beta + intercept, y);
+      pseudo_g = family->gradient(X*beta + intercept, y);
       g = X.t() * pseudo_g;
-      g_intercept = mean(pseudo_g);
 
-      // store old values
-      intercept_tilde_old = intercept_tilde;
+      if (fit_intercept) {
+        g_intercept = mean(pseudo_g);
+        intercept_tilde_old = intercept_tilde;
+      }
+
+      beta_tilde_old = beta_tilde;
+      double f_old = f;
+      double t_old = t;
       beta_tilde_old = beta_tilde;
 
-      // update beta and intercept
-      beta_tilde = beta - (1.0/L)*g;
-      if (fit_intercept)
-        intercept_tilde = intercept - (1.0/L)*g_intercept;
+      // Lipschitz search
+      while (true) {
+        // Update beta and intercept
+        beta_tilde = penalty->eval(beta - (1.0/L)*g, L);
+        vec d = beta_tilde - beta;
+        if (fit_intercept)
+          intercept_tilde = intercept - (1.0/L)*g_intercept;
 
-      // apply regularization
-      beta_tilde = penalty->eval(beta_tilde, L);
+        f = family->loss(X*beta_tilde + intercept, y);
+        double q = f_old + dot(d, g) + 0.5*L*dot(d, d);
+
+        if (q >= f*(1 - 1e-12))
+          break;
+        else
+          L *= eta;
+      }
 
       // FISTA step
-      t_old = t;
       t = 0.5*(1.0 + std::sqrt(1.0 + 4.0*t_old*t_old));
       beta = beta_tilde + (t_old - 1.0)/t * (beta_tilde - beta_tilde_old);
 
       if (fit_intercept)
         intercept = intercept_tilde + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
 
-      accepted = convergenceCheck(beta);
+      accepted = convergenceCheck(intercept, beta);
 
       i++;
     }
@@ -104,6 +118,4 @@ public:
     );
   }
 };
-
-#endif /* GOLEM_SOLVERS_ */
 

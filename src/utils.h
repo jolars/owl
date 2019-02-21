@@ -32,14 +32,20 @@ clamp(const T& x, const T& min, const T& max)
 
 class ConvergenceCheck {
 public:
-  ConvergenceCheck(const arma::vec& beta_old, const double tol)
-    : beta_old(beta_old), tol(tol) {}
+  ConvergenceCheck(const double intercept_old,
+                   const arma::vec& beta_old,
+                   const double tol)
+                   : intercept_old(intercept_old),
+                     beta_old(beta_old),
+                     tol(tol) {}
 
   bool
-  operator()(const arma::vec& beta_new)
+  operator()(const double intercept_new,
+             const arma::vec& beta_new)
   {
-    double max_change = (abs(beta_new - beta_old)).max();
-    double max_size   = (abs(beta_new)).max();
+    double max_change = std::max(std::abs(intercept_new - intercept_old),
+                                 abs(beta_new - beta_old).max());
+    double max_size   = std::max(abs(beta_new).max(), std::abs(intercept_new));
 
     bool all_zero  = (max_size == 0.0) && (max_change == 0.0);
     bool no_change = (max_size != 0.0) && (max_change/max_size <= tol);
@@ -50,6 +56,7 @@ public:
   }
 
 private:
+  double intercept_old;
   arma::vec beta_old;
   const double tol;
 };
