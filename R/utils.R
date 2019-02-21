@@ -19,7 +19,7 @@ random_problem <- function(n, p, k = NULL, amplitude = 3, sigma = 1) {
   nonzero <- sample(p, k)
   beta <- amplitude * (1:p %in% nonzero)
   y <- X %*% beta + stats::rnorm(n, sd = sigma)
-  list(X = X, y = y, beta = beta)
+  list(X = X, y = y, beta = beta, nonzero = nonzero)
 }
 
 firstUpper <- function(x) {
