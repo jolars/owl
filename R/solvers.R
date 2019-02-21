@@ -5,7 +5,7 @@
 #'
 #' @return A set of parameters for the FISTA solver.
 #' @export
-fista <- function(tol = 1e-6, max_passes = 1e4) {
+fista <- function(tol = 1e-3, max_passes = 1e4) {
 
   stopifnot(tol > 0,
             max_passes > 0)
