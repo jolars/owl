@@ -48,11 +48,12 @@ golemDense(arma::mat        X,
                                             fit_intercept);
 
   return Rcpp::List::create(
-    Rcpp::Named("intercept")  = intercept,
-    Rcpp::Named("beta")       = Rcpp::wrap(beta),
-    Rcpp::Named("lambda")     = Rcpp::wrap(penalty->getLambda()),
-    Rcpp::Named("sigma")      = penalty->getSigma(),
-    Rcpp::Named("passes")     = passes
+    Rcpp::Named("intercept")   = intercept,
+    Rcpp::Named("beta")        = Rcpp::wrap(beta),
+    Rcpp::Named("lambda")      = Rcpp::wrap(penalty->getLambda()),
+    Rcpp::Named("sigma")       = penalty->getSigma(),
+    Rcpp::Named("passes")      = passes,
+    Rcpp::Named("diagnostics") = as<Rcpp::List>(result["diagnostics"])
   );
 
   return result;

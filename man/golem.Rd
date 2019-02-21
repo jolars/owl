@@ -7,7 +7,7 @@
 golem(x, y, family = c("gaussian", "binomial"),
   penalty = golem::slope(), solver = golem::fista(),
   intercept = TRUE, standardize = c("features", "response", "both",
-  "none"), ...)
+  "none"), diagnostics = FALSE, ...)
 }
 \arguments{
 \item{x}{input matrix}
@@ -36,6 +36,9 @@ solver function itself. Please see \strong{Solvers} for more information.}
 currently, standardization of response has no real effect. The
 response is always standardized for Gaussian responses and never
 for binomial}
+
+\item{diagnostics}{whether to collect diagnostics from the solver,
+which currently includes loss and timing estimates at each iteration}
 
 \item{...}{currently ignored}
 }

@@ -22,6 +22,7 @@ private:
   arma::uword max_passes;
   double tol;
   const double eta = 2.0;
+  bool diagnostics;
 
 public:
   FISTA(const Rcpp::List& args)
@@ -30,6 +31,7 @@ public:
 
     max_passes = as<arma::uword>(args["max_passes"]);
     tol = as<double>(args["tol"]);
+    diagnostics = as<bool>(args["diagnostics"]);
   }
 
   Rcpp::List
@@ -64,6 +66,17 @@ public:
     bool accepted = false;
 
     ConvergenceCheck convergenceCheck{intercept, beta, tol};
+
+    //diagnostics
+    std::vector<double> losses;
+    std::vector<double> time;
+    wall_clock timer;
+
+    if (diagnostics) {
+      losses.reserve(max_passes);
+      losses.reserve(max_passes);
+      timer.tic();
+    }
 
     while (!accepted && i < max_passes) {
       // loss and gradient
@@ -106,16 +119,26 @@ public:
         intercept = intercept_tilde
                     + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
 
+      if (diagnostics) {
+        time.push_back(timer.toc());
+        double l = family->loss(X*beta + intercept, y) + penalty->primal(beta);
+        losses.push_back(std::move(l));
+      }
+
       accepted = convergenceCheck(intercept, beta);
 
       i++;
     }
 
+    auto diag = Rcpp::List::create(Rcpp::Named("time") = Rcpp::wrap(time),
+                                   Rcpp::Named("loss") = Rcpp::wrap(losses));
+
     return Rcpp::List::create(
       Rcpp::Named("intercept")  = intercept,
       Rcpp::Named("beta")       = Rcpp::wrap(beta),
       Rcpp::Named("passes")     = i,
-      Rcpp::Named("lipschitz")  = L
+      Rcpp::Named("lipschitz")  = L,
+      Rcpp::Named("diagnostics") = diag
     );
   }
 };

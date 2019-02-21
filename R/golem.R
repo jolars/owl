@@ -43,6 +43,8 @@
 #'   currently, standardization of response has no real effect. The
 #'   response is always standardized for Gaussian responses and never
 #'   for binomial
+#' @param diagnostics whether to collect diagnostics from the solver,
+#'   which currently includes loss and timing estimates at each iteration
 #' @param ... currently ignored
 #'
 #' @return The result of fitting
@@ -60,7 +62,12 @@ golem <- function(x,
                   solver = golem::fista(),
                   intercept = TRUE,
                   standardize = c("features", "response", "both", "none"),
+                  diagnostics = FALSE,
                   ...) {
+
+  stopifnot(is.logical(diagnostics),
+            is.logical(intercept))
+
   # collect the call so we can use it in update() later on
   ocall <- match.call()
 
@@ -99,6 +106,8 @@ golem <- function(x,
 
   stopifnot(inherits(solver_args, "solver"),
             inherits(penalty_args, "penalty"))
+
+  solver_args$diagnostics <- diagnostics
 
   family <- match.arg(family)
   fit_intercept <- intercept
@@ -235,6 +244,10 @@ golem <- function(x,
                         call = ocall),
                    class = c(paste0("Golem", firstUpper(family)),
                              "Golem"))
+
+  if (diagnostics) {
+    attr(out, "diagnostics") <- res$diagnostics
+  }
 
   # if (debug)
   #   attr(out, "diagnostics") <- list(loss = res$losses)
