@@ -15,5 +15,5 @@ test_that("unregularized logistic regression matches output from glm()", {
 
   expect_equivalent(coef(glm_fit),
                     coef(golem_fit),
-                    tol = 0.05)
+                    tol = 0.01)
 })
