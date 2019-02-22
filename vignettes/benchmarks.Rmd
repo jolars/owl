@@ -21,15 +21,13 @@ knitr::opts_chunk$set(
 In this vignette, we will provide a matrix of benchmarks for the
 solvers, penalties, and GLM families in **golem**.
 
-### Binomial model
+First, we setup a function to plot the results from the fit.
 
-```{r, fig.cap = "Objective loss over time for the heart data set (binomial response)."}
+```{r}
 library(golem)
 library(lattice)
 
 set.seed(1)
-x <- as.matrix(heart$x)
-y <- heart$y
 
 plot_optim <- function(fit) {
   d <- attr(fit, "diagnostics")
@@ -41,19 +39,15 @@ plot_optim <- function(fit) {
   
   trunc_ind <- ifelse(is.na(trunc_ind), length(y), trunc_ind)
   
-  Suboptimality <- y[1:trunc_ind] - min(y[1:trunc_ind])
+  Suboptimality <- y[1:trunc_ind] - min(y)
   Time <- d$time[1:trunc_ind]
 
-  xyplot(Suboptimality ~ Time, type = "b",
+  xyplot(Suboptimality ~ Time, type = "l",
          xlab = "Time (seconds)")
 }
-
-fit <- golem(x, y, family = "binomial",
-             solver = fista(tol = 0.02),
-             diagnostics = TRUE)
-
-plot_optim(fit)
 ```
+
+
 
 ### Gaussian model
 
@@ -62,11 +56,25 @@ x <- as.matrix(abalone$x)
 y <- abalone$y
 
 fit <- golem(x, y, family = "gaussian",
-             solver = fista(tol = 0.001),
+             solver = fista,
              diagnostics = TRUE)
 d <- attr(fit, "diagnostics")
 plot_optim(fit)
 ```
 
+
+
+### Binomial model
+
+```{r, fig.cap = "Objective loss over time for the heart data set (binomial response)."}
+x <- as.matrix(heart$x)
+y <- heart$y
+
+fit <- golem(x, y, family = "binomial",
+             solver = fista,
+             diagnostics = TRUE)
+
+plot_optim(fit)
+```
 
 
