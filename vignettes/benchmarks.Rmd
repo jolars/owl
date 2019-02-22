@@ -31,11 +31,28 @@ set.seed(1)
 x <- as.matrix(heart$x)
 y <- heart$y
 
+plot_optim <- function(fit) {
+  d <- attr(fit, "diagnostics")
+  y <- d$loss
+  
+  rel_change <- diff(y)/y[-length(y)]
+  
+  trunc_ind <- which(abs(rel_change) < 1e-5)[1]
+  
+  trunc_ind <- ifelse(is.na(trunc_ind), length(y), trunc_ind)
+  
+  Suboptimality <- y[1:trunc_ind] - min(y[1:trunc_ind])
+  Time <- d$time[1:trunc_ind]
+
+  xyplot(Suboptimality ~ Time, type = "b",
+         xlab = "Time (seconds)")
+}
+
 fit <- golem(x, y, family = "binomial",
-             solver = fista(tol = 0.08),
+             solver = fista(tol = 0.02),
              diagnostics = TRUE)
-d <- attr(fit, "diagnostics")
-xyplot(loss ~ time, data = d, type = "l")
+
+plot_optim(fit)
 ```
 
 ### Gaussian model
@@ -48,7 +65,7 @@ fit <- golem(x, y, family = "gaussian",
              solver = fista(tol = 0.001),
              diagnostics = TRUE)
 d <- attr(fit, "diagnostics")
-xyplot(loss ~ time, data = d, type = "l")
+plot_optim(fit)
 ```
 
 

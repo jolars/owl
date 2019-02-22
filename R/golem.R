@@ -99,8 +99,8 @@ golem <- function(x,
   # setup solver settings
   if (is.character(solver))
     solver_args <- match.fun(solver)()
-  else if (is.function(penalty))
-    solver_args <- do.call(penalty, list())
+  else if (is.function(solver))
+    solver_args <- do.call(solver, list())
   else
     solver_args <- solver
 
