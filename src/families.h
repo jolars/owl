@@ -22,7 +22,7 @@ public:
 
   virtual
   double
-  lipschitzConstant(const arma::mat& X) = 0;
+  lipschitzConstant(const arma::mat& X, const bool fit_intercept) = 0;
 
   virtual
   void
@@ -56,11 +56,13 @@ public:
   }
 
   double
-  lipschitzConstant(const arma::mat& X)
+  lipschitzConstant(const arma::mat& X, const bool fit_intercept)
   {
-    // maximum eigenvalue of X'X
-    // TODO(johan): account for the intercept
-    return (arma::eig_sym(X.t() * X)).max();
+    using namespace arma;
+
+    double row_squared_l2_norm_max = sum(square(X), 1).max();
+
+    return row_squared_l2_norm_max + static_cast<double>(fit_intercept);
   }
 
   void
@@ -107,11 +109,13 @@ public:
   }
 
   double
-  lipschitzConstant(const arma::mat& X)
+  lipschitzConstant(const arma::mat& X, const bool fit_intercept)
   {
-    // maximum eigenvalue of X'X
-    // TODO(johan): check that this is actually true for the binomial family
-    return 0.25*(arma::eig_sym(X.t() * X)).max();
+    using namespace arma;
+
+    double row_squared_l2_norm_max = sum(square(X), 1).max();
+
+    return 0.25*(row_squared_l2_norm_max + static_cast<double>(fit_intercept));
   }
 
   void

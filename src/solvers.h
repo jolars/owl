@@ -58,8 +58,8 @@ public:
     vec pseudo_g{g};
     double g_intercept = 0;
 
-    //double L = family->lipschitzConstant(X);
-    double L = 1.0;
+    double L = family->lipschitzConstant(X, fit_intercept);
+    //double L = 1.0;
     double t = 1;
 
     uword i = 0;
