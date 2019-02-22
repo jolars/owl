@@ -1,10 +1,10 @@
 ---
-title: "The SLOPE Penalty"
+title: "Regularization penalties in golem"
 author: "Johan Larsson"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{The SLOPE Penalty}
+  %\VignetteIndexEntry{Regularization penalties in golem}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -27,7 +27,6 @@ Let's set up a simple experiment to see how SLOPE controls the FDR.
 
 ```{r, fig.cap = "Control of false discovery rate using SLOPE."}
 library(golem)
-library(SLOPE)
 
 # proportion of real signals
 q <- seq(0.05, 0.5, length.out = 20)
@@ -49,8 +48,6 @@ for (i in seq_along(q)) {
                intercept = FALSE)
   
   selected_golem <- which(coef(fit) > 0)
-  # selected_slope <- slope_fit$selected
-  #length(selected_golem)/length(selected_golem)
   V <- length(setdiff(selected_golem, signals))
   R <- length(selected_golem)
   fdr[i] <- V/R
@@ -58,6 +55,8 @@ for (i in seq_along(q)) {
 
 library(lattice)
 xyplot(fdr ~ q, type = "b",
+       ylab = "False discovery rate",
+       xlab = "Proportion of true signals",
        panel = function(...) {
          panel.refline(h = 0.2, lty = 2, col = "dark grey")
          panel.xyplot(...)
