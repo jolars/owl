@@ -2,9 +2,10 @@
 % Please edit documentation in R/penalties.R
 \name{elasticNet}
 \alias{elasticNet}
-\title{Elastic Net Penalty}
+\title{Elastic Net (Lasso and Ridge)}
 \usage{
-elasticNet(lambda = NULL, n_lambda = 100, alpha = 1)
+elasticNet(lambda = NULL, lambda_min_ratio = 1e-04, n_lambda = 100,
+  alpha = 1)
 }
 \arguments{
 \item{lambda}{the regularization strength, which can either be a
@@ -12,11 +13,17 @@ user-supplied vector of (theoreticall) any length, or \code{NULL}, in which
 case golem automatically computes a sequence so that the first value
 leads to the null (intercept-only) model.}
 
+\item{lambda_min_ratio}{the lowest permissible value of the
+lambda penalty}
+
 \item{n_lambda}{the length of the \eqn{\lambda} sequence -- ignored if
 a value is supplied to \code{lambda}.}
 
 \item{alpha}{the elastic net mix, 1 for the lasso penalty, 0 for the ridge,
 and anything in between for a mix of the two (the elastic net)}
+}
+\value{
+A paramter pack for the elastic net penalty.
 }
 \description{
 The elastic net penalty is a mix of the lasso (L1) and ridge (L2)

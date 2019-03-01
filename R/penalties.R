@@ -56,6 +56,8 @@ slope <- function(lambda = c("gaussian", "bhq"),
 #'   user-supplied vector of (theoreticall) any length, or `NULL`, in which
 #'   case golem automatically computes a sequence so that the first value
 #'   leads to the null (intercept-only) model.
+#' @param lambda_min_ratio the lowest permissible value of the
+#'   lambda penalty
 #' @param n_lambda the length of the \eqn{\lambda} sequence -- ignored if
 #'   a value is supplied to `lambda`.
 #' @param alpha the elastic net mix, 1 for the lasso penalty, 0 for the ridge,
