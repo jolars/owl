@@ -4,7 +4,7 @@
 \alias{fista}
 \title{FISTA solver}
 \usage{
-fista(tol = 0.001, max_passes = 10000)
+fista(tol = 1e-05, max_passes = 10000)
 }
 \arguments{
 \item{tol}{tolerance threshold for convergence}
