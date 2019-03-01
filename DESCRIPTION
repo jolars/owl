@@ -23,6 +23,7 @@ LinkingTo:
     RcppArmadillo (>= 0.9.200.7.0)
 Suggests:
     covr,
+    glmnet,
     isotone,
     spelling,
     SLOPE,
