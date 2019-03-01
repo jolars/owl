@@ -29,6 +29,7 @@ predict.Golem <- function(object,
 
   if (inherits(newdata, "sparseMatrix"))
     newdata <- methods::as(newdata, "dgCMatrix")
+
   if (inherits(newdata, "data.frame"))
     newdata <- as.matrix(newdata)
 
