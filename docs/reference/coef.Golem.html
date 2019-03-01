@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Make Predictions from Golem Models — predict.Golem • golem</title>
+<title>Return Coefficients from a Golem Model — coef.Golem • golem</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,13 @@
 
 
 
-<meta property="og:title" content="Make Predictions from Golem Models — predict.Golem" />
+<meta property="og:title" content="Return Coefficients from a Golem Model — coef.Golem" />
 
-<meta property="og:description" content="Make Predictions from Golem Models" />
+<meta property="og:description" content="Returns the coefficients for a model fit via golem::golem().
+Unlike retrieving the coefficients using simple indexing, such as
+fit$coefficients, this function attempts to reduce the dimensions of
+the coefficients---that are otherwise always a three-dimensional array---by
+calling base::drop()." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -117,86 +121,42 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Make Predictions from Golem Models</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/predict.R'><code>R/predict.R</code></a></small>
-    <div class="hidden name"><code>predict.Golem.Rd</code></div>
+    <h1>Return Coefficients from a Golem Model</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/coef.R'><code>R/coef.R</code></a></small>
+    <div class="hidden name"><code>coef.Golem.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Make Predictions from Golem Models</p>
+    <p>Returns the coefficients for a model fit via <code><a href='golem.html'>golem::golem()</a></code>.
+Unlike retrieving the coefficients using simple indexing, such as
+<code>fit$coefficients</code>, this function attempts to reduce the dimensions of
+the coefficients---that are otherwise always a three-dimensional array---by
+calling <code><a href='https://www.rdocumentation.org/packages/base/topics/drop'>base::drop()</a></code>.</p>
     
     </div>
 
     <pre class="usage"><span class='co'># S3 method for Golem</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>object</span>, <span class='no'>newdata</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"link"</span>, <span class='st'>"response"</span>),
-  <span class='no'>...</span>)
-
-<span class='co'># S3 method for GolemGaussian</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>object</span>, <span class='kw'>newdata</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"link"</span>, <span class='st'>"response"</span>), <span class='no'>...</span>)
-
-<span class='co'># S3 method for GolemBinomial</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>object</span>, <span class='kw'>newdata</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"link"</span>, <span class='st'>"response"</span>, <span class='st'>"class"</span>), <span class='no'>...</span>)</pre>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>(<span class='no'>object</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>object</th>
-      <td><p>an object of class "Golem"</p></td>
-    </tr>
-    <tr>
-      <th>newdata</th>
-      <td><p>new data to make predictions for</p></td>
-    </tr>
-    <tr>
-      <th>type</th>
-      <td><p>type of predictions. <code>"link"</code> returns the linear predictors,
-<code>"response"</code> returns the response after applying the link functions,
-and <code>"class"</code> returns the predicted class (for the binomial family).</p></td>
+      <td><p>an object of class <code>"Golem"</code></p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>ignored.</p></td>
+      <td><p>parameters passed onto <code><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>stats::coef()</a></code></p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A vector of predictions.</p>
+    <p>The coefficients, including the intercept if it was fit.</p>
     
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>as.matrix</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/with'>with</a></span>(<span class='no'>Puromycin</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/cbind'>cbind</a></span>(<span class='no'>conc</span>, <span class='no'>rate</span>)))
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='no'>Puromycin</span>$<span class='no'>state</span>
-
-<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='golem.html'>golem</a></span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>fit</span>, <span class='no'>x</span>, <span class='st'>"class"</span>)</div><div class='output co'>#&gt;       [,1]       
-#&gt;  [1,] "untreated"
-#&gt;  [2,] "untreated"
-#&gt;  [3,] "untreated"
-#&gt;  [4,] "untreated"
-#&gt;  [5,] "treated"  
-#&gt;  [6,] "treated"  
-#&gt;  [7,] "treated"  
-#&gt;  [8,] "treated"  
-#&gt;  [9,] "treated"  
-#&gt; [10,] "treated"  
-#&gt; [11,] "treated"  
-#&gt; [12,] "treated"  
-#&gt; [13,] "untreated"
-#&gt; [14,] "untreated"
-#&gt; [15,] "untreated"
-#&gt; [16,] "untreated"
-#&gt; [17,] "untreated"
-#&gt; [18,] "untreated"
-#&gt; [19,] "treated"  
-#&gt; [20,] "treated"  
-#&gt; [21,] "treated"  
-#&gt; [22,] "treated"  
-#&gt; [23,] "treated"  </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -204,9 +164,7 @@ and <code>"class"</code> returns the predicted class (for the binomial family).<
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+          </ul>
 
   </div>
 </div>
