@@ -55,6 +55,7 @@ There is a multitude of ways to penalize the models created by
 \code{\link[golem:golem]{golem::golem()}}, currently they are:
 \itemize{
 \item \code{\link[golem:slope]{golem::slope()}}
+\item \code{\link[golem:elasticNet]{golem::elasticNet()}}
 }
 
 These functions are in fact only parameter packs for the actual

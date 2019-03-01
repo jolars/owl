@@ -11,6 +11,7 @@ test_that("unregularized logistic regression matches output from glm()", {
   df <- data.frame(y = y, x1 = x1, x2 = x2)
   glm_fit <- glm(y ~ x1 + x2, data = df, family = "binomial")
   golem_fit <- golem::golem(cbind(x1, x2), y, family = "binomial",
+                            diagnostics = TRUE,
                             penalty = slope(sigma = 0))
 
   expect_equivalent(coef(glm_fit),

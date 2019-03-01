@@ -27,7 +27,7 @@ test_that("SLOPE and golem agree when computing lambda sequences", {
 
   for (lambda in c("bhq", "gaussian")) {
     slope_lambda <- SLOPE::SLOPE(X, y, sigma = 1, lambda = lambda)$lambda
-    golem_lambda <- golem::golem(X, y, sigma = 1, penalty = slope(lambda = lambda))$lambda
+    golem_lambda <- golem::golem(X, y, sigma = 1, penalty = slope(lambda = lambda))$penalty$lambda
     expect_equivalent(golem_lambda, slope_lambda)
   }
 })

@@ -47,8 +47,6 @@ plot_optim <- function(fit) {
 }
 ```
 
-
-
 ### Gaussian model
 
 ```{r, fig.cap = "Objective loss over time for the abalone data set (Gaussian response)."}
@@ -58,11 +56,8 @@ y <- abalone$y
 fit <- golem(x, y, family = "gaussian",
              solver = fista,
              diagnostics = TRUE)
-d <- attr(fit, "diagnostics")
 plot_optim(fit)
 ```
-
-
 
 ### Binomial model
 

@@ -3,6 +3,7 @@
 S3method(predict,Golem)
 S3method(predict,GolemBinomial)
 S3method(predict,GolemGaussian)
+export(elasticNet)
 export(fista)
 export(golem)
 export(slope)

@@ -8,6 +8,7 @@
 #' [golem::golem()], currently they are:
 #'
 #' * [golem::slope()]
+#' * [golem::elasticNet()]
 #'
 #' These functions are in fact only parameter packs for the actual
 #' implementations of the penalties and will be passed on to
@@ -219,37 +220,50 @@ golem <- function(x,
     res <- golemDense(x, y, control)
   }
 
-  if (family %in% c("gaussian", "binomial")) {
-    beta <- as.double(res$beta)
+  beta <- res$beta
+  n_penalties <- dim(beta)[3]
 
-    if (fit_intercept) {
-      coefficients <- c(res$intercept, beta)
-      names(coefficients) <- c("(Intercept)", variable_names)
-    } else {
-      coefficients <- beta
-      names(coefficients) <- variable_names
-    }
-
-    df <- sum(beta > 0)
+  if (fit_intercept) {
+    intercept <- res$intercept
+    coefficients <- array(c(intercept, beta),
+                          dim = c(p + 1, m, n_penalties),
+                          dimnames = list(c("(Intercept)", variable_names),
+                                          response_names,
+                                          paste0("p", seq_len(n_penalties))))
+  } else {
+    coefficients <- array(beta,
+                          dim = c(p, m, n_penalties),
+                          dimnames = list(variable_names,
+                                          response_names,
+                                          paste0("p", seq_len(n_penalties))))
   }
 
+  nonzeros <- apply(beta, 3, function(x) colSums(x > 0))
+
   out <- structure(list(coefficients = coefficients,
-                        lambda = drop(res$lambda),
-                        df = df,
+                        penalty = res$penalty,
+                        nonzeros = nonzeros,
                         passes = res$passes,
                         class_names = class_names,
-                        sigma = res$sigma,
                         n = n,
                         p = p,
+                        m = m,
                         call = ocall),
                    class = c(paste0("Golem", firstUpper(family)),
                              "Golem"))
 
   if (diagnostics) {
-    attr(out, "diagnostics") <- res$diagnostics
+    nl <- length(res$time)
+    nn <- lengths(res$time)
+    time <- unlist(res$time)
+    loss <- unlist(res$loss)
+
+    diag <- data.frame(time = time,
+                       loss = loss,
+                       penalty = rep(seq_len(nl), nn))
+
+    attr(out, "diagnostics") <- diag
   }
 
-  # if (debug)
-  #   attr(out, "diagnostics") <- list(loss = res$losses)
   out
 }

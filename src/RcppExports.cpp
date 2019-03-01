@@ -7,15 +7,15 @@
 using namespace Rcpp;
 
 // golemDense
-Rcpp::List golemDense(arma::mat X, arma::vec y, const Rcpp::List control);
-RcppExport SEXP _golem_golemDense(SEXP XSEXP, SEXP ySEXP, SEXP controlSEXP) {
+Rcpp::List golemDense(arma::mat x, arma::mat y, const Rcpp::List control);
+RcppExport SEXP _golem_golemDense(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Rcpp::List >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(golemDense(X, y, control));
+    rcpp_result_gen = Rcpp::wrap(golemDense(x, y, control));
     return rcpp_result_gen;
 END_RCPP
 }

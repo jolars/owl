@@ -32,7 +32,7 @@ clamp(const T& x, const T& min, const T& max)
 
 class ConvergenceCheck {
 public:
-  ConvergenceCheck(const double intercept_old,
+  ConvergenceCheck(const arma::rowvec& intercept_old,
                    const arma::vec& beta_old,
                    const double tol)
                    : intercept_old(intercept_old),
@@ -40,12 +40,13 @@ public:
                      tol(tol) {}
 
   bool
-  operator()(const double intercept_new,
+  operator()(const arma::rowvec& intercept_new,
              const arma::vec& beta_new)
   {
-    double max_change = std::max(std::abs(intercept_new - intercept_old),
+    double max_change = std::max(abs(intercept_new - intercept_old).max(),
                                  abs(beta_new - beta_old).max());
-    double max_size   = std::max(abs(beta_new).max(), std::abs(intercept_new));
+    double max_size   = std::max(abs(intercept_new).max(),
+                                 abs(beta_new).max());
 
     bool all_zero  = (max_size == 0.0) && (max_change == 0.0);
     bool no_change = (max_size != 0.0) && (max_change/max_size <= tol);
@@ -56,67 +57,76 @@ public:
   }
 
 private:
-  double intercept_old;
+  arma::rowvec intercept_old;
   arma::vec beta_old;
   const double tol;
 };
 
 template <typename T>
 void
-preprocessFeatures(T& X,
-                   arma::rowvec& X_center,
-                   arma::rowvec& X_scale,
+preprocessFeatures(T& x,
+                   arma::rowvec& x_center,
+                   arma::rowvec& x_scale,
                    const std::string& standardize)
 {
   using namespace arma;
 
-  auto p = X.n_cols;
+  auto p = x.n_cols;
 
-  X_center.set_size(p);
-  X_scale.set_size(p);
+  x_center.set_size(p);
+  x_scale.set_size(p);
 
   // TODO(jolars): adapt for sparse input later
 
   if (standardize == "both" || standardize == "features") {
-    X_center = mean(X);
-    for (decltype(p) j = 0; j < p; ++j)
-      X_scale(j) = norm(X.col(j));
-
-    X_scale.replace(0, 1); // avoid scaling by 0
+    x_center = mean(x);
+    x_scale = stddev(x, 1);
+    x_scale.replace(0, 1);
 
     for (decltype(p) j = 0; j < p; ++j)
-      X.col(j) = (X.col(j) - X_center(j))/X_scale(j);
+      x.col(j) = (x.col(j) - x_center(j))/x_scale(j);
 
   } else {
-    X_center.zeros();
-    X_scale.ones();
+    x_center.zeros();
+    x_scale.ones();
   }
 }
 
 inline
-std::pair<double, arma::vec>
-unstandardize(double&& intercept,
-              arma::vec&& beta,
-              const arma::rowvec& X_center,
-              const arma::rowvec& X_scale,
-              const double y_center,
-              const double y_scale,
+void
+unstandardize(arma::cube& intercepts,
+              arma::cube& betas,
+              const arma::rowvec& x_center,
+              const arma::rowvec& x_scale,
+              const arma::rowvec& y_center,
+              const arma::rowvec& y_scale,
               const bool fit_intercept)
 {
   using namespace arma;
 
-  uword p = beta.n_rows;
+  uword p = betas.n_rows;
+  uword m = betas.n_cols;
 
-  for (decltype(p) j = 0; j < p; ++j)
-    beta(j) *= y_scale/X_scale(j);
+  for (uword k = 0; k < m; ++k) {
+    double x_bar_beta_sum = 0.0;
 
-  double X_bar_beta_sum = as_scalar(X_center * beta);
+    for (uword j = 0; j < p; ++j) {
+      betas.tube(j, k) *= y_scale(k)/x_scale(j);
+      x_bar_beta_sum += accu(x_center(j) * betas.tube(j, k));
+    }
 
-  if (fit_intercept)
-    intercept = intercept*y_scale + y_center - X_bar_beta_sum;
+    if (fit_intercept)
+      intercepts.tube(0, k) = intercepts.tube(0, k) * y_scale(k) + y_center(k) - x_bar_beta_sum;
+  }
+}
 
-  return std::make_pair(std::move(intercept),
-                        std::move(beta));
+inline
+arma::vec
+logSeq(const double from,
+       const double to,
+       const unsigned n)
+{
+  return arma::exp(arma::linspace(std::log(from), std::log(to), n));
 }
 
 #endif /* GOLEM_UTILS */

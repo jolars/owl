@@ -1,18 +1,17 @@
 context("gaussian family")
 
 test_that("unregularized gaussian models work as expected", {
-  X <- with(mtcars, cbind(cyl, wt, disp, hp, drat))
-  y <- mtcars$mpg
+  set.seed(1)
 
-  for (standardize in c(TRUE, FALSE)) {
-    lm_fit <- lm(y ~ X)
-    golem_fit <- golem::golem(X, y, family = "gaussian",
-                              standardize = standardize,
-                              penalty = slope(sigma = 0),
-                              solver = fista(max_passes = 1e6, tol = 1e-4))
+  x <- as.matrix(abalone$x)
+  y <- abalone$y
 
-    expect_equivalent(coef(lm_fit),
-                      coef(golem_fit),
-                      tol = 0.05)
-  }
+  lm_fit <- lm(y ~ x)
+  golem_fit <- golem::golem(x, y, family = "gaussian",
+                            penalty = slope(sigma = 0),
+                            solver = fista(tol = 1e-6))
+
+  expect_equivalent(coef(lm_fit),
+                    coef(golem_fit),
+                    tol = 0.1)
 })
