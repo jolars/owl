@@ -78,11 +78,11 @@ public:
   {
     // always center gaussian responses
     y_center = arma::mean(y);
-    // y_scale = arma::stddev(y);
+    //y_scale  = arma::stddev(y, 1);
     y_scale.ones();
 
     y -= y_center(0);
-    y /= y_scale(0);
+    // y /= y_scale(0);
   }
 
   double
