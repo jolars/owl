@@ -83,7 +83,7 @@ golemDense(arma::mat x,
   return Rcpp::List::create(
     Named("intercept")   = wrap(intercepts),
     Named("beta")        = wrap(betas),
-    Named("penalty")     = wrap(penalty->getParams()),
+    Named("penalty")     = wrap(penalty->getParams(y_scale)),
     Named("passes")      = passes,
     Named("loss")        = wrap(losses),
     Named("time")        = wrap(timings)
