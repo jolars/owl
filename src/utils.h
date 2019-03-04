@@ -80,11 +80,16 @@ preprocessFeatures(T& x,
 
   if (standardize == "both" || standardize == "features") {
     x_center = mean(x);
-    x_scale = stddev(x, 1);
-    x_scale.replace(0, 1);
 
     for (decltype(p) j = 0; j < p; ++j)
-      x.col(j) = (x.col(j) - x_center(j))/x_scale(j);
+      x_scale(j) = norm(x.col(j));
+
+    x_scale.replace(0, 1);
+
+    for (decltype(p) j = 0; j < p; ++j) {
+      x.col(j) -= x_center(j);
+      x.col(j) /= x_scale(j);
+    }
 
   } else {
     x_center.zeros();

@@ -221,22 +221,26 @@ golem <- function(x,
   }
 
   beta <- res$beta
+  intercept <- res$intercept
   n_penalties <- dim(beta)[3]
 
   if (fit_intercept) {
-    intercept <- res$intercept
-    coefficients <- array(c(intercept, beta),
-                          dim = c(p + 1, m, n_penalties),
-                          dimnames = list(c("(Intercept)", variable_names),
-                                          response_names,
-                                          paste0("p", seq_len(n_penalties))))
+    coefficients <- array(NA, dim = c(p + 1, m, n_penalties))
+
+    for (i in seq_len(n_penalties)) {
+      coefficients[1, , i] <- intercept[, , i]
+      coefficients[-1, , i] <- beta[, , i]
+    }
+    dimnames(coefficients) <- list(c("(Intercept)", variable_names),
+                                   response_names,
+                                   paste0("p", seq_len(n_penalties)))
   } else {
-    coefficients <- array(beta,
-                          dim = c(p, m, n_penalties),
-                          dimnames = list(variable_names,
-                                          response_names,
-                                          paste0("p", seq_len(n_penalties))))
+    coefficients <- beta
+    dimnames(coefficients) <- list(variable_names,
+                                   response_names,
+                                   paste0("p", seq_len(n_penalties)))
   }
+
 
   nonzeros <- apply(beta, 3, function(x) colSums(x > 0))
 
