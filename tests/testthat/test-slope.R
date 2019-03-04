@@ -5,16 +5,17 @@ test_that("SLOPE and golem agree for gaussian designs", {
 
   problem <- golem:::random_problem(1000, 50, sigma = 1)
 
-  X <- problem$X
+  X <- scale(problem$X)
   y <- problem$y
 
   set.seed(0)
   res_slope <- SLOPE::SLOPE(X, y, sigma = 1, normalize = FALSE)
   set.seed(0)
-  res_golem <- golem::golem(X, y, sigma = 1, intercept = FALSE,
-                            standardize = "none")
+  res_golem <- golem::golem(X, y, intercept = FALSE,
+                            penalty = slope(sigma = 1),
+                            standardize = FALSE)
 
-  expect_equivalent(res_slope$beta, res_golem$coefficients, tol = 0.05)
+  expect_equivalent(res_slope$beta, coef(res_golem), tol = 0.01)
 })
 
 test_that("SLOPE and golem agree when computing lambda sequences", {
