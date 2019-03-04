@@ -30,7 +30,7 @@ public:
 
   virtual
   Rcpp::List
-  getParams() = 0;
+  getParams(const arma::vec& y_scale) = 0;
 
   virtual
   arma::uword
@@ -175,13 +175,13 @@ public:
   }
 
   Rcpp::List
-  getParams()
+  getParams(const arma::vec& y_scale)
   {
     using namespace Rcpp;
 
-    return List::create(Named("name") = "slope",
+    return List::create(Named("name")   = "slope",
                         Named("lambda") = wrap(lambda),
-                        Named("sigma") = sigma);
+                        Named("sigma")  = sigma);
   }
 
 };
@@ -213,8 +213,9 @@ public:
         family->lambdaMax(x, y, y_scale)/std::max(alpha, 0.001);
 
       lambda = logSeq(lambda_max, lambda_max*lambda_min_ratio, n_lambda);
-      lambda /= y_scale.max();
     }
+
+    lambda /= y_scale.max();
   };
 
   arma::mat
@@ -261,13 +262,15 @@ public:
   }
 
   Rcpp::List
-  getParams()
+  getParams(const arma::vec& y_scale)
   {
     using namespace Rcpp;
 
-    return List::create(Named("name") = "elasticNet",
-                        Named("lambda") = wrap(lambda),
-                        Named("alpha") = alpha);
+    arma::vec lambda_out = lambda*y_scale.max();
+
+    return List::create(Named("name")   = "elasticNet",
+                        Named("lambda") = wrap(lambda_out),
+                        Named("alpha")  = alpha);
   }
 };
 
