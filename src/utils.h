@@ -121,7 +121,8 @@ unstandardize(arma::cube& intercepts,
     }
 
     if (fit_intercept)
-      intercepts.tube(0, k) = intercepts.tube(0, k) * y_scale(k) + y_center(k) - x_bar_beta_sum;
+      intercepts.tube(0, k) =
+        intercepts.tube(0, k) * y_scale(k) + y_center(k) - x_bar_beta_sum;
   }
 }
 
