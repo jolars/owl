@@ -53,14 +53,15 @@ for (i in seq_along(q)) {
   fdr[i] <- V/R
 }
 
-library(lattice)
-xyplot(fdr ~ q, type = "b",
-       ylab = "False discovery rate",
-       xlab = "Proportion of true signals",
-       panel = function(...) {
-         panel.refline(h = 0.2, lty = 2, col = "dark grey")
-         panel.xyplot(...)
-       })
+library(ggplot2)
+theme_set(theme_bw())
+library(tibble)
+library(dplyr)
+
+tibble(fdr = fdr, q = q) %>%
+  ggplot(aes(x = q, y = fdr)) +
+  geom_path() +
+  geom_point()
 ```
 
 
