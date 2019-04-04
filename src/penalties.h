@@ -10,7 +10,7 @@ class Penalty {
 public:
   virtual
   arma::mat
-  eval(arma::mat y, const double L) = 0;
+  eval(const arma::mat& y, const double L) = 0;
 
   virtual
   double
@@ -89,7 +89,7 @@ public:
   };
 
   arma::mat
-  eval(arma::mat beta, const double L)
+  eval(const arma::mat& beta, const double L)
   {
     using namespace arma;
 
@@ -97,9 +97,9 @@ public:
 
     // collect sign of beta and work with sorted absolutes
     mat beta_sign = sign(beta);
-    beta = abs(beta);
-    uvec beta_order = stable_sort_index(beta, "descend");
-    beta = (beta(beta_order)).eval();
+    vec beta2 = abs(beta);
+    uvec beta_order = stable_sort_index(beta2, "descend");
+    beta2 = (beta2(beta_order)).eval();
 
     vec s(p);
     vec w(p);
@@ -113,7 +113,7 @@ public:
     for (uword i = 0; i < p; i++) {
       idx_i(k) = i;
       idx_j(k) = i;
-      s(k)     = beta(i) - sigma*lambda(i)/L;
+      s(k)     = beta2(i) - sigma*lambda(i)/L;
       w(k)     = s(k);
 
       while ((k > 0) && (w[k-1] <= w(k))) {
@@ -219,12 +219,12 @@ public:
   };
 
   arma::mat
-  eval(arma::mat beta, const double L)
+  eval(const arma::mat& beta, const double L)
   {
     using namespace arma;
 
     return sign(beta)
-           % clamp(abs(beta) - alpha*lambda[lambda_ind]/L, 0.0, datum::inf);
+           % clamp(abs(beta) - alpha*lambda[lambda_ind]*(1.0/L), 0.0, datum::inf);
   };
 
   double
