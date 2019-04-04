@@ -14,6 +14,10 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+library(ggplot2)
+library(tidyr)
+theme_set(theme_bw())
 ```
 
 ## Benchmarks
@@ -24,10 +28,9 @@ solvers, penalties, and GLM families in **golem**.
 First, we setup a function to plot the results from the fit.
 
 ```{r}
-library(golem)
-library(lattice)
-
 set.seed(1)
+
+library(golem)
 
 plot_optim <- function(fit) {
   d <- attr(fit, "diagnostics")
@@ -41,9 +44,11 @@ plot_optim <- function(fit) {
   
   Suboptimality <- y[1:trunc_ind] - min(y)
   Time <- d$time[1:trunc_ind]
-
-  xyplot(Suboptimality ~ Time, type = "l",
-         xlab = "Time (seconds)")
+  
+  data.frame(Suboptimality = Suboptimality, Time = Time) %>%
+    ggplot(aes(x = Suboptimality, y = Time)) +
+    geom_line() +
+    xlab("Time (seconds)")
 }
 ```
 
