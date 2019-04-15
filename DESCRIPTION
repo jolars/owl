@@ -22,17 +22,15 @@ LinkingTo:
     RcppArmadillo (>= 0.9.200.7.0)
 Suggests:
     covr,
-    dplyr,
-    ggplot2,
     glmnet,
     isotone,
     knitr,
+    lattice,
+    latticeExtra,
     rmarkdown,
     SLOPE,
     spelling,
     testthat,
-    tibble,
-    tidyr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Language: en-US

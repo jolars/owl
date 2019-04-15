@@ -27,6 +27,8 @@ Let's set up a simple experiment to see how SLOPE controls the FDR.
 
 ```{r, fig.cap = "Control of false discovery rate using SLOPE."}
 library(golem)
+library(lattice)
+library(latticeExtra)
 
 # proportion of real signals
 q <- seq(0.05, 0.5, length.out = 20)
@@ -53,15 +55,8 @@ for (i in seq_along(q)) {
   fdr[i] <- V/R
 }
 
-library(ggplot2)
-theme_set(theme_bw())
-library(tibble)
-library(dplyr)
-
-tibble(fdr = fdr, q = q) %>%
-  ggplot(aes(x = q, y = fdr)) +
-  geom_path() +
-  geom_point()
+xyplot(fdr ~ q, type = "b") +
+ layer_(panel.refline(h = 0.2)) 
 ```
 
 
