@@ -1,3 +1,17 @@
+#' @include families.R penalties.R solvers.R
+setClass("Golem",
+         slots = c(coefficients = "array",
+                   nonzeros = "numeric",
+                   family = "Family",
+                   penalty = "Penalty",
+                   class_names = "character",
+                   n = "numeric",
+                   p = "numeric",
+                   m = "numeric",
+                   diagnostics = "data.frame",
+                   passes = "numeric",
+                   call = "call"))
+
 #' Regularized Generalized Linear Models
 #'
 #' This functions fits a generalized linear model (GLM) using efficient
@@ -7,8 +21,8 @@
 #' There is a multitude of ways to penalize the models created by
 #' [golem::golem()], currently they are:
 #'
-#' * [golem::slope()]
-#' * [golem::elasticNet()]
+#' * [golem::Slope()]
+#' * [golem::Lasso()]
 #'
 #' These functions are in fact only parameter packs for the actual
 #' implementations of the penalties and will be passed on to
@@ -22,7 +36,7 @@
 #' @section Solvers:
 #' There is currently a single solver available for [golem::golem], namely
 #'
-#' * [golem::fista()]
+#' * [golem::Fista()]
 #'
 #' @param x input matrix
 #' @param y response variable
@@ -44,8 +58,6 @@
 #'   currently, standardization of response has no real effect. The
 #'   response is always standardized for Gaussian responses and never
 #'   for binomial
-#' @param diagnostics whether to collect diagnostics from the solver,
-#'   which currently includes loss and timing estimates at each iteration
 #' @param ... currently ignored
 #'
 #' @return The result of fitting
@@ -59,22 +71,40 @@
 golem <- function(x,
                   y,
                   family = c("gaussian", "binomial"),
-                  penalty = golem::slope(),
-                  solver = golem::fista(),
+                  penalty = golem::Slope(),
+                  solver = golem::Fista(),
                   intercept = TRUE,
                   standardize = c("features", "response", "both", "none"),
-                  diagnostics = FALSE,
                   ...) {
 
-  stopifnot(is.logical(diagnostics),
-            is.logical(intercept))
+  stopifnot(is.logical(intercept))
 
   # collect the call so we can use it in update() later on
   ocall <- match.call()
 
-  n <- NROW(x)
-  p <- NCOL(x)
-  m <- NCOL(y)
+  fit_intercept <- intercept
+  n_samples  <- n <- NROW(x)
+  n_features <- p <- NCOL(x)
+  n_targets  <- m <- NCOL(y)
+
+  if (NROW(y) != NROW(x))
+    stop("the number of samples in 'x' and 'y' must match")
+
+  if (NROW(y) == 0)
+    stop("the response (y) is empty")
+
+  if (NROW(x) == 0)
+    stop("the feature matrix (x) is empty")
+
+  if (anyNA(y) || anyNA(x))
+    stop("missing values are not allowed")
+
+  # convert sparse x to dgCMatrix class from package Matrix.
+  if (is_sparse <- inherits(x, "sparseMatrix")) {
+    x <- methods::as(x, "dgCMatrix")
+  } else {
+    x <- as.matrix(x)
+  }
 
   # collect settings
   if (isFALSE(standardize)) {
@@ -85,116 +115,63 @@ golem <- function(x,
     standardize <- match.arg(standardize)
   }
 
+  # setup family
+  family <- switch(match.arg(family),
+                   gaussian = Gaussian(),
+                   binomial = Binomial())
+
+  y <- preprocessResponse(family, y)
+  x <- preprocessFeatures(x, standardize)
+
+  y_center <- attr(y, "center")
+  y_scale  <- attr(y, "scale")
+  x_center <- attr(x, "center")
+  x_scale  <- attr(x, "scale")
+
+  class_names <- attr(y, "class_names")
+
   # setup penalty settings
   if (is.character(penalty))
-    penalty_args <- match.fun(penalty)()
+    penalty <- match.fun(penalty)()
   else if (is.function(penalty))
-    penalty_args <- do.call(penalty, list())
-  else
-    penalty_args <- penalty
+    penalty <- do.call(penalty, list())
 
-  penalty_args <- utils::modifyList(penalty_args,
-                                    list(n = n,
-                                         p = p))
+  penalty <- setup(penalty, family, x, y, y_scale)
 
   # setup solver settings
   if (is.character(solver))
-    solver_args <- match.fun(solver)()
+    solver <- match.fun(solver)()
   else if (is.function(solver))
-    solver_args <- do.call(solver, list())
-  else
-    solver_args <- solver
+    solver <- do.call(solver, list())
 
-  stopifnot(inherits(solver_args, "solver"),
-            inherits(penalty_args, "penalty"))
-
-  solver_args$diagnostics <- diagnostics
-
-  family <- match.arg(family)
-  fit_intercept <- intercept
-
-  # collect options
-  debug <- isTRUE(getOption("golem.debug"))
-
-  n_samples <- NROW(x)
-  n_features <- NCOL(x)
-  n_targets <- NCOL(y)
-
-  stopifnot(is.logical(intercept),
-            is.logical(debug))
-
-  if (NROW(y) != NROW(x))
-    stop("the number of samples in 'x' and 'y' must match")
-
-  if (NROW(y) == 0)
-    stop("the response (y) is empty.")
-
-  if (NROW(x) == 0)
-    stop("the feature matrix (x) is empty.")
-
-  # convert sparse x to dgCMatrix class from package Matrix.
-  if (is_sparse <- inherits(x, "sparseMatrix")) {
-    x <- methods::as(x, "dgCMatrix")
-  } else {
-    x <- as.matrix(x)
-  }
+  stopifnot(isClass(solver, "Solver"),
+            isClass(penalty, "Penalty"),
+            isClass(family, "Family"))
 
   # collect response and variable names (if they are given) and otherwise
   # make new
   response_names <- colnames(y)
   variable_names <- colnames(x)
-  class_names    <- NULL
 
   if (is.null(variable_names))
     variable_names <- paste0("V", seq_len(p))
   if (is.null(response_names))
     response_names <- paste0("y", seq_len(m))
 
-  if (any(is.na(y)) || any(is.na(x)))
-    stop("NA values are not allowed.")
-
-  switch(
-    family,
-    gaussian = {
-      if (m > 1)
-        stop("response for Gaussian regression must be one-dimensional.")
-
-      if (!is.numeric(y))
-        stop("non-numeric response.")
-
-      n_classes <- 1L
-      y <- as.numeric(y)
-    },
-    binomial = {
-      if (length(unique(y)) > 2)
-        stop("more than two classes in response")
-
-      if (length(unique(y)) == 1)
-        stop("only one class in response.")
-
-      y_table <- table(y)
-      min_class <- min(y_table)
-      n_classes <- 1L
-
-      if (min_class <= 1)
-        stop("one class only has ", min_class, " observations.")
-
-      class_names <- names(y_table)
-
-      # Transform response to {-1, 1}, which is used internally
-      y <- ifelse(as.numeric(as.factor(y)) == 1, -1, 1)
-    }
-  )
-
-  y <- as.matrix(y)
+  lipschitz_constant <- lipschitzConstant(family, x, fit_intercept)
 
   control <- list(debug = debug,
-                  family_choice = family,
-                  penalty_args = penalty_args,
-                  solver_args = solver_args,
-                  fit_intercept = intercept,
+                  family = family,
+                  penalty = penalty,
+                  solver = solver,
+                  fit_intercept = fit_intercept,
                   is_sparse = is_sparse,
-                  standardize = standardize)
+                  standardize = standardize,
+                  x_center = x_center,
+                  x_scale = x_scale,
+                  y_center = y_center,
+                  y_scale = y_scale,
+                  lipschitz_constant = lipschitz_constant)
 
   # run the solver, perhaps iteratively
   # if (is.null(sigma)) {
@@ -220,8 +197,17 @@ golem <- function(x,
     res <- golemDense(x, y, control)
   }
 
-  beta <- res$beta
-  intercept <- res$intercept
+  unstandardized_coefs <- unstandardize(res$intercept,
+                                        res$beta,
+                                        x_center,
+                                        x_scale,
+                                        y_center,
+                                        y_scale,
+                                        fit_intercept)
+
+  beta <- unstandardized_coefs$betas
+  intercept <- unstandardized_coefs$intercepts
+
   n_penalties <- dim(beta)[3]
 
   if (fit_intercept) {
@@ -244,30 +230,34 @@ golem <- function(x,
 
   nonzeros <- apply(beta, 3, function(x) colSums(x > 0))
 
-  out <- structure(list(coefficients = coefficients,
-                        penalty = res$penalty,
-                        nonzeros = nonzeros,
-                        passes = res$passes,
-                        class_names = class_names,
-                        n = n,
-                        p = p,
-                        m = m,
-                        call = ocall),
-                   class = c(paste0("Golem", firstUpper(family)),
-                             "Golem"))
+  diagnostics <- solver@diagnostics
 
   if (diagnostics) {
     nl <- length(res$time)
     nn <- lengths(res$time)
     time <- unlist(res$time)
-    loss <- unlist(res$loss)
+    primal <- unlist(res$primals)
+    dual <- unlist(res$duals)
 
     diag <- data.frame(time = time,
-                       loss = loss,
+                       primal = primal,
+                       dual = dual,
                        penalty = rep(seq_len(nl), nn))
-
-    attr(out, "diagnostics") <- diag
+  } else {
+    diag <- data.frame()
   }
 
-  out
+  new("Golem",
+      coefficients = coefficients,
+      nonzeros = nonzeros,
+      family = family,
+      penalty = penalty,
+      class_names = class_names,
+      n = n,
+      p = p,
+      m = m,
+      diagnostics = diag,
+      passes = as.double(res$passes),
+      call = ocall)
 }
+

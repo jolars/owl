@@ -31,7 +31,7 @@ library(lattice)
 library(latticeExtra)
 
 plot_optim <- function(fit) {
-  d <- attr(fit, "diagnostics")
+  d <- fit@diagnostics
   y <- d$loss
   
   rel_change <- diff(y)/y[-length(y)]
@@ -54,8 +54,7 @@ x <- as.matrix(abalone$x)
 y <- abalone$y
 
 fit <- golem(x, y, family = "gaussian",
-             solver = fista,
-             diagnostics = TRUE)
+             solver = Fista(diagnostics = TRUE))
 plot_optim(fit)
 ```
 
@@ -66,8 +65,7 @@ x <- as.matrix(heart$x)
 y <- heart$y
 
 fit <- golem(x, y, family = "binomial",
-             solver = fista,
-             diagnostics = TRUE)
+             solver = Fista(diagnostics = TRUE))
 
 plot_optim(fit)
 ```

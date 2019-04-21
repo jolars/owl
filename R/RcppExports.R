@@ -9,3 +9,11 @@ prox_slope_cpp <- function(y, args) {
     .Call(`_golem_prox_slope_cpp`, y, args)
 }
 
+colNorms <- function(x, norm_type = 2L) {
+    .Call(`_golem_colNorms`, x, norm_type)
+}
+
+rowNorms <- function(x, norm_type = 2L) {
+    .Call(`_golem_rowNorms`, x, norm_type)
+}
+

@@ -8,8 +8,8 @@ test_that("unregularized gaussian models work as expected", {
 
   lm_fit <- lm(y ~ x)
   golem_fit <- golem::golem(x, y, family = "gaussian",
-                            penalty = slope(sigma = 0),
-                            solver = fista(tol = 1e-6))
+                            penalty = Slope(sigma = 0.01),
+                            solver = Fista(tol = 1e-6))
 
   expect_equivalent(coef(lm_fit),
                     coef(golem_fit),

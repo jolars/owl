@@ -5,9 +5,9 @@
 \title{Regularized Generalized Linear Models}
 \usage{
 golem(x, y, family = c("gaussian", "binomial"),
-  penalty = golem::slope(), solver = golem::fista(),
+  penalty = golem::Slope(), solver = golem::Fista(),
   intercept = TRUE, standardize = c("features", "response", "both",
-  "none"), diagnostics = FALSE, ...)
+  "none"), ...)
 }
 \arguments{
 \item{x}{input matrix}
@@ -37,9 +37,6 @@ currently, standardization of response has no real effect. The
 response is always standardized for Gaussian responses and never
 for binomial}
 
-\item{diagnostics}{whether to collect diagnostics from the solver,
-which currently includes loss and timing estimates at each iteration}
-
 \item{...}{currently ignored}
 }
 \value{
@@ -54,8 +51,8 @@ optimization routines suitable to big data problems.
 There is a multitude of ways to penalize the models created by
 \code{\link[golem:golem]{golem::golem()}}, currently they are:
 \itemize{
-\item \code{\link[golem:slope]{golem::slope()}}
-\item \code{\link[golem:elasticNet]{golem::elasticNet()}}
+\item \code{\link[golem:Slope]{golem::Slope()}}
+\item \code{\link[golem:Lasso]{golem::Lasso()}}
 }
 
 These functions are in fact only parameter packs for the actual
@@ -72,7 +69,7 @@ the various checks.
 
 There is currently a single solver available for \link[golem:golem]{golem::golem}, namely
 \itemize{
-\item \code{\link[golem:fista]{golem::fista()}}
+\item \code{\link[golem:Fista]{golem::Fista()}}
 }
 }
 

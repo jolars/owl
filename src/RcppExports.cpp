@@ -31,10 +31,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// colNorms
+arma::vec colNorms(const arma::mat& x, const arma::uword norm_type);
+RcppExport SEXP _golem_colNorms(SEXP xSEXP, SEXP norm_typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::uword >::type norm_type(norm_typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(colNorms(x, norm_type));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rowNorms
+arma::vec rowNorms(const arma::mat& x, const arma::uword norm_type);
+RcppExport SEXP _golem_rowNorms(SEXP xSEXP, SEXP norm_typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::uword >::type norm_type(norm_typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowNorms(x, norm_type));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_golem_golemDense", (DL_FUNC) &_golem_golemDense, 3},
     {"_golem_prox_slope_cpp", (DL_FUNC) &_golem_prox_slope_cpp, 2},
+    {"_golem_colNorms", (DL_FUNC) &_golem_colNorms, 2},
+    {"_golem_rowNorms", (DL_FUNC) &_golem_rowNorms, 2},
     {NULL, NULL, 0}
 };
 

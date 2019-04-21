@@ -8,7 +8,11 @@ class Family {
 public:
   virtual
   double
-  loss(const arma::mat& lin_pred, const arma::mat& y) = 0;
+  primal(const arma::mat& lin_pred, const arma::mat& y) = 0;
+
+  virtual
+  double
+  dual(const arma::mat& lin_pred, const arma::mat&y) = 0;
 
   // this is not really the true gradient, and needs to multiplied by X'
   virtual
@@ -18,24 +22,6 @@ public:
   virtual
   double
   link(const double y) = 0;
-
-  virtual
-  double
-  lipschitzConstant(const arma::mat& x, const bool fit_intercept) = 0;
-
-  virtual
-  void
-  preprocessResponse(arma::mat& y,
-                     arma::rowvec& y_center,
-                     arma::rowvec& y_scale,
-                     const std::string& standardize) = 0;
-
-  virtual
-  double
-  lambdaMax(const arma::mat& x,
-            const arma::mat& y,
-            const arma::rowvec& y_scale) = 0;
-
 };
 
 class Gaussian : public Family {
@@ -43,9 +29,15 @@ public:
   Gaussian() {};
 
   double
-  loss(const arma::mat& lin_pred, const arma::mat& y)
+  primal(const arma::mat& lin_pred, const arma::mat& y)
   {
     return 0.5*std::pow(arma::norm(lin_pred - y), 2);
+  }
+
+  double
+  dual(const arma::mat& lin_pred, const arma::mat& y)
+  {
+    return -primal(lin_pred, y) - arma::dot(lin_pred - y, y);
   }
 
   arma::mat
@@ -59,40 +51,6 @@ public:
   {
     return y;
   }
-
-  double
-  lipschitzConstant(const arma::mat& x, const bool fit_intercept)
-  {
-    using namespace arma;
-
-    double row_squared_l2_norm_max = sum(square(x), 1).max();
-
-    return row_squared_l2_norm_max + static_cast<double>(fit_intercept);
-  }
-
-  void
-  preprocessResponse(arma::mat& y,
-                     arma::rowvec& y_center,
-                     arma::rowvec& y_scale,
-                     const std::string& standardize)
-  {
-    // always center gaussian responses
-    y_center = arma::mean(y);
-    //y_scale  = arma::stddev(y, 1);
-    y_scale.ones();
-
-    y -= y_center(0);
-    // y /= y_scale(0);
-  }
-
-  double
-  lambdaMax(const arma::mat& x,
-            const arma::mat& y,
-            const arma::rowvec& y_scale)
-  {
-    using namespace arma;
-    return y_scale(0)*abs(x.t()*y.col(0)).max()/y.n_rows;
-  }
 };
 
 class Binomial : public Family {
@@ -100,15 +58,23 @@ public:
   Binomial() {};
 
   double
-  loss(const arma::mat& lin_pred, const arma::mat& y)
+  primal(const arma::mat& lin_pred, const arma::mat& y)
   {
     return arma::accu(arma::log(1.0 + arma::exp(-y % lin_pred)));
+  }
+
+  double
+  dual(const arma::mat& lin_pred, const arma::mat&y)
+  {
+    using namespace arma;
+    const arma::vec r = 1.0/(1.0 + arma::exp(y % lin_pred));
+    return arma::as_scalar((r-1.0).t()*log(1.0-r) - r.t()*log(r));
   }
 
   arma::mat
   gradient(const arma::mat& lin_pred, const arma::mat& y)
   {
-    return -y/(arma::exp(y%lin_pred) + 1.0);
+    return -y / (arma::exp(y % lin_pred) + 1.0);
   }
 
   double
@@ -120,48 +86,6 @@ public:
     double z = clamp(y, pmin, pmax);
 
     return std::log((y + 1.0)/2 / (1.0 - z));
-  }
-
-  double
-  lipschitzConstant(const arma::mat& x, const bool fit_intercept)
-  {
-    using namespace arma;
-
-    double row_squared_l2_norm_max = sum(square(x), 1).max();
-
-    return 0.25*(row_squared_l2_norm_max + static_cast<double>(fit_intercept));
-  }
-
-  void
-  preprocessResponse(arma::mat& y,
-                     arma::rowvec& y_center,
-                     arma::rowvec& y_scale,
-                     const std::string& standardize)
-  {
-    // no preprocessing for binomial response
-    y_center.zeros();
-    y_scale.ones();
-  }
-
-  double
-  lambdaMax(const arma::mat& x,
-            const arma::mat& y,
-            const arma::rowvec& y_scale)
-  {
-    using namespace arma;
-
-    auto n = y.n_rows;
-
-    // convert y that is is {-1, -1} to {0, 1}
-    vec y_tmp = (vectorise(y)+ 1.0)/2.0;
-
-    double y_bar = mean(y_tmp);
-    double y_sd = stddev(y_tmp);
-
-    y_tmp -= y_bar;
-    y_tmp /= y_sd != 0.0 ? y_sd : 1.0;
-
-    return y_sd*abs(x.t() * y_tmp).max()/n;
   }
 };
 

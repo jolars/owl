@@ -46,7 +46,7 @@ for (i in seq_along(q)) {
   y <- problem$y
   signals <- problem$nonzero
   
-  fit <- golem(X, y, penalty = slope(lambda = "bhq", sigma = 1),
+  fit <- golem(X, y, penalty = Slope(lambda = "bhq", sigma = 1),
                intercept = FALSE)
   
   selected_golem <- which(coef(fit) > 0)
@@ -55,7 +55,7 @@ for (i in seq_along(q)) {
   fdr[i] <- V/R
 }
 
-xyplot(fdr ~ q, type = "b") +
+xyplot(fdr ~ q, type = "b", ylab = "FDR") +
  layer_(panel.refline(h = 0.2)) 
 ```
 
