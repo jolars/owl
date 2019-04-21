@@ -111,10 +111,6 @@ public:
 
     tol_infeas *= penalty->lambdaInfeas();
 
-    // ConvergenceCheck convergenceCheck{intercept, beta, tol};
-    // PrimalDualGapCheck primalDualGapCheck{tol_rel_gap,
-    //                                       tol_infeas*penalty->lambdaInfeas()};
-
     double primal = 0;
     double dual = 0;
     double infeasibility = 0;
@@ -144,11 +140,6 @@ public:
         g_intercept = mean(pseudo_g);
         intercept_tilde_old = intercept_tilde;
       }
-
-      // primalDualInfeasibility(family, penalty, primal, dual, infeasibility);
-
-      // check optimality
-      // accepted = primalDualGapCheck(primal, dual, infeasibility);
 
       double primal = f + penalty->primal(beta);
       double dual = family->dual(lin_pred, y);
