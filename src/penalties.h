@@ -37,7 +37,7 @@ public:
   const arma::vec lambda;
   const double sigma;
 
-  SLOPE(const double sigma, const arma::vec lambda)
+  SLOPE(const double sigma, const arma::vec& lambda)
         : sigma(sigma), lambda(lambda) {}
 
   arma::mat
@@ -152,9 +152,7 @@ public:
   infeasibility(const arma::mat& grad)
   {
     using namespace arma;
-
-    vec grad_sorted = sort(abs(grad), "descending");
-    return std::max(cumsum(grad_sorted - lambda).max(), 0.0);
+    return std::max(cumsum(sort(abs(grad), "descending") - lambda).max(), 0.0);
   }
 
   void
