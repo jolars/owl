@@ -196,8 +196,6 @@ public:
       if (fit_intercept)
         lin_pred.each_row() += intercept;
 
-      // accepted = convergenceCheck(intercept, beta);
-
       i++;
     }
 
