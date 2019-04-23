@@ -16,7 +16,7 @@ golemDense(arma::mat x,
   using Rcpp::Named;
   using Rcpp::wrap;
 
-  auto n = x.n_rows;
+  // auto n = x.n_rows;
   auto m = y.n_cols;
   auto p = x.n_cols;
 

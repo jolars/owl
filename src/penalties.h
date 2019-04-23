@@ -34,8 +34,8 @@ public:
 
 class SLOPE : public Penalty {
 public:
-  const arma::vec lambda;
   const double sigma;
+  const arma::vec lambda;
 
   SLOPE(const double sigma, const arma::vec& lambda)
         : sigma(sigma), lambda(lambda) {}
@@ -128,8 +128,8 @@ public:
 
 class Lasso : public Penalty {
 public:
-  double lambda;
   const arma::vec lambda_path;
+  double lambda;
 
   Lasso(const arma::vec& lambda_path)
         : lambda_path(lambda_path), lambda(lambda_path(0)) {}

@@ -98,8 +98,6 @@ public:
     mat pseudo_g(g);
     rowvec g_intercept(n_responses, fill::zeros);
 
-    uword check_iter = 1;
-
     L = 1.0;
     double t = 1;
 
@@ -110,10 +108,6 @@ public:
     double tol_infeas = 1e-6;
 
     tol_infeas *= penalty->lambdaInfeas();
-
-    double primal = 0;
-    double dual = 0;
-    double infeasibility = 0;
 
     // diagnostics
     wall_clock timer;

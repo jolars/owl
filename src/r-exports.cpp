@@ -20,12 +20,11 @@ colNorms(const arma::mat& x, const arma::uword norm_type = 2)
   using namespace arma;
 
   uword p = x.n_cols;
-  uword n = x.n_rows;
 
-  vec norms(p);
+  arma::vec norms(p);
 
   for (decltype(p) i = 0; i < p; ++i) {
-    norms(i) = norm(x.col(i), norm_type);
+    norms(i) = arma::norm(x.col(i), norm_type);
   }
 
   return norms;
@@ -38,7 +37,6 @@ rowNorms(const arma::mat& x, const arma::uword norm_type = 2)
   using namespace arma;
 
   uword p = x.n_cols;
-  uword n = x.n_rows;
 
   vec norms(p);
 
