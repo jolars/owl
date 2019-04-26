@@ -14,10 +14,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-
-library(ggplot2)
-library(tidyr)
-theme_set(theme_bw())
 ```
 
 ## Benchmarks
@@ -31,9 +27,11 @@ First, we setup a function to plot the results from the fit.
 set.seed(1)
 
 library(golem)
+library(lattice)
+library(latticeExtra)
 
 plot_optim <- function(fit) {
-  d <- attr(fit, "diagnostics")
+  d <- fit@diagnostics
   y <- d$loss
   
   rel_change <- diff(y)/y[-length(y)]
@@ -45,10 +43,7 @@ plot_optim <- function(fit) {
   Suboptimality <- y[1:trunc_ind] - min(y)
   Time <- d$time[1:trunc_ind]
   
-  data.frame(Suboptimality = Suboptimality, Time = Time) %>%
-    ggplot(aes(x = Suboptimality, y = Time)) +
-    geom_line() +
-    xlab("Time (seconds)")
+  xyplot(Suboptimality ~ Time, type = "l", xlab = "Time (Seconds)")
 }
 ```
 
@@ -59,8 +54,7 @@ x <- as.matrix(abalone$x)
 y <- abalone$y
 
 fit <- golem(x, y, family = "gaussian",
-             solver = fista,
-             diagnostics = TRUE)
+             solver = Fista(diagnostics = TRUE))
 plot_optim(fit)
 ```
 
@@ -71,8 +65,7 @@ x <- as.matrix(heart$x)
 y <- heart$y
 
 fit <- golem(x, y, family = "binomial",
-             solver = fista,
-             diagnostics = TRUE)
+             solver = Fista(diagnostics = TRUE))
 
 plot_optim(fit)
 ```

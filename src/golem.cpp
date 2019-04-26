@@ -16,32 +16,22 @@ golemDense(arma::mat x,
   using Rcpp::Named;
   using Rcpp::wrap;
 
-  auto n = x.n_rows;
+  // auto n = x.n_rows;
   auto m = y.n_cols;
   auto p = x.n_cols;
 
   // parameter packs for penalty and solver
-  auto penalty_args = as<Rcpp::List>(control["penalty_args"]);
-  auto solver_args = as<Rcpp::List>(control["solver_args"]);
+  auto penalty_args = as<Rcpp::S4>(control["penalty"]);
+  auto solver_args = as<Rcpp::S4>(control["solver"]);
+  auto lipschitz_constant = as<double>(control["lipschitz_constant"]);
 
-  auto family_choice = as<std::string>(control["family_choice"]);
-  auto standardize = as<std::string>(control["standardize"]);
+  auto family_args = as<Rcpp::S4>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
-  auto diagnostics = as<bool>(solver_args["diagnostics"]);
+  bool diagnostics = solver_args.slot("diagnostics");
 
-  // setup family and response
-  auto family = setupFamily(family_choice);
-  rowvec y_center(m);
-  rowvec y_scale(m);
-  family->preprocessResponse(y, y_center, y_scale, standardize);
-
-  // peprocess features
-  rowvec x_center(p);
-  rowvec x_scale(p);
-  preprocessFeatures(x, x_center, x_scale, standardize);
-
-  // setup penalty
-  auto penalty = setupPenalty(penalty_args, x, y, y_scale, family);
+  // // setup family and response
+  auto family = setupFamily(family_args.slot("name"));
+  auto penalty = setupPenalty(penalty_args);
   auto n_penalties = penalty->pathLength();
 
   cube betas(p, m, n_penalties);
@@ -52,11 +42,13 @@ golemDense(arma::mat x,
   mat beta(p, m, fill::zeros);
 
   uvec passes(n_penalties);
-  std::vector<std::vector<double>> losses;
+  std::vector<std::vector<double>> primals;
+  std::vector<std::vector<double>> duals;
   std::vector<std::vector<double>> timings;
 
   FISTA solver(std::move(intercept),
                std::move(beta),
+               lipschitz_constant,
                solver_args);
 
   for (uword i = 0; i < n_penalties; ++i) {
@@ -65,27 +57,21 @@ golemDense(arma::mat x,
     betas.slice(i) = res.beta;
     intercepts.slice(i) = res.intercept;
     passes(i) = res.passes;
+    penalty->step(i + 1); // selects next lambda for LASSO for instance
 
     if (diagnostics) {
-      losses.push_back(res.loss);
+      primals.push_back(res.primals);
+      duals.push_back(res.duals);
       timings.push_back(res.time);
     }
   }
 
-  unstandardize(intercepts,
-                betas,
-                x_center,
-                x_scale,
-                y_center,
-                y_scale,
-                fit_intercept);
-
   return Rcpp::List::create(
     Named("intercept")   = wrap(intercepts),
     Named("beta")        = wrap(betas),
-    Named("penalty")     = wrap(penalty->getParams(y_scale)),
     Named("passes")      = passes,
-    Named("loss")        = wrap(losses),
+    Named("primals")     = wrap(primals),
+    Named("duals")       = wrap(duals),
     Named("time")        = wrap(timings)
   );
 }

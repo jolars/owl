@@ -10,25 +10,29 @@ struct Results {
   Results(arma::rowvec intercept,
           arma::mat beta,
           arma::uword passes,
-          std::vector<double> loss,
+          std::vector<double> primals,
+          std::vector<double> duals,
           std::vector<double> time)
           : intercept(intercept),
             beta(beta),
             passes(passes),
-            loss(loss),
+            primals(primals),
+            duals(duals),
             time(time) {}
 
   arma::rowvec intercept;
   arma::mat beta;
   arma::uword passes;
-  std::vector<double> loss;
+  std::vector<double> primals;
+  std::vector<double> duals;
   std::vector<double> time;
 };
 
 class Solver {
 protected:
   bool diagnostics;
-  std::vector<double> loss;
+  std::vector<double> primals;
+  std::vector<double> duals;
   std::vector<double> time;
   arma::uword path_iter = 0;
 
@@ -50,20 +54,23 @@ private:
   arma::uword max_passes;
   double tol;
   const double eta = 2.0;
+  double L = 0;
 
 public:
   FISTA(arma::rowvec&& intercept_init,
         arma::mat&& beta_init,
-        const Rcpp::List& args)
+        const double lipschitz_constant,
+        const Rcpp::S4& args)
   {
     using Rcpp::as;
 
     intercept = std::move(intercept_init);
     beta = std::move(beta_init);
 
-    max_passes  = as<arma::uword>(args["max_passes"]);
-    tol         = as<double>(args["tol"]);
-    diagnostics = as<bool>(args["diagnostics"]);
+    max_passes  = args.slot("max_passes");
+    tol         = args.slot("tol");
+    diagnostics = args.slot("diagnostics");
+    L           = lipschitz_constant;
   }
 
   Results
@@ -91,20 +98,23 @@ public:
     mat pseudo_g(g);
     rowvec g_intercept(n_responses, fill::zeros);
 
-    double L = family->lipschitzConstant(x, fit_intercept);
-    //double L = 1.0;
+    L = 1.0;
     double t = 1;
 
     uword i = 0;
     bool accepted = false;
 
-    ConvergenceCheck convergenceCheck{intercept, beta, tol};
+    double tol_rel_gap = 1e-6;
+    double tol_infeas = 1e-6;
+
+    tol_infeas *= penalty->lambdaInfeas();
 
     // diagnostics
     wall_clock timer;
 
     if (diagnostics) {
-      loss.reserve(max_passes);
+      primals.reserve(max_passes);
+      duals.reserve(max_passes);
       time.reserve(max_passes);
       timer.tic();
     }
@@ -113,9 +123,10 @@ public:
     if (fit_intercept)
       lin_pred.each_row() += intercept;
 
+
     while (!accepted && i < max_passes) {
-      // loss and gradient
-      double f = family->loss(lin_pred, y);
+      // gradient
+      double f = family->primal(lin_pred, y);
       pseudo_g = family->gradient(lin_pred, y);
       g = x.t() * pseudo_g;
 
@@ -124,15 +135,32 @@ public:
         intercept_tilde_old = intercept_tilde;
       }
 
+      double primal = f + penalty->primal(beta);
+      double dual = family->dual(lin_pred, y);
+      double infeasibility = penalty->infeasibility(g);
+
+      accepted = (std::abs(primal - dual)/std::max(1.0, primal) < tol_rel_gap)
+                  && (infeasibility <= tol_infeas);
+
+      if (diagnostics) {
+        time.push_back(timer.toc());
+        primals.push_back(primal);
+        duals.push_back(dual);
+      }
+
+      if (accepted)
+        break;
+
       beta_tilde_old = beta_tilde;
       double f_old = f;
       double t_old = t;
       beta_tilde_old = beta_tilde;
 
-      // Lipschitz search
+      // // Lipschitz search
       while (true) {
         // Update beta and intercept
-        beta_tilde = penalty->eval(beta - (1.0/L)*g, L);
+        beta_tilde = penalty->eval(beta - (1.0/L)*g, 1.0/L);
+
         mat d = beta_tilde - beta;
         if (fit_intercept)
           intercept_tilde = intercept - (1.0/L)*g_intercept;
@@ -141,7 +169,7 @@ public:
         if (fit_intercept)
           lin_pred.each_row() += intercept;
 
-        f = family->loss(lin_pred, y);
+        f = family->primal(lin_pred, y);
         mat q = f_old + d.t()*g + 0.5*L*d.t()*d;
 
         if (any(q.diag() >= f*(1 - 1e-12)))
@@ -162,17 +190,10 @@ public:
       if (fit_intercept)
         lin_pred.each_row() += intercept;
 
-      if (diagnostics) {
-        time.push_back(timer.toc());
-        loss.push_back(family->loss(lin_pred, y) + penalty->primal(beta));
-      }
-
-      accepted = convergenceCheck(intercept, beta);
-
       i++;
     }
 
-    Results res{intercept, beta, i, loss, time};
+    Results res{intercept, beta, i, primals, duals, time};
 
     return res;
   }

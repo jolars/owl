@@ -11,6 +11,10 @@
 #'
 #' @return The coefficients, including the intercept if it was fit.
 #' @export
-coef.Golem <- function(object, ...) {
-  drop(object$coefficients)
-}
+#' @include golem.R
+setMethod(
+  "coef",
+  "Golem",
+  function(object, ...)
+    drop(object@coefficients)
+)
