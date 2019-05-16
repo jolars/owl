@@ -1,5 +1,3 @@
-context("lasso penalty")
-
 test_that("lasso induces sparse models", {
   x <- with(mtcars, cbind(mpg, disp))
   y <- mtcars$hp

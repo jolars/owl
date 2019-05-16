@@ -1,5 +1,3 @@
-context("test-slope")
-
 test_that("SLOPE and golem agree for gaussian designs", {
   set.seed(1)
 

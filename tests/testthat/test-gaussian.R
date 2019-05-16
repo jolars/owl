@@ -1,5 +1,3 @@
-context("gaussian family")
-
 test_that("unregularized gaussian models work as expected", {
   set.seed(1)
 

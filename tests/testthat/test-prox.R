@@ -1,5 +1,3 @@
-context("prox")
-
 test_that("prox_sorted_L1 agrees with isotone package", {
   if (!requireNamespace("isotone", quietly = TRUE))
     skip("isotone is not available")

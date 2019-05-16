@@ -1,5 +1,3 @@
-context("binomial family")
-
 test_that("unregularized logistic regression matches output from glm()", {
   set.seed(1)
   X <- scale(matrix(rnorm(2000), ncol = 2))
