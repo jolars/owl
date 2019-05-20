@@ -42,7 +42,7 @@ setMethod(
     lin_pred <- newdata %*% beta
 
     switch(
-      type,
+      match.arg(type),
       link = lin_pred,
       response = link(family, lin_pred),
       class = predictClass(family, lin_pred, object@class_names),
