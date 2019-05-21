@@ -12,12 +12,14 @@ struct Results {
           arma::uword passes,
           std::vector<double> primals,
           std::vector<double> duals,
+          std::vector<double> infeasibilities,
           std::vector<double> time)
           : intercept(intercept),
             beta(beta),
             passes(passes),
             primals(primals),
             duals(duals),
+            infeasibilities(infeasibilities),
             time(time) {}
 
   arma::rowvec intercept;
@@ -25,6 +27,7 @@ struct Results {
   arma::uword passes;
   std::vector<double> primals;
   std::vector<double> duals;
+  std::vector<double> infeasibilities;
   std::vector<double> time;
 };
 
@@ -33,6 +36,7 @@ protected:
   bool diagnostics;
   std::vector<double> primals;
   std::vector<double> duals;
+  std::vector<double> infeasibilities;
   std::vector<double> time;
   arma::uword path_iter = 0;
 
@@ -98,7 +102,7 @@ public:
     mat pseudo_g(g);
     rowvec g_intercept(n_responses, fill::zeros);
 
-    L = 1.0;
+    // L = 1.0;
     double t = 1;
 
     uword i = 0;
@@ -115,6 +119,7 @@ public:
     if (diagnostics) {
       primals.reserve(max_passes);
       duals.reserve(max_passes);
+      infeasibilities.reserve(max_passes);
       time.reserve(max_passes);
       timer.tic();
     }
@@ -122,7 +127,6 @@ public:
     lin_pred = x*beta;
     if (fit_intercept)
       lin_pred.each_row() += intercept;
-
 
     while (!accepted && i < max_passes) {
       // gradient
@@ -145,6 +149,7 @@ public:
       if (diagnostics) {
         time.push_back(timer.toc());
         primals.push_back(primal);
+        infeasibilities.push_back(infeasibility);
         duals.push_back(dual);
       }
 
@@ -193,7 +198,7 @@ public:
       i++;
     }
 
-    Results res{intercept, beta, i, primals, duals, time};
+    Results res{intercept, beta, i, primals, duals, infeasibilities, time};
 
     return res;
   }

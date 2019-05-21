@@ -11,7 +11,6 @@ golemDense(arma::mat x,
            const Rcpp::List control)
 {
   using namespace arma;
-
   using Rcpp::as;
   using Rcpp::Named;
   using Rcpp::wrap;
@@ -41,10 +40,22 @@ golemDense(arma::mat x,
   rowvec intercept(m, fill::zeros);
   mat beta(p, m, fill::zeros);
 
+  // apply weights
+  auto weights = as<arma::vec>(control["weights"]);
+  // for (uword j = 0; j < p; ++j)
+  //   x.col(j) /= weights(j);
+  //
+  // weights.print();
+
+  mat Dinv = diagmat(1.0/weights);
+
+  x = x * Dinv;
+
   uvec passes(n_penalties);
   std::vector<std::vector<double>> primals;
   std::vector<std::vector<double>> duals;
   std::vector<std::vector<double>> timings;
+  std::vector<std::vector<double>> infeasibilities;
 
   FISTA solver(std::move(intercept),
                std::move(beta),
@@ -54,24 +65,26 @@ golemDense(arma::mat x,
   for (uword i = 0; i < n_penalties; ++i) {
     Results res = solver.fit(x, y, family, penalty, fit_intercept);
 
-    betas.slice(i) = res.beta;
+    betas.slice(i) = Dinv * res.beta;
     intercepts.slice(i) = res.intercept;
     passes(i) = res.passes;
-    penalty->step(i + 1); // selects next lambda for LASSO for instance
+    penalty->step(i + 1); // move a step on the regularization path
 
     if (diagnostics) {
       primals.push_back(res.primals);
       duals.push_back(res.duals);
+      infeasibilities.push_back(res.infeasibilities);
       timings.push_back(res.time);
     }
   }
 
   return Rcpp::List::create(
-    Named("intercept")   = wrap(intercepts),
-    Named("beta")        = wrap(betas),
-    Named("passes")      = passes,
-    Named("primals")     = wrap(primals),
-    Named("duals")       = wrap(duals),
-    Named("time")        = wrap(timings)
+    Named("intercept")       = wrap(intercepts),
+    Named("beta")            = wrap(betas),
+    Named("passes")          = passes,
+    Named("primals")         = wrap(primals),
+    Named("duals")           = wrap(duals),
+    Named("infeasibilities") = wrap(infeasibilities),
+    Named("time")            = wrap(timings)
   );
 }

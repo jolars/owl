@@ -62,7 +62,7 @@ Suggests:
     rmarkdown,
     SLOPE,
     spelling,
-    testthat,
+    testthat (>= 2.1.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Language: en-US
@@ -73,12 +73,14 @@ VignetteBuilder: knitr
 Collate: 
     'RcppExports.R'
     'solvers.R'
-    'penalties.R'
+    'utils.R'
     'families.R'
+    'penalties.R'
     'golem.R'
     'coef.R'
     'data.R'
     'golem-package.R'
+    'groupslope-lambda.R'
+    'post-processing.R'
+    'pre-processing.R'
     'predict.R'
-    'preprocessFeatures.R'
-    'utils.R'

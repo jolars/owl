@@ -53,6 +53,7 @@ There is a multitude of ways to penalize the models created by
 \itemize{
 \item \code{\link[golem:Slope]{golem::Slope()}}
 \item \code{\link[golem:Lasso]{golem::Lasso()}}
+\item \code{\link[golem:GroupSlope]{golem::GroupSlope()}}
 }
 
 These functions are in fact only parameter packs for the actual

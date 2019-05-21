@@ -32,18 +32,14 @@ library(latticeExtra)
 
 plot_optim <- function(fit) {
   d <- fit@diagnostics
-  y <- d$loss
   
-  rel_change <- diff(y)/y[-length(y)]
+  p1 <- xyplot(objective ~ time, data = d, groups = type, type = "l", 
+               xlab = "Time (Seconds)", 
+               subset = type != "Infeasibility", auto.key = TRUE)
+  p2 <- xyplot(objective ~ time, data = d, type = "l", xlab = "Time (Seconds)",
+               ylab = "Infeasibility",
+               subset = type == "Infeasibility")
   
-  trunc_ind <- which(abs(rel_change) < 1e-5)[1]
-  
-  trunc_ind <- ifelse(is.na(trunc_ind), length(y), trunc_ind)
-  
-  Suboptimality <- y[1:trunc_ind] - min(y)
-  Time <- d$time[1:trunc_ind]
-  
-  xyplot(Suboptimality ~ Time, type = "l", xlab = "Time (Seconds)")
 }
 ```
 
