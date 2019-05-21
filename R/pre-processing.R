@@ -50,7 +50,7 @@ orthogonalize <- function(x, penalty) {
     x <- matrix(nrow = n, ncol = sum(ortho_group_length))
     grp <- rep(NA, sum(ortho_group_length))
     block_end <- cumsum(ortho_group_length)
-    block_start <- head(c(1, block_end + 1), n_groups)
+    block_start <- utils::head(c(1, block_end + 1), n_groups)
 
     for (i in seq_len(n_groups)) {
       ind <- block_start[i]:block_end[i]
