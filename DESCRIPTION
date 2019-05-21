@@ -62,7 +62,8 @@ Suggests:
     rmarkdown,
     SLOPE,
     spelling,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    grpSLOPE
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Language: en-US
