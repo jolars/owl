@@ -3,6 +3,7 @@ title: "Regularization penalties in golem"
 author: "Johan Larsson"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: golem.bib
 vignette: >
   %\VignetteIndexEntry{Regularization penalties in golem}
   %\VignetteEngine{knitr::rmarkdown}
@@ -42,11 +43,11 @@ for (i in seq_along(q)) {
   sigma <- 1
   problem <- golem:::random_problem(n, p, k, sigma = sigma)
   
-  X <- problem$X
+  x <- problem$x
   y <- problem$y
   signals <- problem$nonzero
   
-  fit <- golem(X, y, penalty = Slope(lambda = "bhq", sigma = 1),
+  fit <- golem(x, y, penalty = Slope(lambda = "bhq", sigma = 1),
                intercept = FALSE)
   
   selected_golem <- which(coef(fit) > 0)
@@ -59,5 +60,13 @@ xyplot(fdr ~ q, type = "b", ylab = "FDR") +
  layer_(panel.refline(h = 0.2)) 
 ```
 
+## Group SLOPE
 
+The Group SLOPE penalty [@brzyski2018] works very much like the
+regular SLOPE penalty but on the group level instead of 
+on a per-observation basis. 
 
+Much like the group lasso, Group SLOPE ensures that the coefficients
+for the features of a given group are either all zero or all non-zero.
+
+## References
