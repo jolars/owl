@@ -8,6 +8,9 @@ GroupSlope(groups, lambda = c("corrected", "mean", "max"),
   sigma = NULL, fdr = 0.2, orthogonalize = TRUE)
 }
 \arguments{
+\item{groups}{a vector of integers indicating which group each
+feature belongs to}
+
 \item{lambda}{penalty strength}
 
 \item{sigma}{noise estimate}
@@ -15,8 +18,6 @@ GroupSlope(groups, lambda = c("corrected", "mean", "max"),
 \item{fdr}{target false discovery rate}
 
 \item{orthogonalize}{whether to orthogonalize data matrix (within groups)}
-
-\item{n_obs}{number of observations; only needed if \code{lambda = "corrected"}.}
 }
 \value{
 A parameter pack for the Group SLOPE penalty.

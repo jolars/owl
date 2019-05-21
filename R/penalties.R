@@ -76,7 +76,8 @@ setClass("GroupSlope",
 #' @param sigma noise estimate
 #' @param fdr target false discovery rate
 #' @param orthogonalize whether to orthogonalize data matrix (within groups)
-#' @param n_obs number of observations; only needed if `lambda = "corrected"`.
+#' @param groups a vector of integers indicating which group each
+#'   feature belongs to
 #'
 #' @return A parameter pack for the Group SLOPE penalty.
 #'
