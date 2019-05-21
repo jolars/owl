@@ -12,11 +12,12 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE
 )
 ```
 
-## Benchmarks
+## Diagnostics
 
 In this vignette, we will provide a matrix of benchmarks for the
 solvers, penalties, and GLM families in **golem**.
@@ -33,13 +34,16 @@ library(latticeExtra)
 plot_optim <- function(fit) {
   d <- fit@diagnostics
   
-  p1 <- xyplot(objective ~ time, data = d, groups = type, type = "l", 
+  p1 <- xyplot(primal + dual ~ time, data = d, type = "l", 
+               ylab = "Objetive",
                xlab = "Time (Seconds)", 
-               subset = type != "Infeasibility", auto.key = TRUE)
-  p2 <- xyplot(objective ~ time, data = d, type = "l", xlab = "Time (Seconds)",
-               ylab = "Infeasibility",
-               subset = type == "Infeasibility")
-  
+               auto.key = list(space = "inside", lines = TRUE,
+                               points = FALSE))
+  p2 <- xyplot(infeasibility ~ time, data = d, type = "l", 
+               xlab = "Time (Seconds)",
+               ylab = "Infeasibility")
+  print(p1)
+  print(p2)
 }
 ```
 
