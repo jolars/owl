@@ -8,7 +8,7 @@ Lasso(lambda = NULL, lambda_min_ratio = 1e-04, n_lambda = 100)
 }
 \arguments{
 \item{lambda}{the regularization strength, which can either be a
-user-supplied vector of (theoreticall) any length, or \code{NULL}, in which
+user-supplied vector of (theoretical) any length, or \code{NULL}, in which
 case golem automatically computes a sequence so that the first value
 leads to the null (intercept-only) model.}
 
@@ -19,7 +19,7 @@ lambda penalty}
 a value is supplied to \code{lambda}.}
 }
 \value{
-A paramter pack for the lasso penalty.
+A parameter pack for the lasso penalty.
 }
 \description{
 The lasso penalty penalized coefficients via the L1 norm, which induces

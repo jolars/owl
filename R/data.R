@@ -34,7 +34,7 @@
 #' their obscure definitions here.
 #'
 #' @format 270 observations from 17 variables represented as a list consisting
-#'  of a binary factor response vector `y`,
+#' of a binary factor response vector `y`,
 #' with levels 'absence' and 'presence' indicating the absence or presence of
 #' heart disease and `x`: a sparse feature matrix of class 'dgCMatrix' with the
 #' following variables:
@@ -106,11 +106,11 @@
 #'
 #' A data set of the attributes of 382 students in secondary education
 #' collected from two schools. The goal is to predict the
-#' grade in math and portugese at the end of the third period. See the
+#' grade in math and Portugese at the end of the third period. See the
 #' cited sources for additional information.
 #'
 #' @section Preprocessing:
-#' All of the grade-specific predictors were droppped from the data set.
+#' All of the grade-specific predictors were dropped from the data set.
 #' (Note that it is not clear from the source why some of these predictors are
 #' specific to each grade, such as which parent is the student's guardian.)
 #' The categorical variables were dummy-coded. Only the final grades (G3)

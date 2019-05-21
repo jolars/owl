@@ -141,7 +141,7 @@ setClass("Lasso",
 #' strong.
 #'
 #' @param lambda the regularization strength, which can either be a
-#'   user-supplied vector of (theoreticall) any length, or `NULL`, in which
+#'   user-supplied vector of (theoretical) any length, or `NULL`, in which
 #'   case golem automatically computes a sequence so that the first value
 #'   leads to the null (intercept-only) model.
 #' @param lambda_min_ratio the lowest permissible value of the
@@ -149,7 +149,7 @@ setClass("Lasso",
 #' @param n_lambda the length of the \eqn{\lambda} sequence -- ignored if
 #'   a value is supplied to `lambda`.
 #'
-#' @return A paramter pack for the lasso penalty.
+#' @return A parameter pack for the lasso penalty.
 #' @export
 Lasso <- function(lambda = NULL,
                   lambda_min_ratio = 0.0001,
