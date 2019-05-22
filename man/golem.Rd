@@ -4,15 +4,21 @@
 \alias{golem}
 \title{Regularized Generalized Linear Models}
 \usage{
-golem(x, y, family = c("gaussian", "binomial"),
-  penalty = golem::Slope(), solver = golem::Fista(),
+golem(x, y, groups = NULL, family = c("gaussian", "binomial"),
+  penalty = c("slope", "group_slope", "lasso"), solver = "fista",
   intercept = TRUE, standardize = c("features", "response", "both",
-  "none"), ...)
+  "none"), orthogonalize = TRUE, sigma = NULL, lambda = NULL,
+  fdr = 0.2, n_lambda = 100, lambda_min_ratio = ifelse(NROW(x) <
+  NCOL(x), 0.01, 1e-04), tol = 1e-06, max_passes = 10000,
+  diagnostics = FALSE, ...)
 }
 \arguments{
 \item{x}{input matrix}
 
 \item{y}{response variable}
+
+\item{groups}{vector of integers to indicate group membership of each
+feature (only relevant for Group SLOPE)}
 
 \item{family}{response type, one of \code{'gaussian'}, \code{'binomial'},
 \code{'multinomial'}, or \code{'mgaussian'}. See \strong{Supported families} for details.}
@@ -37,10 +43,32 @@ currently, standardization of response has no real effect. The
 response is always standardized for Gaussian responses and never
 for binomial}
 
+\item{orthogonalize}{whether \code{x} should be orthogonalized}
+
+\item{sigma}{noise estimate (only relevant for SLOPE and Group SLOPE)}
+
+\item{lambda}{either a character vector indicating the method used
+to construct the lambda path or}
+
+\item{fdr}{target false discovery rate (only relevant for SLOPE and
+Group SLOPE)}
+
+\item{n_lambda}{length of regularization path (only relevant for lasso)}
+
+\item{lambda_min_ratio}{smallest value for \code{lambda} as a fraction of
+\eqn{\lambda_\text{max}}{\lambda_max}#'}
+
+\item{tol}{tolerance for optimizer}
+
+\item{max_passes}{maximum number of passes for optimizer}
+
+\item{diagnostics}{should diagnostics be saved for the model fit (timings,
+primal and dual objectives, and infeasibility)}
+
 \item{...}{currently ignored}
 }
 \value{
-The result of fitting
+An object of class \code{"Golem"}.
 }
 \description{
 This functions fits a generalized linear model (GLM) using efficient
@@ -51,9 +79,9 @@ optimization routines suitable to big data problems.
 There is a multitude of ways to penalize the models created by
 \code{\link[golem:golem]{golem::golem()}}, currently they are:
 \itemize{
-\item \code{\link[golem:Slope]{golem::Slope()}}
-\item \code{\link[golem:Lasso]{golem::Lasso()}}
-\item \code{\link[golem:GroupSlope]{golem::GroupSlope()}}
+\item SLOPE
+\item Group SLOPE
+\item LASSO
 }
 
 These functions are in fact only parameter packs for the actual
@@ -70,7 +98,7 @@ the various checks.
 
 There is currently a single solver available for \link[golem:golem]{golem::golem}, namely
 \itemize{
-\item \code{\link[golem:Fista]{golem::Fista()}}
+\item FISTA
 }
 }
 

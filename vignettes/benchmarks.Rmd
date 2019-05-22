@@ -53,8 +53,7 @@ plot_optim <- function(fit) {
 x <- as.matrix(abalone$x)
 y <- abalone$y
 
-fit <- golem(x, y, family = "gaussian",
-             solver = Fista(diagnostics = TRUE))
+fit <- golem(x, y, family = "gaussian", diagnostics = TRUE)
 plot_optim(fit)
 ```
 
@@ -64,8 +63,7 @@ plot_optim(fit)
 x <- as.matrix(heart$x)
 y <- heart$y
 
-fit <- golem(x, y, family = "binomial",
-             solver = Fista(diagnostics = TRUE))
+fit <- golem(x, y, family = "binomial", diagnostics = TRUE)
 
 plot_optim(fit)
 ```

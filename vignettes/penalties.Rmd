@@ -47,7 +47,7 @@ for (i in seq_along(q)) {
   y <- problem$y
   signals <- problem$nonzero
   
-  fit <- golem(x, y, penalty = Slope(lambda = "bhq", sigma = 1),
+  fit <- golem(x, y, penalty = "slope", lambda = "bhq", sigma = 1,
                intercept = FALSE)
   
   selected_golem <- which(coef(fit) > 0)

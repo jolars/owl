@@ -9,8 +9,10 @@ test_that("results from group slope mirror those from grpSLOPE package", {
   sigma  <- 1
 
   golem_fit <- golem(x, y,
-                     penalty = GroupSlope(groups = grp,
-                                          fdr = fdr, sigma = sigma))
+                     penalty = "group_slope",
+                     groups = grp,
+                     fdr = fdr,
+                     sigma = sigma)
 
   gslope_fit <- grpSLOPE::grpSLOPE(x, y, group = grp, fdr = fdr, sigma = sigma)
 
@@ -33,7 +35,9 @@ test_that("binomial group slope models work", {
   df <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3)
   golem_fit <- golem(cbind(x1, x2, x3), y,
                      family = "binomial",
-                     penalty = GroupSlope(groups = c(1, 1, 2), sigma = 3))
+                     penalty = "group_slope",
+                     groups = c(1, 1, 2),
+                     sigma = 3)
 
   expect_equivalent(coef(golem_fit) != 0, c(TRUE, TRUE, TRUE, FALSE))
 })

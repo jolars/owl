@@ -10,18 +10,12 @@ setClass("Slope",
          slots = c(sigma = "numeric",
                    fdr = "numeric"))
 
-#' Sorted L-One Penalized Estimation (SLOPE)
-#'
-#' @param lambda penalty strength
-#' @param sigma estimate of signal noise
-#' @param fdr target for false discovery rate (FDR)
-#'
-#' @return A parameter pack for the SLOPE penalty.
-#'
-#' @export
 Slope <- function(lambda = c("gaussian", "bhq"),
                   sigma = NULL,
                   fdr = 0.2) {
+
+  if (is.null(lambda))
+    lambda <- "gaussian"
 
   stopifnot(length(fdr) == 1,
             fdr >= 0 && fdr <= 1)
@@ -70,23 +64,14 @@ setClass("GroupSlope",
                    wt = "numeric",
                    wt_per_coef = "numeric"))
 
-#' Group SLOPE Penalty
-#'
-#' @param lambda penalty strength
-#' @param sigma noise estimate
-#' @param fdr target false discovery rate
-#' @param orthogonalize whether to orthogonalize data matrix (within groups)
-#' @param groups a vector of integers indicating which group each
-#'   feature belongs to
-#'
-#' @return A parameter pack for the Group SLOPE penalty.
-#'
-#' @export
 GroupSlope <- function(groups,
                        lambda = c("corrected", "mean", "max"),
                        sigma = NULL,
                        fdr = 0.2,
                        orthogonalize = TRUE) {
+
+  if (is.null(lambda))
+    lambda <- "corrected"
 
   stopifnot(length(fdr) == 1,
             fdr >= 0 && fdr <= 1)

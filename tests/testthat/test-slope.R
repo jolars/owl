@@ -10,8 +10,9 @@ test_that("SLOPE and golem agree for gaussian designs", {
   res_slope <- SLOPE::SLOPE(x, y, sigma = 1, normalize = FALSE)
   set.seed(0)
   res_golem <- golem::golem(x, y, intercept = FALSE,
-                            penalty = Slope(sigma = 1),
-                            solver = Fista(diagnostics = TRUE),
+                            penalty = "slope",
+                            sigma = 1,
+                            diagnostics = TRUE,
                             standardize = FALSE)
 
   expect_equivalent(res_slope$beta, coef(res_golem), tol = 0.01)
@@ -27,7 +28,8 @@ test_that("SLOPE and golem agree when computing lambda sequences", {
 
   for (lambda in c("bhq", "gaussian")) {
     slope_lambda <- SLOPE::SLOPE(x, y, sigma = 1, lambda = lambda)$lambda
-    golem_lambda <- golem::golem(x, y, sigma = 1, penalty = Slope(lambda = lambda))@penalty@lambda
+    golem_lambda <- golem::golem(x, y, sigma = 1, lambda = lambda,
+                                 penalty = "slope")@penalty@lambda
     expect_equivalent(golem_lambda, slope_lambda)
   }
 })
