@@ -185,10 +185,6 @@ golem <- function(x,
                   max_passes = max_passes,
                   diagnostics = diagnostics)
 
-  # stopifnot(isClass(solver, "Solver"),
-  #           isClass(penalty, "Penalty"),
-  #           isClass(family, "Family"))
-
   # collect response and variable names (if they are given) and otherwise
   # make new
   response_names <- colnames(y)
