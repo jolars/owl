@@ -52,12 +52,12 @@ student
 \description{
 A data set of the attributes of 382 students in secondary education
 collected from two schools. The goal is to predict the
-grade in math and portugese at the end of the third period. See the
+grade in math and Portugese at the end of the third period. See the
 cited sources for additional information.
 }
 \section{Preprocessing}{
 
-All of the grade-specific predictors were droppped from the data set.
+All of the grade-specific predictors were dropped from the data set.
 (Note that it is not clear from the source why some of these predictors are
 specific to each grade, such as which parent is the student's guardian.)
 The categorical variables were dummy-coded. Only the final grades (G3)

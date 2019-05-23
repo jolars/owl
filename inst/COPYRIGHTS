@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 --------------------------------------------------------------------------------
 
-Files: R/lambda.R
+Files: R/penalties.R
        R/golem.R
        R/utils.R
-       R/lambda.R
-       src/slope.cpp
+       src/solvers.cpp
+       src/penalties.cpp
 
-Are modifications or straight-out copies of functions are code from
+contain modified code from
 the SLOPE package, which comes with the following copyright notice:
 
 Copyright 2013, M. Bogdan, E. van den Berg, W. Su, and E.J. Candes
@@ -46,3 +46,30 @@ This file is part of SLOPE Toolbox.
   along with the SLOPE Toolbox. If not, see
   <http://www.gnu.org/licenses/>.
 
+
+--------------------------------------------------------------------------------
+
+Files: R/penalties.R
+       R/golem.R
+       R/utils.R
+       R/lambda.R
+       src/slope.cpp
+
+contain modified code from
+the grpSLOPE package, which comes with the following copyright notice:
+
+    grpSLOPE: Group SLOPE (Group Sorted L1 Penalized Estimation)
+    Copyright (C) 2016 Alexej Gossmann
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.

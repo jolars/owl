@@ -1,12 +1,18 @@
+# updates attributes given a list of attributes
+updateAttributes <- function(x, val) {
+  attributes(x) <- utils::modifyList(attributes(x), val, keep.null = TRUE)
+  x
+}
+
 # Compute the usual unbiased estimate of the variance in a linear model.
-estimate_noise <- function(X, y, intercept = TRUE) {
-  n <- nrow(X)
+estimate_noise <- function(x, y, intercept = TRUE) {
+  n <- nrow(x)
   if (intercept)
-    X <- cbind(rep(1, n), X)
-  p <- ncol(X)
+    x <- cbind(rep(1, n), x)
+  p <- ncol(x)
   stopifnot(n > p)
 
-  fit <- stats::lm.fit(X, y)
+  fit <- stats::lm.fit(x, y)
   sqrt(sum(fit$residuals^2) / (n-p))
 }
 
@@ -15,11 +21,11 @@ random_problem <- function(n, p, k = NULL, amplitude = 3, sigma = 1) {
   if (is.null(k))
     k <- max(1, as.integer(p/5))
 
-  X <- matrix(stats::rnorm(n*p), n, p)
+  x <- matrix(stats::rnorm(n*p), n, p)
   nonzero <- sample(p, k)
   beta <- amplitude * (1:p %in% nonzero)
-  y <- X %*% beta + stats::rnorm(n, sd = sigma)
-  list(X = X, y = y, beta = beta, nonzero = nonzero)
+  y <- x %*% beta + stats::rnorm(n, sd = sigma)
+  list(x = x, y = y, beta = beta, nonzero = nonzero)
 }
 
 firstUpper <- function(x) {
@@ -31,30 +37,18 @@ logSeq <- function(from, to, length.out) {
   exp(seq(log(from), log(to), length.out = length.out))
 }
 
-unstandardize <- function(intercepts,
-                          betas,
-                          x_center,
-                          x_scale,
-                          y_center,
-                          y_scale,
-                          fit_intercept) {
-  p <- NROW(betas)
-  m <- NCOL(betas)
-  K <- dim(betas)[3]
+groupID <- function(group) {
+  group <- as.integer(group)
+  id <- unique(group)
 
-  for (k in seq_len(m)) {
-    x_bar_beta_sum <- double(K)
+  members <- lapply(id, function(id_i) which(group %in% id_i))
+  names(members) <- id
 
-    for (j in seq_len(p)) {
-      betas[j, k, ] <- betas[j, k, ] * y_scale[k]/x_scale[j]
-      x_bar_beta_sum <- x_bar_beta_sum + x_center[j] * betas[j, k, ]
-    }
+  members
+}
 
-    if (fit_intercept) {
-      intercepts[m, k, ] <-
-        intercepts[m, k, ]*y_scale[k] + y_center[k] - x_bar_beta_sum
-    }
-  }
-
-  list(intercepts = intercepts, betas = betas)
+NSLICE <- function(x) {
+  d <- dim(x)
+  n_slices <- if (length(d) == 3) d[3] else 1
+  n_slices
 }

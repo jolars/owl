@@ -21,8 +21,9 @@ setClass("Golem",
 #' There is a multitude of ways to penalize the models created by
 #' [golem::golem()], currently they are:
 #'
-#' * [golem::Slope()]
-#' * [golem::Lasso()]
+#' * SLOPE
+#' * Group SLOPE
+#' * LASSO
 #'
 #' These functions are in fact only parameter packs for the actual
 #' implementations of the penalties and will be passed on to
@@ -36,7 +37,7 @@ setClass("Golem",
 #' @section Solvers:
 #' There is currently a single solver available for [golem::golem], namely
 #'
-#' * [golem::Fista()]
+#' * FISTA
 #'
 #' @param x input matrix
 #' @param y response variable
@@ -59,8 +60,22 @@ setClass("Golem",
 #'   response is always standardized for Gaussian responses and never
 #'   for binomial
 #' @param ... currently ignored
-#'
-#' @return The result of fitting
+#' @param groups vector of integers to indicate group membership of each
+#'   feature (only relevant for Group SLOPE)
+#' @param sigma noise estimate (only relevant for SLOPE and Group SLOPE)
+#' @param lambda either a character vector indicating the method used
+#'   to construct the lambda path or
+#' @param fdr target false discovery rate (only relevant for SLOPE and
+#'   Group SLOPE)
+#' @param n_lambda length of regularization path (only relevant for lasso)
+#' @param lambda_min_ratio smallest value for `lambda` as a fraction of
+#'   \eqn{\lambda_\text{max}}{\lambda_max}#'
+#' @param tol tolerance for optimizer
+#' @param max_passes maximum number of passes for optimizer
+#' @param diagnostics should diagnostics be saved for the model fit (timings,
+#'   primal and dual objectives, and infeasibility)
+#' @param orthogonalize whether `x` should be orthogonalized
+#' @return An object of class `"Golem"`.
 #' @export
 #'
 #' @examples
@@ -70,22 +85,39 @@ setClass("Golem",
 #' golem_fit <- golem::golem(X, y, family = "gaussian")
 golem <- function(x,
                   y,
+                  groups = NULL,
                   family = c("gaussian", "binomial"),
-                  penalty = golem::Slope(),
-                  solver = golem::Fista(),
+                  penalty = c("slope", "group_slope", "lasso"),
+                  solver = "fista",
                   intercept = TRUE,
                   standardize = c("features", "response", "both", "none"),
+                  orthogonalize = TRUE,
+                  sigma = NULL,
+                  lambda = NULL,
+                  fdr = 0.2,
+                  n_lambda = 100,
+                  lambda_min_ratio = ifelse(NROW(x) < NCOL(x), 0.01, 0.0001),
+                  tol = 1e-06,
+                  max_passes = 1e4,
+                  diagnostics = FALSE,
                   ...) {
 
-  stopifnot(is.logical(intercept))
+  stopifnot(is.logical(intercept),
+            is.character(family),
+            is.character(solver),
+            is.character(penalty))
 
   # collect the call so we can use it in update() later on
   ocall <- match.call()
 
+  family <- match.arg(family)
+  penalty <- match.arg(penalty)
+  solver <- match.arg(solver)
+
   fit_intercept <- intercept
-  n_samples  <- n <- NROW(x)
-  n_features <- p <- NCOL(x)
-  n_targets  <- m <- NCOL(y)
+  n <- NROW(x)
+  p <- NCOL(x)
+  m <- NCOL(y)
 
   if (NROW(y) != NROW(x))
     stop("the number of samples in 'x' and 'y' must match")
@@ -115,13 +147,29 @@ golem <- function(x,
     standardize <- match.arg(standardize)
   }
 
+  # setup penalty settings
+  penalty <- switch(penalty,
+                    slope = Slope(lambda = lambda,
+                                  sigma = sigma,
+                                  fdr = fdr),
+                    group_slope = GroupSlope(groups = groups,
+                                             lambda = lambda,
+                                             sigma = sigma,
+                                             fdr = fdr,
+                                             orthogonalize = orthogonalize),
+                    lasso = Lasso(lambda = lambda,
+                                  lambda_min_ratio = lambda_min_ratio,
+                                  n_lambda = n_lambda))
+
   # setup family
-  family <- switch(match.arg(family),
+  family <- switch(family,
                    gaussian = Gaussian(),
                    binomial = Binomial())
 
   y <- preprocessResponse(family, y)
-  x <- preprocessFeatures(x, standardize)
+  res <- preprocessFeatures(penalty, x, standardize)
+  x <- res$x
+  penalty <- res$penalty
 
   y_center <- attr(y, "center")
   y_scale  <- attr(y, "scale")
@@ -130,23 +178,12 @@ golem <- function(x,
 
   class_names <- attr(y, "class_names")
 
-  # setup penalty settings
-  if (is.character(penalty))
-    penalty <- match.fun(penalty)()
-  else if (is.function(penalty))
-    penalty <- do.call(penalty, list())
-
   penalty <- setup(penalty, family, x, y, y_scale)
 
   # setup solver settings
-  if (is.character(solver))
-    solver <- match.fun(solver)()
-  else if (is.function(solver))
-    solver <- do.call(solver, list())
-
-  stopifnot(isClass(solver, "Solver"),
-            isClass(penalty, "Penalty"),
-            isClass(family, "Family"))
+  solver <- Fista(tol = tol,
+                  max_passes = max_passes,
+                  diagnostics = diagnostics)
 
   # collect response and variable names (if they are given) and otherwise
   # make new
@@ -160,12 +197,14 @@ golem <- function(x,
 
   lipschitz_constant <- lipschitzConstant(family, x, fit_intercept)
 
-  control <- list(debug = debug,
-                  family = family,
+  weights <- getWeights(penalty, x)
+
+  control <- list(family = family,
                   penalty = penalty,
                   solver = solver,
                   fit_intercept = fit_intercept,
                   is_sparse = is_sparse,
+                  weights = weights,
                   standardize = standardize,
                   x_center = x_center,
                   x_scale = x_scale,
@@ -197,13 +236,8 @@ golem <- function(x,
     res <- golemDense(x, y, control)
   }
 
-  unstandardized_coefs <- unstandardize(res$intercept,
-                                        res$beta,
-                                        x_center,
-                                        x_scale,
-                                        y_center,
-                                        y_scale,
-                                        fit_intercept)
+  unstandardized_coefs <-
+    postProcess(penalty, res$intercept, res$beta, x, y, fit_intercept)
 
   beta <- unstandardized_coefs$betas
   intercept <- unstandardized_coefs$intercepts
@@ -227,8 +261,7 @@ golem <- function(x,
                                    paste0("p", seq_len(n_penalties)))
   }
 
-
-  nonzeros <- apply(beta, 3, function(x) colSums(x > 0))
+  nonzeros <- unstandardized_coefs$selected
 
   diagnostics <- solver@diagnostics
 
@@ -238,10 +271,12 @@ golem <- function(x,
     time <- unlist(res$time)
     primal <- unlist(res$primals)
     dual <- unlist(res$duals)
+    infeasibility <- unlist(res$infeasibilities)
 
     diag <- data.frame(time = time,
                        primal = primal,
                        dual = dual,
+                       infeasibility = infeasibility,
                        penalty = rep(seq_len(nl), nn))
   } else {
     diag <- data.frame()

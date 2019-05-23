@@ -6,7 +6,39 @@ Authors@R:
              "Larsson",
              role = c("aut", "cre"),
              email = "mail@larssonjohan.com",
-             comment = c(ORCID = "0000-0002-4029-5945")))
+             comment = c(ORCID = "0000-0002-4029-5945")),
+      person("Malgorzata",
+             "Bogdan",
+             role = c("ctb", "cph"),
+             comment = "code adapted from SLOPE and grpSLOPE"),
+      person("Ewout",
+             "van den Berg",
+             role = c("ctb", "cph"),
+             comment = "code adapted from SLOPE"),
+      person("Chiara",
+             "Sabatti",
+             role = c("ctb"),
+             comment = "code adapted from SLOPE"),
+      person("Emmanuel",
+             "Candes",
+             role = c("ctb", "cph"),
+             comment = "code adapted from SLOPE"),
+      person("Evan",
+             "Patterson",
+             role = c("ctb"),
+             comment = "code adapted from SLOPE"),
+      person("Weijie",
+             "Su",
+             role = c("ctb", "cph"),
+             comment = "code adapted from SLOPE and grpSLOPE"),
+      person("Damian",
+             "Brzyski",
+             role = c("ctb", "cph"),
+             comment = "code adapted from grpSLOPE"),
+      person("Alexej",
+             "Gossmann",
+             role = c("ctb", "cph"),
+             comment = "code adapted from grpSLOPE"))
 Description: Fast implementations of penalized Generalized Linear Models (GLM)
     suited to big data.
 License: GPL-3
@@ -16,7 +48,8 @@ Depends:
 Imports:
     Matrix,
     methods,
-    Rcpp
+    Rcpp,
+    grpSLOPE
 LinkingTo:
     Rcpp (>= 1.0.0),
     RcppArmadillo (>= 0.9.200.7.0)
@@ -30,7 +63,7 @@ Suggests:
     rmarkdown,
     SLOPE,
     spelling,
-    testthat,
+    testthat (>= 2.1.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Language: en-US
@@ -41,12 +74,14 @@ VignetteBuilder: knitr
 Collate: 
     'RcppExports.R'
     'solvers.R'
-    'penalties.R'
+    'utils.R'
     'families.R'
+    'penalties.R'
     'golem.R'
     'coef.R'
     'data.R'
     'golem-package.R'
+    'groupslope-lambda.R'
+    'post-processing.R'
+    'pre-processing.R'
     'predict.R'
-    'preprocessFeatures.R'
-    'utils.R'

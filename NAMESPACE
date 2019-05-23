@@ -2,7 +2,6 @@
 
 export(Fista)
 export(Lasso)
-export(Slope)
 export(golem)
 exportMethods(coef)
 exportMethods(predict)

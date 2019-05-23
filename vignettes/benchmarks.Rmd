@@ -12,11 +12,12 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE
 )
 ```
 
-## Benchmarks
+## Diagnostics
 
 In this vignette, we will provide a matrix of benchmarks for the
 solvers, penalties, and GLM families in **golem**.
@@ -32,18 +33,17 @@ library(latticeExtra)
 
 plot_optim <- function(fit) {
   d <- fit@diagnostics
-  y <- d$loss
   
-  rel_change <- diff(y)/y[-length(y)]
-  
-  trunc_ind <- which(abs(rel_change) < 1e-5)[1]
-  
-  trunc_ind <- ifelse(is.na(trunc_ind), length(y), trunc_ind)
-  
-  Suboptimality <- y[1:trunc_ind] - min(y)
-  Time <- d$time[1:trunc_ind]
-  
-  xyplot(Suboptimality ~ Time, type = "l", xlab = "Time (Seconds)")
+  p1 <- xyplot(primal + dual ~ time, data = d, type = "l", 
+               ylab = "Objetive",
+               xlab = "Time (Seconds)", 
+               auto.key = list(space = "inside", lines = TRUE,
+                               points = FALSE))
+  p2 <- xyplot(infeasibility ~ time, data = d, type = "l", 
+               xlab = "Time (Seconds)",
+               ylab = "Infeasibility")
+  print(p1)
+  print(p2)
 }
 ```
 
@@ -53,8 +53,7 @@ plot_optim <- function(fit) {
 x <- as.matrix(abalone$x)
 y <- abalone$y
 
-fit <- golem(x, y, family = "gaussian",
-             solver = Fista(diagnostics = TRUE))
+fit <- golem(x, y, family = "gaussian", diagnostics = TRUE)
 plot_optim(fit)
 ```
 
@@ -64,8 +63,7 @@ plot_optim(fit)
 x <- as.matrix(heart$x)
 y <- heart$y
 
-fit <- golem(x, y, family = "binomial",
-             solver = Fista(diagnostics = TRUE))
+fit <- golem(x, y, family = "binomial", diagnostics = TRUE)
 
 plot_optim(fit)
 ```
