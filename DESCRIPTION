@@ -48,7 +48,8 @@ Depends:
 Imports:
     Matrix,
     methods,
-    Rcpp
+    Rcpp,
+    grpSLOPE
 LinkingTo:
     Rcpp (>= 1.0.0),
     RcppArmadillo (>= 0.9.200.7.0)
@@ -62,8 +63,7 @@ Suggests:
     rmarkdown,
     SLOPE,
     spelling,
-    testthat (>= 2.1.0),
-    grpSLOPE
+    testthat (>= 2.1.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Language: en-US
