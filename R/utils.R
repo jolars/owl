@@ -41,7 +41,7 @@ groupID <- function(group) {
   group <- as.integer(group)
   id <- unique(group)
 
-  members <- lapply(id, function(i) which(group %in% id[i]))
+  members <- lapply(id, function(id_i) which(group %in% id_i))
   names(members) <- id
 
   members
