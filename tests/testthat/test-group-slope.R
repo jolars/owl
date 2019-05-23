@@ -41,3 +41,34 @@ test_that("binomial group slope models work", {
 
   expect_equivalent(coef(golem_fit) != 0, c(TRUE, TRUE, TRUE, FALSE))
 })
+
+test_that("group_slope lambda sequences are computed properly", {
+  set.seed(1)
+
+  n <- 100
+  p <- 5
+  fdr <- 0.2
+
+  x <- matrix(rnorm(p*n), n)
+  y <- rnorm(n)
+
+  set.seed(1)
+
+  for (lambda in c("corrected", "mean", "max")) {
+    groups <- sample(1:p, replace = TRUE)
+
+    golem_fit <- golem(x, y, penalty = "group_slope", lambda = lambda,
+                       fdr = fdr,
+                       groups = groups)
+
+    grps_lambda <- grpSLOPE:::lambdaGroupSLOPE(fdr = fdr, group = groups,
+                                               wt = golem_fit@penalty@wt,
+                                               n.obs = n,
+                                               method = lambda)
+    expect_equal(golem_fit@penalty@lambda,
+                 grps_lambda)
+  }
+
+
+
+})
