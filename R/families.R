@@ -78,7 +78,7 @@ setMethod(
   "preprocessResponse",
   "Binomial",
   function(object, y) {
-    m <- NCOL(y)
+    # m <- NCOL(y)
 
     if (length(unique(y)) > 2)
       stop("more than two classes in response")
