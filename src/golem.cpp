@@ -29,7 +29,7 @@ golemDense(arma::mat x,
   bool diagnostics = solver_args.slot("diagnostics");
 
   // // setup family and response
-  auto family = setupFamily(family_args.slot("name"));
+  auto family = setupFamily(family_args.slot("name"), fit_intercept);
   auto penalty = setupPenalty(penalty_args);
   auto n_penalties = penalty->pathLength();
 

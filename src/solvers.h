@@ -88,7 +88,7 @@ public:
 
     uword n = x.n_rows;
     uword p = x.n_cols;
-    uword n_responses = y.n_cols;
+    uword m = y.n_cols;
 
     rowvec intercept_tilde(intercept);
     rowvec intercept_tilde_old(intercept_tilde);
@@ -96,11 +96,11 @@ public:
     mat beta_tilde(beta);
     mat beta_tilde_old(beta_tilde);
 
-    mat lin_pred(n, n_responses);
+    mat lin_pred(n, m);
 
-    mat g(p, n_responses, fill::zeros);
+    mat g(p, m, fill::zeros);
     mat pseudo_g(g);
-    rowvec g_intercept(n_responses, fill::zeros);
+    rowvec g_intercept(m, fill::zeros);
 
     // L = 1.0;
     double t = 1;
@@ -124,14 +124,12 @@ public:
       timer.tic();
     }
 
-    lin_pred = x*beta;
-    if (fit_intercept)
-      lin_pred.each_row() += intercept;
+    family->eval(x, y, intercept, beta);
 
     while (!accepted && i < max_passes) {
       // gradient
-      double f = family->primal(lin_pred, y);
-      pseudo_g = family->gradient(lin_pred, y);
+      double f = family->primal();
+      pseudo_g = family->gradient(y);
       g = x.t() * pseudo_g;
 
       if (fit_intercept) {
@@ -139,8 +137,8 @@ public:
         intercept_tilde_old = intercept_tilde;
       }
 
-      double primal = f + penalty->primal(beta);
-      double dual = family->dual(lin_pred, y);
+      double primal = f + penalty->primal(beta_tilde);
+      double dual = family->dual(y);
       double infeasibility = penalty->infeasibility(g);
 
       accepted = (std::abs(primal - dual)/std::max(1.0, primal) < tol_rel_gap)
@@ -170,11 +168,9 @@ public:
         if (fit_intercept)
           intercept_tilde = intercept - (1.0/L)*g_intercept;
 
-        lin_pred = x*beta_tilde;
-        if (fit_intercept)
-          lin_pred.each_row() += intercept;
+        family->eval(x, y, intercept_tilde, beta_tilde);
 
-        f = family->primal(lin_pred, y);
+        f = family->primal();
         mat q = f_old + d.t()*g + 0.5*L*d.t()*d;
 
         if (any(q.diag() >= f*(1 - 1e-12)))
@@ -191,9 +187,7 @@ public:
         intercept = intercept_tilde
                     + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
 
-      lin_pred = x*beta;
-      if (fit_intercept)
-        lin_pred.each_row() += intercept;
+      family->eval(x, y, intercept, beta);
 
       i++;
     }
