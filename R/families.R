@@ -5,13 +5,18 @@ setClass("Family",
 setClass("Gaussian", contains = "Family")
 setClass("Binomial", contains = "Family")
 
-setGeneric("lambdaMax",
-           function(object, x, y, y_scale) standardGeneric("lambdaMax"))
+setGeneric(
+  "lambdaMax",
+  function(object, x, y, y_scale)
+    standardGeneric("lambdaMax")
+)
 
-setMethod("lambdaMax",
-          "Gaussian",
-          function(object, x, y, y_scale)
-            y_scale*max(abs(crossprod(x, y)))/NROW(x))
+setMethod(
+  "lambdaMax",
+  "Gaussian",
+  function(object, x, y, y_scale)
+    y_scale*max(abs(crossprod(x, y)))/NROW(x)
+)
 
 setMethod(
   "lambdaMax",
@@ -30,49 +35,57 @@ setMethod(
   }
 )
 
-setGeneric("lipschitzConstant",
-           function(object, x, fit_intercept)
-             standardGeneric("lipschitzConstant"))
+setGeneric(
+  "lipschitzConstant",
+  function(object, x, fit_intercept)
+    standardGeneric("lipschitzConstant")
+)
 
-setMethod("lipschitzConstant",
-          "Gaussian",
-          function(object, x, fit_intercept) {
-            max(rowSums(x^2)) + fit_intercept
-          })
+setMethod(
+  "lipschitzConstant",
+  "Gaussian",
+  function(object, x, fit_intercept) {
+    max(rowSums(x^2)) + fit_intercept
+  }
+)
 
-setMethod("lipschitzConstant",
-          "Binomial",
-          function(object, x, fit_intercept) {
-            0.25 * (max(rowSums(x^2)) + fit_intercept)
-          })
+setMethod(
+  "lipschitzConstant",
+  "Binomial",
+  function(object, x, fit_intercept) {
+    0.25 * (max(rowSums(x^2)) + fit_intercept)
+  }
+)
 
 setGeneric("preprocessResponse",
            function(object, y) standardGeneric("preprocessResponse"))
 
-setMethod("preprocessResponse",
-          "Gaussian",
-          function(object, y) {
-            m <- NCOL(y)
+setMethod(
+  "preprocessResponse",
+  "Gaussian",
+  function(object, y) {
+    m <- NCOL(y)
 
-            if (!is.numeric(y))
-              stop("non-numeric response.")
+    if (!is.numeric(y))
+      stop("non-numeric response.")
 
-            if (m > 1)
-              stop("response for Gaussian regression must be one-dimensional.")
+    if (m > 1)
+      stop("response for Gaussian regression must be one-dimensional.")
 
-            y <- as.numeric(y)
+    y <- as.numeric(y)
 
-            y_center <- mean(y)
-            #y_scale  <- sd(y)
-            y_scale  <- 1
+    y_center <- mean(y)
+    #y_scale  <- sd(y)
+    y_scale  <- 1
 
-            y <- as.matrix(y - y_center)
-            attr(y, "center") <- y_center
-            attr(y, "scale") <- y_scale
-            attr(y, "n_classes") <- 1
-            attr(y, "class_names") <- NA_character_
-            y
-          })
+    y <- as.matrix(y - y_center)
+    attr(y, "center") <- y_center
+    attr(y, "scale") <- y_scale
+    attr(y, "n_classes") <- 1
+    attr(y, "class_names") <- NA_character_
+    y
+  }
+)
 
 setMethod(
   "preprocessResponse",
@@ -105,8 +118,11 @@ setMethod(
   }
 )
 
-setGeneric("link",
-           function(object, lin_pred) standardGeneric("link"))
+setGeneric(
+  "link",
+  function(object, lin_pred)
+    standardGeneric("link")
+)
 
 setMethod("link",
           "Family",

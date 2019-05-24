@@ -180,6 +180,8 @@ golem <- function(x,
 
   penalty <- setup(penalty, family, x, y, y_scale)
 
+  is_slope <- inherits(penalty, "Slope") || inherits(penalty, "GroupSlope")
+
   # setup solver settings
   solver <- Fista(tol = tol,
                   max_passes = max_passes,
@@ -212,28 +214,50 @@ golem <- function(x,
                   y_scale = y_scale,
                   lipschitz_constant = lipschitz_constant)
 
-  # run the solver, perhaps iteratively
-  # if (is.null(sigma)) {
-  #   # run Algorithm 5 of Section 3.2.3.
-  #   selected <- NULL
-  #   repeat {
-  #     selected.prev <- selected
-  #     sigma <- c(sigma, estimate_noise(X[, selected, drop = FALSE], y))
-  #     result <- SLOPE_solver_call(X, y, tail(sigma,1) * lambda)
-  #     selected <- result$selected
-  #     if (identical(selected, selected.prev))
-  #       break
-  #     if (length(selected) + 1 >= n)
-  #       stop("selected >= n-1 variables. Cannot estimate variance.")
-  #   }
-  # } else {
-  #   result = SLOPE_solver_call(X, y, sigma * lambda)
-  # }
-
-  if (is_sparse) {
+  golemFit <- if (is_sparse) {
     stop("sparse feature matrices are not yet supported.")
   } else {
-    res <- golemDense(x, y, control)
+    golemDense
+  }
+
+  if (is_slope && is.null(sigma)) {
+    if (inherits(family, "Gaussian")) {
+      control$penalty@sigma <- penalty@sigma <- sd(y)
+      res <- golemDense(x, y, control)
+
+      S_new <- which(res$beta != 0)
+      S <- c()
+
+      while(!isTRUE(all.equal(S, S_new)) && (length(S_new) > 0)) {
+        S <- S_new
+        if (length(S) > n) {
+          stop("sigma estimation fails because more predictors got ",
+               "selected than there are observations.")
+        }
+
+        new_x <- x[, S, drop = FALSE]
+
+        if (fit_intercept)
+          new_x <- cbind(1, new_x)
+
+        OLS <- lm.fit(new_x, y)
+        if (standardize %in% c("features", "both")) {
+          sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S) - 1))
+        } else {
+          sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S)))
+        }
+
+        control$penalty@sigma <- penalty@sigma <- sigma
+
+        res <- golemFit(x, y, control)
+        S_new <- which(res$beta != 0)
+      }
+    } else if (inherits(family, "Binomial")) {
+      control$penalty@sigma <- penalty@sigma <- 0.5
+      res <- golemFit(x, y, control)
+    }
+  } else {
+    res <- golemFit(x, y, control)
   }
 
   unstandardized_coefs <-
