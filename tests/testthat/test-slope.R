@@ -33,3 +33,19 @@ test_that("SLOPE and golem agree when computing lambda sequences", {
     expect_equivalent(golem_lambda, slope_lambda)
   }
 })
+
+
+test_that("sigma estimation for SLOPE", {
+  set.seed(1)
+
+  problem <- golem:::random_problem(10, 5, sigma = 1)
+
+  x <- problem$x
+  y <- problem$y
+
+  slope_fit <- SLOPE::SLOPE(x, y)
+  golem_fit <- golem::golem(x, y, penalty = "slope", intercept = FALSE)
+
+  expect_equal(slope_fit$sigma[length(slope_fit$sigma)],
+               golem_fit@penalty@sigma)
+})

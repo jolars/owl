@@ -22,8 +22,8 @@ Slope <- function(lambda = c("gaussian", "bhq"),
 
   # noise estimate
   if (is.null(sigma)) {
-    sigma <- 1 # temporarily set sigma to 1
     sigma_type <- "auto"
+    sigma <- NA_real_
   } else {
     stopifnot(length(sigma) == 1)
     sigma_type <- "user"
@@ -78,8 +78,8 @@ GroupSlope <- function(groups,
 
   # noise estimate
   if (is.null(sigma)) {
-    sigma <- 1 # temporarily set sigma to 1
     sigma_type <- "auto"
+    sigma <- NA_real_
   } else {
     stopifnot(length(sigma) == 1)
     sigma_type <- "user"
@@ -218,8 +218,8 @@ setMethod(
 
     n_groups      <- length(group_id)
 
-    wt                 <- attr(x, "wt")
-    n                  <- attr(x, "n")
+    wt <- attr(x, "wt")
+    n  <- attr(x, "n")
     wt <- object@wt
 
     group_sizes <- if (orthogonalize)
