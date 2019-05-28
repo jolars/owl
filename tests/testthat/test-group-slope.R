@@ -17,7 +17,7 @@ test_that("results from group slope mirror those from grpSLOPE package", {
   gslope_fit <- grpSLOPE::grpSLOPE(x, y, group = grp, fdr = fdr, sigma = sigma)
 
   expect_equivalent(coef(golem_fit), coef(gslope_fit, scaled = FALSE),
-                    tol = 1e-6)
+                    tol = 1e-5)
 })
 
 test_that("uneven group input is handled correctly", {
