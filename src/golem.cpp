@@ -6,8 +6,8 @@
 
 // [[Rcpp::export]]
 Rcpp::List
-golemDense(arma::mat x,
-           arma::mat y,
+golemDense(const arma::mat& x,
+           const arma::mat& y,
            const Rcpp::List control)
 {
   using namespace arma;
@@ -40,11 +40,6 @@ golemDense(arma::mat x,
   rowvec intercept(m, fill::zeros);
   mat beta(p, m, fill::zeros);
 
-  // apply weights
-  auto weights = as<arma::vec>(control["weights"]);
-  for (uword j = 0; j < p; ++j)
-    x.col(j) /= weights(j);
-
   uvec passes(n_penalties);
   std::vector<std::vector<double>> primals;
   std::vector<std::vector<double>> duals;
@@ -59,7 +54,7 @@ golemDense(arma::mat x,
   for (uword i = 0; i < n_penalties; ++i) {
     Results res = solver.fit(x, y, family, penalty, fit_intercept);
 
-    betas.slice(i) = res.beta/weights;
+    betas.slice(i) = res.beta;
     intercepts.slice(i) = res.intercept;
     passes(i) = res.passes;
     penalty->step(i + 1); // move a step on the regularization path

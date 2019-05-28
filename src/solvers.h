@@ -58,7 +58,7 @@ private:
   arma::uword max_passes;
   double tol;
   const double eta = 2.0;
-  double L = 0;
+  double L = 1.0;
 
 public:
   FISTA(arma::rowvec&& intercept_init,
@@ -102,7 +102,6 @@ public:
     mat pseudo_g(g);
     rowvec g_intercept(m, fill::zeros);
 
-    // L = 1.0;
     double t = 1;
 
     uword i = 0;
@@ -112,6 +111,8 @@ public:
     double tol_infeas = 1e-6;
 
     tol_infeas *= penalty->lambdaInfeas();
+    tol_infeas =
+      tol_infeas < std::sqrt(datum::eps) ? std::sqrt(datum::eps) : tol_infeas;
 
     // diagnostics
     wall_clock timer;

@@ -82,6 +82,7 @@ Collate:
     'data.R'
     'golem-package.R'
     'groupslope-lambda.R'
+    'lipschitz-constant.R'
     'post-processing.R'
     'pre-processing.R'
     'predict.R'
