@@ -197,9 +197,11 @@ golem <- function(x,
   if (is.null(response_names))
     response_names <- paste0("y", seq_len(m))
 
-  lipschitz_constant <- lipschitzConstant(family, x, fit_intercept)
-
   weights <- getWeights(penalty, x)
+
+  x <- sweep(x, 2, weights, "/")
+
+  lipschitz_constant <- lipschitzConstant(family, penalty, x, fit_intercept)
 
   control <- list(family = family,
                   penalty = penalty,
@@ -260,8 +262,10 @@ golem <- function(x,
     res <- golemFit(x, y, control)
   }
 
+  beta <- sweep(res$beta, 1, weights, "/")
+
   unstandardized_coefs <-
-    postProcess(penalty, res$intercept, res$beta, x, y, fit_intercept)
+    postProcess(penalty, res$intercept, beta, x, y, fit_intercept)
 
   beta <- unstandardized_coefs$betas
   intercept <- unstandardized_coefs$intercepts
@@ -316,7 +320,7 @@ golem <- function(x,
       p = p,
       m = m,
       diagnostics = diag,
-      passes = as.double(res$passes),
+      passes = as.integer(res$passes),
       call = ocall)
 }
 

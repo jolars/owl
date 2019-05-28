@@ -35,28 +35,6 @@ setMethod(
   }
 )
 
-setGeneric(
-  "lipschitzConstant",
-  function(object, x, fit_intercept)
-    standardGeneric("lipschitzConstant")
-)
-
-setMethod(
-  "lipschitzConstant",
-  "Gaussian",
-  function(object, x, fit_intercept) {
-    max(rowSums(x^2)) + fit_intercept
-  }
-)
-
-setMethod(
-  "lipschitzConstant",
-  "Binomial",
-  function(object, x, fit_intercept) {
-    0.25 * (max(rowSums(x^2)) + fit_intercept)
-  }
-)
-
 setGeneric("preprocessResponse",
            function(object, y) standardGeneric("preprocessResponse"))
 
