@@ -10,3 +10,4 @@
 ^README\.Rmd$
 ^golem\.Rproj$
 ^\.Rproj\.user$
+^pkgdown$
