@@ -12,7 +12,8 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-# golem
+
+# golem <img src='man/figures/logo.png' align="right" height="106" />
 
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/jolars/golem.svg?branch=master)](https://travis-ci.org/jolars/golem)
