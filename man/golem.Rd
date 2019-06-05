@@ -9,7 +9,8 @@ golem(x, y, groups = NULL, family = c("gaussian", "binomial"),
   intercept = TRUE, standardize_features = TRUE,
   orthogonalize = TRUE, sigma = NULL, lambda = NULL, fdr = 0.2,
   n_lambda = 100, lambda_min_ratio = ifelse(NROW(x) < NCOL(x), 0.01,
-  1e-04), tol = 1e-06, max_passes = 10000, diagnostics = FALSE, ...)
+  1e-04), tol_rel_gap = 1e-06, tol_infeas = 1e-06,
+  max_passes = 10000, diagnostics = FALSE, ...)
 }
 \arguments{
 \item{x}{feature matrix}
@@ -31,8 +32,8 @@ details.}
 \item{standardize_features}{whether to standardize features (predictors)}
 
 \item{orthogonalize}{whether \code{x} should be orthogonalized. Note that
-setting this to TRUE when \code{x} is sparse will through an error.
-(only applies to Group SLOPE)}
+setting this to TRUE when \code{x} is sparse will through an error. (only
+applies to Group SLOPE)}
 
 \item{sigma}{noise estimate (only applies to SLOPE and Group SLOPE)}
 
@@ -47,7 +48,9 @@ Group SLOPE)}
 \item{lambda_min_ratio}{smallest value for \code{lambda} as a fraction of
 \eqn{\lambda_\mathrm{max}}{\lambda_max} (only applies to lasso)}
 
-\item{tol}{tolerance for optimizer}
+\item{tol_rel_gap}{relative tolerance threshold for duality gap check}
+
+\item{tol_infeas}{tolerance threshold for infeasibility}
 
 \item{max_passes}{maximum number of passes for optimizer}
 

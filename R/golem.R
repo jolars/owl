@@ -109,13 +109,14 @@ setClass("Golem",
 #' @param n_lambda length of regularization path (only relevant for lasso)
 #' @param lambda_min_ratio smallest value for `lambda` as a fraction of
 #'   \eqn{\lambda_\mathrm{max}}{\lambda_max} (only applies to lasso)
-#' @param tol tolerance for optimizer
 #' @param max_passes maximum number of passes for optimizer
 #' @param diagnostics should diagnostics be saved for the model fit (timings,
 #'   primal and dual objectives, and infeasibility)
 #' @param orthogonalize whether `x` should be orthogonalized. Note that
-#'   setting this to TRUE when `x` is sparse will through an error.
-#'   (only applies to Group SLOPE)
+#'   setting this to TRUE when `x` is sparse will through an error. (only
+#'   applies to Group SLOPE)
+#' @param tol_rel_gap relative tolerance threshold for duality gap check
+#' @param tol_infeas tolerance threshold for infeasibility
 #' @return An object of class `"Golem"`.
 #' @export
 #'
@@ -142,7 +143,8 @@ golem <- function(x,
                   fdr = 0.2,
                   n_lambda = 100,
                   lambda_min_ratio = ifelse(NROW(x) < NCOL(x), 0.01, 0.0001),
-                  tol = 1e-06,
+                  tol_rel_gap = 1e-6,
+                  tol_infeas = 1e-6,
                   max_passes = 1e4,
                   diagnostics = FALSE,
                   ...) {
@@ -232,7 +234,8 @@ golem <- function(x,
   is_slope <- inherits(penalty, "Slope") || inherits(penalty, "GroupSlope")
 
   # setup solver settings
-  solver <- Fista(tol = tol,
+  solver <- Fista(tol_rel_gap = tol_rel_gap,
+                  tol_infeas = tol_infeas,
                   max_passes = max_passes,
                   diagnostics = diagnostics)
 
