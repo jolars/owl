@@ -144,7 +144,8 @@ optimization routines suitable to big data problems.</p>
   <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
   <span class='kw'>n_lambda</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/ifelse'>ifelse</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>NROW</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>NCOL</a></span>(<span class='no'>x</span>), <span class='fl'>0.01</span>,
-  <span class='fl'>1e-04</span>), <span class='kw'>tol</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
+  <span class='fl'>1e-04</span>), <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
+  <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -186,8 +187,8 @@ details.</p></td>
     <tr>
       <th>orthogonalize</th>
       <td><p>whether <code>x</code> should be orthogonalized. Note that
-setting this to TRUE when <code>x</code> is sparse will through an error.
-(only applies to Group SLOPE)</p></td>
+setting this to TRUE when <code>x</code> is sparse will through an error. (only
+applies to Group SLOPE)</p></td>
     </tr>
     <tr>
       <th>sigma</th>
@@ -213,8 +214,12 @@ Group SLOPE)</p></td>
 \(\lambda_\mathrm{max}\) (only applies to lasso)</p></td>
     </tr>
     <tr>
-      <th>tol</th>
-      <td><p>tolerance for optimizer</p></td>
+      <th>tol_rel_gap</th>
+      <td><p>relative tolerance threshold for duality gap check</p></td>
+    </tr>
+    <tr>
+      <th>tol_infeas</th>
+      <td><p>tolerance threshold for infeasibility</p></td>
     </tr>
     <tr>
       <th>max_passes</th>
