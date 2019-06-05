@@ -13,7 +13,7 @@ test_that("SLOPE and golem agree for gaussian designs", {
                             penalty = "slope",
                             sigma = 1,
                             diagnostics = TRUE,
-                            standardize = FALSE)
+                            standardize_features = FALSE)
 
   expect_equivalent(res_slope$beta, coef(res_golem), tol = 0.01)
 })

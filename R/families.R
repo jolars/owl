@@ -42,26 +42,18 @@ setMethod(
   "preprocessResponse",
   "Gaussian",
   function(object, y) {
-    m <- NCOL(y)
-
-    if (!is.numeric(y))
-      stop("non-numeric response.")
-
-    if (m > 1)
-      stop("response for Gaussian regression must be one-dimensional.")
 
     y <- as.numeric(y)
 
+    if (NCOL(y) > 1)
+      stop("response for Gaussian regression must be one-dimensional.")
+
     y_center <- mean(y)
-    #y_scale  <- sd(y)
     y_scale  <- 1
 
     y <- as.matrix(y - y_center)
-    attr(y, "center") <- y_center
-    attr(y, "scale") <- y_scale
-    attr(y, "n_classes") <- 1
-    attr(y, "class_names") <- NA_character_
-    y
+
+    list(y, y_center, y_scale, n_classes = 1L, class_names = NA_character_)
   }
 )
 
@@ -69,7 +61,8 @@ setMethod(
   "preprocessResponse",
   "Binomial",
   function(object, y) {
-    # m <- NCOL(y)
+    if (NCOL(y) > 1)
+      stop("response for binomial regression must be one-dimensional.")
 
     if (length(unique(y)) > 2)
       stop("more than two classes in response")
@@ -88,11 +81,11 @@ setMethod(
     # Transform response to {-1, 1}, which is used internally
     y <- as.matrix(ifelse(as.numeric(as.factor(y)) == 1, -1, 1))
 
-    attr(y, "scale") <- 1
-    attr(y, "center") <- 0
-    attr(y, "n_classes") <- 1
-    attr(y, "class_names") <- class_names
-    y
+    list(y,
+         y_center = 0,
+         y_scale = 1,
+         n_classes = 1L,
+         class_names = class_names)
   }
 )
 

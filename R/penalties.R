@@ -25,7 +25,7 @@ Slope <- function(lambda = c("gaussian", "bhq"),
     sigma_type <- "auto"
     sigma <- NA_real_
   } else {
-    stopifnot(length(sigma) == 1)
+    stopifnot(length(sigma) == 1, sigma >= 0, is.finite(sigma))
     sigma_type <- "user"
   }
 
@@ -39,6 +39,9 @@ Slope <- function(lambda = c("gaussian", "bhq"),
 
     if (is.unsorted(rev(lambda)))
       stop("lambda sequence must be non-increasing")
+
+    if (any(lambda < 0))
+      stop("lambda sequence cannot contain negative values")
   }
 
   new("Slope",
@@ -73,15 +76,17 @@ GroupSlope <- function(groups,
   if (is.null(lambda))
     lambda <- "corrected"
 
-  stopifnot(length(fdr) == 1,
-            fdr >= 0 && fdr <= 1)
+  stopifnot(length(fdr) == 1, fdr >= 0, fdr <= 1)
+
+  if (anyNA(groups))
+    stop("NA values not allowed in 'groups'")
 
   # noise estimate
   if (is.null(sigma)) {
     sigma_type <- "auto"
     sigma <- NA_real_
   } else {
-    stopifnot(length(sigma) == 1)
+    stopifnot(length(sigma) == 1, sigma >= 0, is.finite(sigma))
     sigma_type <- "user"
   }
 
@@ -95,6 +100,9 @@ GroupSlope <- function(groups,
 
     if (is.unsorted(rev(lambda)))
       stop("lambda sequence must be non-increasing")
+
+    if (any(lambda < 0))
+      stop("lambda sequence cannot contain negative values")
   }
 
   group_id <- groupID(groups)
@@ -119,23 +127,6 @@ setClass("Lasso",
                    n_lambda = "numeric",
                    lambda_scale = "numeric"))
 
-#' Lasso
-#'
-#' The lasso penalty penalized coefficients via the L1 norm, which induces
-#' sparse solutions if the regularization strength (lambda) is sufficiently
-#' strong.
-#'
-#' @param lambda the regularization strength, which can either be a
-#'   user-supplied vector of (theoretical) any length, or `NULL`, in which
-#'   case golem automatically computes a sequence so that the first value
-#'   leads to the null (intercept-only) model.
-#' @param lambda_min_ratio the lowest permissible value of the
-#'   lambda penalty
-#' @param n_lambda the length of the \eqn{\lambda} sequence -- ignored if
-#'   a value is supplied to `lambda`.
-#'
-#' @return A parameter pack for the lasso penalty.
-#' @export
 Lasso <- function(lambda = NULL,
                   lambda_min_ratio = 0.0001,
                   n_lambda = 100) {
@@ -174,7 +165,7 @@ setMethod(
     sigma       <- object@sigma
     fdr         <- object@fdr
 
-    n <- NROW(x)
+    n  <- NROW(x)
     p <- NCOL(x)
 
     if (lambda_type %in% c("bhq", "gaussian")) {
@@ -212,14 +203,12 @@ setMethod(
     lambda_type   <- object@lambda_type
     sigma         <- object@sigma
     fdr           <- object@fdr
-    # groups        <- object@groups
     orthogonalize <- object@orthogonalize
     group_id      <- object@group_id
 
     n_groups      <- length(group_id)
 
-    wt <- attr(x, "wt")
-    n  <- attr(x, "n")
+    n  <- NROW(x)
     wt <- object@wt
 
     group_sizes <- if (orthogonalize)
@@ -255,7 +244,7 @@ setMethod(
 
     } else {
       if (length(lambda) != n_groups)
-        stop("lambda sequence must be as long as there are variables", )
+        stop("lambda sequence must be as long as there are variables")
     }
 
     object@lambda         <- lambda
@@ -294,8 +283,10 @@ setMethod(
   }
 )
 
-setGeneric("getWeights",
-           function(penalty, x) standardGeneric("getWeights"))
+setGeneric(
+  "getWeights",
+  function(penalty, x) standardGeneric("getWeights")
+)
 
 setMethod(
   "getWeights",

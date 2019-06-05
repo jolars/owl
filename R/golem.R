@@ -17,72 +17,117 @@ setClass("Golem",
 #' This functions fits a generalized linear model (GLM) using efficient
 #' optimization routines suitable to big data problems.
 #'
-#' @section Regularization Penalties:
-#' There is a multitude of ways to penalize the models created by
-#' [golem::golem()], currently they are:
+#' The objective for each model is simply the loss function for
+#' each family plus a penalty term.
 #'
-#' * SLOPE
-#' * Group SLOPE
-#' * LASSO
+#' @section Families:
 #'
-#' These functions are in fact only parameter packs for the actual
-#' implementations of the penalties and will be passed on to
-#' the respective C++ creator functions, where the magic happens.
+#' **Gaussian**
 #'
-#' Do *not* attempt to create your own penalty functions using this interface.
-#' Such attempts will most likely be caught in assertions before anything bad
-#' happens, but all bets are off if you are able to sneak them through
-#' the various checks.
+#' The Gaussian model (Ordinary Least Squares) minimizes the following
+#' objective.
+#'
+#' \deqn{
+#'   ||\boldsymbol{y} - \boldsymbol{X\beta}||_2^2
+#' }{
+#'   ||y - X\beta||_2^2
+#' }
+#'
+#' **Binomial**
+#'
+#' The binomial model (logistic regression) has the following objective.
+#'
+#' \deqn{
+#'   \sum_{i=1}^n \log\left[1+ \exp\left(- y_i\boldsymbol{x}_i'\boldsymbol{\beta} \right) \right]
+#' }{
+#'   \sum log[1+ exp(- y_i x_i' \beta)]
+#' }
+#'
+#' @section Penalties:
+#' Models fit by [golem::golem()] can be regularized via several
+#' penalties.
+#'
+#' **Lasso**
+#'
+#' The Lasso penalizes coefficients using the L1 norm. The penalty
+#' term in the lagrangian form of the loss function is
+#'
+#' \deqn{
+#'   \lambda \sum_{j=1}^p |\beta_j|
+#' }{
+#'   \lambda \sum |\beta|
+#' }
+#'
+#' **SLOPE**
+#'
+#' SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
+#' Unlike the latter, however, SLOPE uses a non-increasing
+#' sequence of \eqn{\lambda}---one
+#' for each coefficient. The penalty term looks like
+#'
+#' \deqn{
+#'   \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
+#' }{
+#'   \sigma \sum \lambda |\beta|(j)
+#' }
+#'
+#' **Group SLOPE**
+#'
+#' Group SLOPE is an extension of Group LASSO. It applies the following
+#' penalty
+#'
+#' \deqn{
+#'   J_\lambda(\beta) = \sum_{j=1}^p \lambda_j |W||\beta||_{I,X}|_{(j)}
+#' }{
+#'   J_\lambda(\beta) = \sum \lambda_j |W||\beta||_{I,X}|_(j)
+#' }
 #'
 #' @section Solvers:
-#' There is currently a single solver available for [golem::golem], namely
+#' There is currently a single solver available for [golem::golem].
 #'
-#' * FISTA
+#' **FISTA**
 #'
-#' @param x input matrix
-#' @param y response variable
-#' @param family response type, one of `'gaussian'`, `'binomial'`,
-#'   `'multinomial'`, or `'mgaussian'`. See **Supported families** for details.
-#' @param penalty the regularization penalty to use, either in the
-#'   form of the output from one of this package's penalty functions,
-#'   the function itself, or a character vector specifying one such function.
-#'   Each function has its respective set of parameters, such as the
-#'   regularization strength. Please see
-#'   *Regularization Penalties* for more information.
-#' @param solver the solver to use to optimize the loss function (objective).
-#'   Just like the `penalty` parameter, this argument may be
-#'   either a function, the function's output, or a character vector.
-#'   Control arguments (such as convergence threshold) are set in the
-#'   solver function itself. Please see **Solvers** for more information.
-#' @param intercept whether to fit an intercept or not
-#' @param standardize the type of standardization to carry out. Note that
-#'   currently, standardization of response has no real effect. The
-#'   response is always standardized for Gaussian responses and never
-#'   for binomial
+#' FISTA (Fast Iterative Shrinking-Tresholding Algorithm) is an extension
+#' of the classical gradient algorithm.
+#'
+#' @param x feature matrix
+#' @param y response
+#' @param family response type. See **Families** for details.
+#' @param penalty the regularization penalty to use. See **Penalties** for
+#'   details.
+#' @param solver the numerical solver to use. See **Solvers** for details.
+#' @param intercept whether to fit an intercept
+#' @param standardize_features whether to standardize features (predictors)
 #' @param ... currently ignored
 #' @param groups vector of integers to indicate group membership of each
-#'   feature (only relevant for Group SLOPE)
-#' @param sigma noise estimate (only relevant for SLOPE and Group SLOPE)
+#'   feature (only applies to Group SLOPE)
+#' @param sigma noise estimate (only applies to SLOPE and Group SLOPE)
 #' @param lambda either a character vector indicating the method used
 #'   to construct the lambda path or
-#' @param fdr target false discovery rate (only relevant for SLOPE and
+#' @param fdr target false discovery rate (only applies to SLOPE and
 #'   Group SLOPE)
 #' @param n_lambda length of regularization path (only relevant for lasso)
 #' @param lambda_min_ratio smallest value for `lambda` as a fraction of
-#'   \eqn{\lambda_\text{max}}{\lambda_max}#'
+#'   \eqn{\lambda_\mathrm{max}}{\lambda_max} (only applies to lasso)
 #' @param tol tolerance for optimizer
 #' @param max_passes maximum number of passes for optimizer
 #' @param diagnostics should diagnostics be saved for the model fit (timings,
 #'   primal and dual objectives, and infeasibility)
-#' @param orthogonalize whether `x` should be orthogonalized
+#' @param orthogonalize whether `x` should be orthogonalized. Note that
+#'   setting this to TRUE when `x` is sparse will through an error.
+#'   (only applies to Group SLOPE)
 #' @return An object of class `"Golem"`.
 #' @export
 #'
 #' @examples
-#' X <- with(mtcars, cbind(cyl, wt, disp, hp, drat))
-#' y <- mtcars$mpg
 #'
-#' golem_fit <- golem::golem(X, y, family = "gaussian")
+#' # Gaussian response, slope penalty (default)
+#' gaussian_fit <- golem(abalone$x, abalone$y, family = "gaussian")
+#'
+#' # Binomial response, lasso penalty
+#' binomial_fit <- golem(heart$x, heart$y, family = "binomial",
+#'                       penalty = "lasso")
+#'
 golem <- function(x,
                   y,
                   groups = NULL,
@@ -90,7 +135,7 @@ golem <- function(x,
                   penalty = c("slope", "group_slope", "lasso"),
                   solver = "fista",
                   intercept = TRUE,
-                  standardize = c("features", "response", "both", "none"),
+                  standardize_features = TRUE,
                   orthogonalize = TRUE,
                   sigma = NULL,
                   lambda = NULL,
@@ -103,6 +148,7 @@ golem <- function(x,
                   ...) {
 
   stopifnot(is.logical(intercept),
+            is.logical(standardize_features),
             is.character(family),
             is.character(solver),
             is.character(penalty))
@@ -115,9 +161,6 @@ golem <- function(x,
   solver <- match.arg(solver)
 
   fit_intercept <- intercept
-  n <- NROW(x)
-  p <- NCOL(x)
-  m <- NCOL(y)
 
   if (NROW(y) != NROW(x))
     stop("the number of samples in 'x' and 'y' must match")
@@ -131,21 +174,23 @@ golem <- function(x,
   if (anyNA(y) || anyNA(x))
     stop("missing values are not allowed")
 
+  n <- NROW(x)
+  p <- NCOL(x)
+  m <- NCOL(y)
+
   # convert sparse x to dgCMatrix class from package Matrix.
-  if (is_sparse <- inherits(x, "sparseMatrix")) {
+  is_sparse <- inherits(x, "sparseMatrix")
+
+  if (is_sparse) {
     x <- methods::as(x, "dgCMatrix")
   } else {
     x <- as.matrix(x)
   }
 
-  # collect settings
-  if (isFALSE(standardize)) {
-    standardize <- "none"
-  } else if (isTRUE(standardize)) {
-    standardize <- "features"
-  } else {
-    standardize <- match.arg(standardize)
-  }
+  if (penalty == "group_slope" && standardize_features && is_sparse &&
+      orthogonalize)
+    stop("orthogonalization is currently not implemented for sparse data ",
+         "when standardization is required")
 
   # setup penalty settings
   penalty <- switch(penalty,
@@ -166,17 +211,21 @@ golem <- function(x,
                    gaussian = Gaussian(),
                    binomial = Binomial())
 
-  y <- preprocessResponse(family, y)
-  res <- preprocessFeatures(penalty, x, standardize)
-  x <- res$x
-  penalty <- res$penalty
+  y_center <- y_scale <- double(m)
+  n_classes <- integer(0)
+  class_names <- character(0)
 
-  y_center <- attr(y, "center")
-  y_scale  <- attr(y, "scale")
-  x_center <- attr(x, "center")
-  x_scale  <- attr(x, "scale")
+  c(y, y_center, y_scale, n_classes, class_names) %<-%
+    preprocessResponse(family, y)
 
-  class_names <- attr(y, "class_names")
+  x_center <- x_scale <- double(p)
+  c(x, x_center, x_scale) %<-% standardize(x, standardize_features)
+
+  c(penalty, x) %<-% preprocessFeatures(penalty,
+                                        x,
+                                        x_center,
+                                        x_scale,
+                                        standardize_features)
 
   penalty <- setup(penalty, family, x, y, y_scale)
 
@@ -199,9 +248,18 @@ golem <- function(x,
 
   weights <- getWeights(penalty, x)
 
-  x <- sweep(x, 2, weights, "/")
+  for (j in seq_len(p))
+    x[, j] <- x[, j]/weights[j]
 
-  lipschitz_constant <- lipschitzConstant(family, penalty, x, fit_intercept)
+  x_center <- x_center/weights
+
+  lipschitz_constant <- lipschitzConstant(family,
+                                          penalty,
+                                          x,
+                                          fit_intercept,
+                                          x_center,
+                                          x_scale,
+                                          standardize_features)
 
   control <- list(family = family,
                   penalty = penalty,
@@ -209,23 +267,19 @@ golem <- function(x,
                   fit_intercept = fit_intercept,
                   is_sparse = is_sparse,
                   weights = weights,
-                  standardize = standardize,
-                  x_center = x_center,
-                  x_scale = x_scale,
-                  y_center = y_center,
-                  y_scale = y_scale,
+                  standardize_features = standardize_features,
+                  x_scaled_center = x_center/x_scale,
                   lipschitz_constant = lipschitz_constant)
 
-  golemFit <- if (is_sparse) {
-    stop("sparse feature matrices are not yet supported.")
-  } else {
-    golemDense
-  }
+  golemFit <- if (is_sparse) golemSparse else golemDense
+
+  if (is_sparse)
+    x <- methods::as(x, "dgCMatrix")
 
   if (is_slope && is.null(sigma)) {
     if (inherits(family, "Gaussian")) {
-      control$penalty@sigma <- penalty@sigma <- sd(y)
-      res <- golemDense(x, y, control)
+      control$penalty@sigma <- penalty@sigma <- stats::sd(y)
+      res <- golemFit(x, y, control)
 
       S_new <- which(res$beta != 0)
       S <- c()
@@ -240,10 +294,10 @@ golem <- function(x,
         new_x <- x[, S, drop = FALSE]
 
         if (fit_intercept)
-          new_x <- cbind(1, new_x)
+          new_x <- Matrix::cbind2(1, new_x)
 
-        OLS <- lm.fit(new_x, y)
-        if (standardize %in% c("features", "both")) {
+        OLS <- stats::lm.fit(as.matrix(new_x), y)
+        if (standardize_features) {
           sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S) - 1))
         } else {
           sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S)))
@@ -263,12 +317,20 @@ golem <- function(x,
   }
 
   beta <- sweep(res$beta, 1, weights, "/")
+  x_center <- x_center*weights
 
-  unstandardized_coefs <-
-    postProcess(penalty, res$intercept, beta, x, y, fit_intercept)
+  nonzeros <- integer(0)
 
-  beta <- unstandardized_coefs$betas
-  intercept <- unstandardized_coefs$intercepts
+  c(intercept, beta, nonzeros) %<-% postProcess(penalty,
+                                                res$intercept,
+                                                beta,
+                                                x,
+                                                y,
+                                                fit_intercept,
+                                                x_center,
+                                                x_scale,
+                                                y_center,
+                                                y_scale)
 
   n_penalties <- dim(beta)[3]
 
@@ -288,8 +350,6 @@ golem <- function(x,
                                    response_names,
                                    paste0("p", seq_len(n_penalties)))
   }
-
-  nonzeros <- unstandardized_coefs$selected
 
   diagnostics <- solver@diagnostics
 

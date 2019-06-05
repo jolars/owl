@@ -29,6 +29,47 @@ clamp(const T& x, const T& min, const T& max)
   return x > max ? max : (x < min ? min : x);
 }
 
+inline
+arma::mat
+innerProduct(const arma::mat& x,
+             const arma::mat& beta,
+             const arma::vec& x_scaled_center)
+{
+  return x * beta;
+}
+
+inline
+arma::mat
+innerProduct(const arma::sp_mat& x,
+             const arma::mat& beta,
+             const arma::vec& x_scaled_center)
+{
+  using namespace arma;
+
+  uword n = x.n_rows;
+  uword p = x.n_cols;
+  uword m = beta.n_cols;
+
+  mat lin_pred(m, n, fill::zeros);
+
+  sp_mat::const_col_iterator it, it_end;
+
+  for (uword j = 0; j < p; ++j) {
+    it = x.begin_col(j);
+    it_end = x.end_col(j);
+
+    for (; it != it_end; ++it) {
+      uword i = it.row();
+
+      for (uword k = 0; k < m; ++k) {
+        lin_pred(k, i) += ((*it) - x_scaled_center(j))*beta(j, k);
+      }
+    }
+  }
+
+  return lin_pred.t();
+}
+
 // class ConvergenceCheck {
 // public:
 //   ConvergenceCheck(const arma::rowvec& intercept_old,
