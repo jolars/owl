@@ -51,8 +51,9 @@ private:
   arma::vec x_scaled_center;
   const bool is_sparse;
   arma::uword max_passes;
-  double tol;
   const double eta = 2.0;
+  double tol_rel_gap = 1e-6;
+  double tol_infeas = 1e-6;
 
 public:
   FISTA(arma::rowvec&& intercept_init,
@@ -73,8 +74,9 @@ public:
     beta        = std::move(beta_init);
 
     max_passes  = args.slot("max_passes");
-    tol         = args.slot("tol");
     diagnostics = args.slot("diagnostics");
+    tol_rel_gap = args.slot("tol_rel_gap");
+    tol_infeas  = args.slot("tol_infeas");
   }
 
   template <typename T>
@@ -107,9 +109,6 @@ public:
 
     uword i = 0;
     bool accepted = false;
-
-    double tol_rel_gap = 1e-6;
-    double tol_infeas = 1e-6;
 
     tol_infeas *= penalty->lambdaInfeas();
     tol_infeas =
