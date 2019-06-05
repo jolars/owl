@@ -37,7 +37,9 @@ setClass("Golem",
 #' @section Solvers:
 #' There is currently a single solver available for [golem::golem], namely
 #'
-#' * FISTA
+#' **FISTA**
+#'
+#' We use the accelerated version of FISTA.
 #'
 #' @param x input matrix
 #' @param y response variable
@@ -66,7 +68,7 @@ setClass("Golem",
 #'   Group SLOPE)
 #' @param n_lambda length of regularization path (only relevant for lasso)
 #' @param lambda_min_ratio smallest value for `lambda` as a fraction of
-#'   \eqn{\lambda_\text{max}}{\lambda_max}#'
+#'   \eqn{\lambda_\mathrm{max}}{\lambda_max}
 #' @param tol tolerance for optimizer
 #' @param max_passes maximum number of passes for optimizer
 #' @param diagnostics should diagnostics be saved for the model fit (timings,

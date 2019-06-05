@@ -52,7 +52,7 @@ Group SLOPE)}
 \item{n_lambda}{length of regularization path (only relevant for lasso)}
 
 \item{lambda_min_ratio}{smallest value for \code{lambda} as a fraction of
-\eqn{\lambda_\text{max}}{\lambda_max}#'}
+\eqn{\lambda_\mathrm{max}}{\lambda_max}}
 
 \item{tol}{tolerance for optimizer}
 
@@ -93,9 +93,10 @@ the various checks.
 \section{Solvers}{
 
 There is currently a single solver available for \link[golem:golem]{golem::golem}, namely
-\itemize{
-\item FISTA
-}
+
+\strong{FISTA}
+
+We use the accelerated version of FISTA.
 }
 
 \examples{
