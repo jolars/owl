@@ -84,8 +84,6 @@ public:
       lin_pred = x * beta - arma::dot(x_scaled_center, beta);
     else
       lin_pred = x * beta;
-//
-//     lin_pred = innerProduct(x, beta, x_scaled_center);
 
     if (fit_intercept)
       lin_pred += intercept(0);
