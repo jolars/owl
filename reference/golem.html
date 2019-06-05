@@ -8,6 +8,13 @@
 
 <title>Regularized Generalized Linear Models — golem • golem</title>
 
+<!-- favicons -->
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png" />
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png" />
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png" />
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png" />
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
@@ -34,6 +41,8 @@
 
 <meta property="og:description" content="This functions fits a generalized linear model (GLM) using efficient
 optimization routines suitable to big data problems." />
+
+<meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -130,54 +139,91 @@ optimization routines suitable to big data problems.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>golem</span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>),
-  <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='kw pkg'>golem</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/golem/topics/Slope'>Slope</a></span>(), <span class='kw'>solver</span> <span class='kw'>=</span> <span class='kw pkg'>golem</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/golem/topics/Fista'>Fista</a></span>(),
-  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"features"</span>, <span class='st'>"response"</span>, <span class='st'>"both"</span>,
-  <span class='st'>"none"</span>), <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>golem</span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>),
+  <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"slope"</span>, <span class='st'>"group_slope"</span>, <span class='st'>"lasso"</span>), <span class='kw'>solver</span> <span class='kw'>=</span> <span class='st'>"fista"</span>,
+  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
+  <span class='kw'>n_lambda</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/ifelse'>ifelse</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>NROW</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>NCOL</a></span>(<span class='no'>x</span>), <span class='fl'>0.01</span>,
+  <span class='fl'>1e-04</span>), <span class='kw'>tol</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>input matrix</p></td>
+      <td><p>feature matrix</p></td>
     </tr>
     <tr>
       <th>y</th>
-      <td><p>response variable</p></td>
+      <td><p>response</p></td>
+    </tr>
+    <tr>
+      <th>groups</th>
+      <td><p>vector of integers to indicate group membership of each
+feature (only applies to Group SLOPE)</p></td>
     </tr>
     <tr>
       <th>family</th>
-      <td><p>response type, one of <code>'gaussian'</code>, <code>'binomial'</code>,
-<code>'multinomial'</code>, or <code>'mgaussian'</code>. See <strong>Supported families</strong> for details.</p></td>
+      <td><p>response type. See <strong>Families</strong> for details.</p></td>
     </tr>
     <tr>
       <th>penalty</th>
-      <td><p>the regularization penalty to use, either in the
-form of the output from one of this package's penalty functions,
-the function itself, or a character vector specifying one such function.
-Each function has its respective set of parameters, such as the
-regularization strength. Please see
-<em>Regularization Penalties</em> for more information.</p></td>
+      <td><p>the regularization penalty to use. See <strong>Penalties</strong> for
+details.</p></td>
     </tr>
     <tr>
       <th>solver</th>
-      <td><p>the solver to use to optimize the loss function (objective).
-Just like the <code>penalty</code> parameter, this argument may be
-either a function, the function's output, or a character vector.
-Control arguments (such as convergence threshold) are set in the
-solver function itself. Please see <strong>Solvers</strong> for more information.</p></td>
+      <td><p>the numerical solver to use. See <strong>Solvers</strong> for details.</p></td>
     </tr>
     <tr>
       <th>intercept</th>
-      <td><p>whether to fit an intercept or not</p></td>
+      <td><p>whether to fit an intercept</p></td>
     </tr>
     <tr>
-      <th>standardize</th>
-      <td><p>the type of standardization to carry out. Note that
-currently, standardization of response has no real effect. The
-response is always standardized for Gaussian responses and never
-for binomial</p></td>
+      <th>standardize_features</th>
+      <td><p>whether to standardize features (predictors)</p></td>
+    </tr>
+    <tr>
+      <th>orthogonalize</th>
+      <td><p>whether <code>x</code> should be orthogonalized. Note that
+setting this to TRUE when <code>x</code> is sparse will through an error.
+(only applies to Group SLOPE)</p></td>
+    </tr>
+    <tr>
+      <th>sigma</th>
+      <td><p>noise estimate (only applies to SLOPE and Group SLOPE)</p></td>
+    </tr>
+    <tr>
+      <th>lambda</th>
+      <td><p>either a character vector indicating the method used
+to construct the lambda path or</p></td>
+    </tr>
+    <tr>
+      <th>fdr</th>
+      <td><p>target false discovery rate (only applies to SLOPE and
+Group SLOPE)</p></td>
+    </tr>
+    <tr>
+      <th>n_lambda</th>
+      <td><p>length of regularization path (only relevant for lasso)</p></td>
+    </tr>
+    <tr>
+      <th>lambda_min_ratio</th>
+      <td><p>smallest value for <code>lambda</code> as a fraction of
+\(\lambda_\mathrm{max}\) (only applies to lasso)</p></td>
+    </tr>
+    <tr>
+      <th>tol</th>
+      <td><p>tolerance for optimizer</p></td>
+    </tr>
+    <tr>
+      <th>max_passes</th>
+      <td><p>maximum number of passes for optimizer</p></td>
+    </tr>
+    <tr>
+      <th>diagnostics</th>
+      <td><p>should diagnostics be saved for the model fit (timings,
+primal and dual objectives, and infeasibility)</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -187,37 +233,71 @@ for binomial</p></td>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The result of fitting</p>
+    <p>An object of class <code>"Golem"</code>.</p>
     
-    <h2 class="hasAnchor" id="regularization-penalties"><a class="anchor" href="#regularization-penalties"></a>Regularization Penalties</h2>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>The objective for each model is simply the loss function for
+each family plus a penalty term.</p>
+    
+    <h2 class="hasAnchor" id="families"><a class="anchor" href="#families"></a>Families</h2>
 
     
-    <p>There is a multitude of ways to penalize the models created by
-<code>golem::golem()</code>, currently they are:</p><ul>
-<li><p><code><a href='Slope.html'>golem::Slope()</a></code></p></li>
-<li><p><code><a href='Lasso.html'>golem::Lasso()</a></code></p></li>
-</ul>
-    <p>These functions are in fact only parameter packs for the actual
-implementations of the penalties and will be passed on to
-the respective C++ creator functions, where the magic happens.</p>
-<p>Do <em>not</em> attempt to create your own penalty functions using this interface.
-Such attempts will most likely be caught in assertions before anything bad
-happens, but all bets are off if you are able to sneak them through
-the various checks.</p>
+    <p><strong>Gaussian</strong></p>
+<p>The Gaussian model (Ordinary Least Squares) minimizes the following
+objective.</p>
+<p>$$
+  ||\boldsymbol{y} - \boldsymbol{X\beta}||_2^2
+$$</p>
+<p><strong>Binomial</strong></p>
+<p>The binomial model (logistic regression) has the following objective.</p>
+<p>$$
+  \sum_{i=1}^n \log\left[1+ \exp\left(- y_i\boldsymbol{x}_i'\boldsymbol{\beta} \right) \right]
+$$</p>
+    
+    <h2 class="hasAnchor" id="penalties"><a class="anchor" href="#penalties"></a>Penalties</h2>
+
+    
+    <p>Models fit by <code>golem::golem()</code> can be regularized via several
+penalties.</p>
+<p><strong>Lasso</strong></p>
+<p>The Lasso penalizes coefficients using the L1 norm. The penalty
+term in the lagrangian form of the loss function is</p>
+<p>$$
+  \lambda \sum_{j=1}^p |\beta_j|
+$$</p>
+<p><strong>SLOPE</strong></p>
+<p>SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
+Unlike the latter, however, SLOPE uses a non-increasing
+sequence of \(\lambda\)---one
+for each coefficient. The penalty term looks like</p>
+<p>$$
+  \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
+$$</p>
+<p><strong>Group SLOPE</strong></p>
+<p>Group SLOPE is an extension of Group LASSO. It applies the following
+penalty</p>
+<p>$$
+  J_\lambda(\beta) = \sum_{j=1}^p \lambda_j |W||\beta||_{I,X}|_{(j)}
+$$</p>
     
     <h2 class="hasAnchor" id="solvers"><a class="anchor" href="#solvers"></a>Solvers</h2>
 
     
-    <p>There is currently a single solver available for golem::golem, namely</p><ul>
-<li><p><code><a href='Fista.html'>golem::Fista()</a></code></p></li>
-</ul>
+    <p>There is currently a single solver available for golem::golem.</p>
+<p><strong>FISTA</strong></p>
+<p>FISTA (Fast Iterative Shrinking-Tresholding Algorithm) is an extension
+of the classical gradient algorithm.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>X</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/with'>with</a></span>(<span class='no'>mtcars</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/cbind'>cbind</a></span>(<span class='no'>cyl</span>, <span class='no'>wt</span>, <span class='no'>disp</span>, <span class='no'>hp</span>, <span class='no'>drat</span>))
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='no'>mtcars</span>$<span class='no'>mpg</span>
+    <pre class="examples"><div class='input'>
+<span class='co'># Gaussian response, slope penalty (default)</span>
+<span class='no'>gaussian_fit</span> <span class='kw'>&lt;-</span> <span class='fu'>golem</span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"gaussian"</span>)
 
-<span class='no'>golem_fit</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>golem</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/golem/topics/golem'>golem</a></span>(<span class='no'>X</span>, <span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"gaussian"</span>)</div></pre>
+<span class='co'># Binomial response, lasso penalty</span>
+<span class='no'>binomial_fit</span> <span class='kw'>&lt;-</span> <span class='fu'>golem</span>(<span class='no'>heart</span>$<span class='no'>x</span>, <span class='no'>heart</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>,
+                      <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='st'>"lasso"</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -226,7 +306,11 @@ the various checks.</p>
       
       <li><a href="#value">Value</a></li>
 
-      <li><a href="#regularization-penalties">Regularization Penalties</a></li>
+      <li><a href="#details">Details</a></li>
+
+      <li><a href="#families">Families</a></li>
+
+      <li><a href="#penalties">Penalties</a></li>
 
       <li><a href="#solvers">Solvers</a></li>
       
