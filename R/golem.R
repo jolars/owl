@@ -54,11 +54,8 @@ setClass("Golem",
 #'   either a function, the function's output, or a character vector.
 #'   Control arguments (such as convergence threshold) are set in the
 #'   solver function itself. Please see **Solvers** for more information.
-#' @param intercept whether to fit an intercept or not
-#' @param standardize the type of standardization to carry out. Note that
-#'   currently, standardization of response has no real effect. The
-#'   response is always standardized for Gaussian responses and never
-#'   for binomial
+#' @param intercept whether to fit an intercept
+#' @param standardize_features whether to standardize features (predictors)
 #' @param ... currently ignored
 #' @param groups vector of integers to indicate group membership of each
 #'   feature (only relevant for Group SLOPE)
@@ -90,7 +87,7 @@ golem <- function(x,
                   penalty = c("slope", "group_slope", "lasso"),
                   solver = "fista",
                   intercept = TRUE,
-                  standardize = c("features", "response", "both", "none"),
+                  standardize_features = TRUE,
                   orthogonalize = TRUE,
                   sigma = NULL,
                   lambda = NULL,
@@ -103,6 +100,7 @@ golem <- function(x,
                   ...) {
 
   stopifnot(is.logical(intercept),
+            is.logical(standardize_features),
             is.character(family),
             is.character(solver),
             is.character(penalty))
@@ -115,9 +113,6 @@ golem <- function(x,
   solver <- match.arg(solver)
 
   fit_intercept <- intercept
-  n <- NROW(x)
-  p <- NCOL(x)
-  m <- NCOL(y)
 
   if (NROW(y) != NROW(x))
     stop("the number of samples in 'x' and 'y' must match")
@@ -131,21 +126,23 @@ golem <- function(x,
   if (anyNA(y) || anyNA(x))
     stop("missing values are not allowed")
 
+  n <- NROW(x)
+  p <- NCOL(x)
+  m <- NCOL(y)
+
   # convert sparse x to dgCMatrix class from package Matrix.
-  if (is_sparse <- inherits(x, "sparseMatrix")) {
+  is_sparse <- inherits(x, "sparseMatrix")
+
+  if (is_sparse) {
     x <- methods::as(x, "dgCMatrix")
   } else {
     x <- as.matrix(x)
   }
 
-  # collect settings
-  if (isFALSE(standardize)) {
-    standardize <- "none"
-  } else if (isTRUE(standardize)) {
-    standardize <- "features"
-  } else {
-    standardize <- match.arg(standardize)
-  }
+  if (penalty == "group_slope" && standardize_features && is_sparse &&
+      orthogonalize)
+    stop("orthogonalization is currently not implemented for sparse data ",
+         "when standardization is required")
 
   # setup penalty settings
   penalty <- switch(penalty,
@@ -166,17 +163,21 @@ golem <- function(x,
                    gaussian = Gaussian(),
                    binomial = Binomial())
 
-  y <- preprocessResponse(family, y)
-  res <- preprocessFeatures(penalty, x, standardize)
-  x <- res$x
-  penalty <- res$penalty
+  y_center <- y_scale <- double(m)
+  n_classes <- integer(0)
+  class_names <- character(0)
 
-  y_center <- attr(y, "center")
-  y_scale  <- attr(y, "scale")
-  x_center <- attr(x, "center")
-  x_scale  <- attr(x, "scale")
+  c(y, y_center, y_scale, n_classes, class_names) %<-%
+    preprocessResponse(family, y)
 
-  class_names <- attr(y, "class_names")
+  x_center <- x_scale <- double(p)
+  c(x, x_center, x_scale) %<-% standardize(x, standardize_features)
+
+  c(penalty, x) %<-% preprocessFeatures(penalty,
+                                        x,
+                                        x_center,
+                                        x_scale,
+                                        standardize_features)
 
   penalty <- setup(penalty, family, x, y, y_scale)
 
@@ -199,9 +200,18 @@ golem <- function(x,
 
   weights <- getWeights(penalty, x)
 
-  x <- sweep(x, 2, weights, "/")
+  for (j in seq_len(p))
+    x[, j] <- x[, j]/weights[j]
 
-  lipschitz_constant <- lipschitzConstant(family, penalty, x, fit_intercept)
+  x_center <- x_center/weights
+
+  lipschitz_constant <- lipschitzConstant(family,
+                                          penalty,
+                                          x,
+                                          fit_intercept,
+                                          x_center,
+                                          x_scale,
+                                          standardize_features)
 
   control <- list(family = family,
                   penalty = penalty,
@@ -209,23 +219,19 @@ golem <- function(x,
                   fit_intercept = fit_intercept,
                   is_sparse = is_sparse,
                   weights = weights,
-                  standardize = standardize,
-                  x_center = x_center,
-                  x_scale = x_scale,
-                  y_center = y_center,
-                  y_scale = y_scale,
+                  standardize_features = standardize_features,
+                  x_scaled_center = x_center/x_scale,
                   lipschitz_constant = lipschitz_constant)
 
-  golemFit <- if (is_sparse) {
-    stop("sparse feature matrices are not yet supported.")
-  } else {
-    golemDense
-  }
+  golemFit <- if (is_sparse) golemSparse else golemDense
+
+  if (is_sparse)
+    x <- methods::as(x, "dgCMatrix")
 
   if (is_slope && is.null(sigma)) {
     if (inherits(family, "Gaussian")) {
-      control$penalty@sigma <- penalty@sigma <- sd(y)
-      res <- golemDense(x, y, control)
+      control$penalty@sigma <- penalty@sigma <- stats::sd(y)
+      res <- golemFit(x, y, control)
 
       S_new <- which(res$beta != 0)
       S <- c()
@@ -240,10 +246,10 @@ golem <- function(x,
         new_x <- x[, S, drop = FALSE]
 
         if (fit_intercept)
-          new_x <- cbind(1, new_x)
+          new_x <- Matrix::cbind2(1, new_x)
 
-        OLS <- lm.fit(new_x, y)
-        if (standardize %in% c("features", "both")) {
+        OLS <- stats::lm.fit(as.matrix(new_x), y)
+        if (standardize_features) {
           sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S) - 1))
         } else {
           sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S)))
@@ -263,12 +269,20 @@ golem <- function(x,
   }
 
   beta <- sweep(res$beta, 1, weights, "/")
+  x_center <- x_center*weights
 
-  unstandardized_coefs <-
-    postProcess(penalty, res$intercept, beta, x, y, fit_intercept)
+  nonzeros <- integer(0)
 
-  beta <- unstandardized_coefs$betas
-  intercept <- unstandardized_coefs$intercepts
+  c(intercept, beta, nonzeros) %<-% postProcess(penalty,
+                                                res$intercept,
+                                                beta,
+                                                x,
+                                                y,
+                                                fit_intercept,
+                                                x_center,
+                                                x_scale,
+                                                y_center,
+                                                y_scale)
 
   n_penalties <- dim(beta)[3]
 
@@ -288,8 +302,6 @@ golem <- function(x,
                                    response_names,
                                    paste0("p", seq_len(n_penalties)))
   }
-
-  nonzeros <- unstandardized_coefs$selected
 
   diagnostics <- solver@diagnostics
 

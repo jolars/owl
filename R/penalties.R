@@ -25,7 +25,7 @@ Slope <- function(lambda = c("gaussian", "bhq"),
     sigma_type <- "auto"
     sigma <- NA_real_
   } else {
-    stopifnot(length(sigma) == 1)
+    stopifnot(length(sigma) == 1, sigma >= 0, is.finite(sigma))
     sigma_type <- "user"
   }
 
@@ -39,6 +39,9 @@ Slope <- function(lambda = c("gaussian", "bhq"),
 
     if (is.unsorted(rev(lambda)))
       stop("lambda sequence must be non-increasing")
+
+    if (any(lambda < 0))
+      stop("lambda sequence cannot contain negative values")
   }
 
   new("Slope",
@@ -73,15 +76,17 @@ GroupSlope <- function(groups,
   if (is.null(lambda))
     lambda <- "corrected"
 
-  stopifnot(length(fdr) == 1,
-            fdr >= 0 && fdr <= 1)
+  stopifnot(length(fdr) == 1, fdr >= 0, fdr <= 1)
+
+  if (anyNA(groups))
+    stop("NA values not allowed in 'groups'")
 
   # noise estimate
   if (is.null(sigma)) {
     sigma_type <- "auto"
     sigma <- NA_real_
   } else {
-    stopifnot(length(sigma) == 1)
+    stopifnot(length(sigma) == 1, sigma >= 0, is.finite(sigma))
     sigma_type <- "user"
   }
 
@@ -95,6 +100,9 @@ GroupSlope <- function(groups,
 
     if (is.unsorted(rev(lambda)))
       stop("lambda sequence must be non-increasing")
+
+    if (any(lambda < 0))
+      stop("lambda sequence cannot contain negative values")
   }
 
   group_id <- groupID(groups)
@@ -174,7 +182,7 @@ setMethod(
     sigma       <- object@sigma
     fdr         <- object@fdr
 
-    n <- NROW(x)
+    n  <- NROW(x)
     p <- NCOL(x)
 
     if (lambda_type %in% c("bhq", "gaussian")) {
@@ -212,14 +220,12 @@ setMethod(
     lambda_type   <- object@lambda_type
     sigma         <- object@sigma
     fdr           <- object@fdr
-    # groups        <- object@groups
     orthogonalize <- object@orthogonalize
     group_id      <- object@group_id
 
     n_groups      <- length(group_id)
 
-    wt <- attr(x, "wt")
-    n  <- attr(x, "n")
+    n  <- NROW(x)
     wt <- object@wt
 
     group_sizes <- if (orthogonalize)
@@ -255,7 +261,7 @@ setMethod(
 
     } else {
       if (length(lambda) != n_groups)
-        stop("lambda sequence must be as long as there are variables", )
+        stop("lambda sequence must be as long as there are variables")
     }
 
     object@lambda         <- lambda
@@ -294,8 +300,10 @@ setMethod(
   }
 )
 
-setGeneric("getWeights",
-           function(penalty, x) standardGeneric("getWeights"))
+setGeneric(
+  "getWeights",
+  function(penalty, x) standardGeneric("getWeights")
+)
 
 setMethod(
   "getWeights",

@@ -39,46 +39,47 @@ protected:
   std::vector<double> infeasibilities;
   std::vector<double> time;
   arma::uword path_iter = 0;
-
   arma::rowvec intercept;
   arma::mat beta;
-
-public:
-  virtual
-  Results
-  fit(const arma::mat& x,
-      const arma::mat& y,
-      const std::unique_ptr<Family>& family,
-      const std::unique_ptr<Penalty>& penalty,
-      const bool fit_intercept) = 0;
 };
+
 
 class FISTA : public Solver {
 private:
+  double L;
+  const bool standardize;
+  arma::vec x_scaled_center;
+  const bool is_sparse;
   arma::uword max_passes;
   double tol;
   const double eta = 2.0;
-  double L = 1.0;
 
 public:
   FISTA(arma::rowvec&& intercept_init,
         arma::mat&& beta_init,
         const double lipschitz_constant,
+        const bool standardize,
+        const arma::vec x_scaled_center,
+        const bool is_sparse,
         const Rcpp::S4& args)
+        : L(lipschitz_constant),
+          standardize(standardize),
+          x_scaled_center(x_scaled_center),
+          is_sparse(is_sparse)
   {
     using Rcpp::as;
 
-    intercept = std::move(intercept_init);
-    beta = std::move(beta_init);
+    intercept   = std::move(intercept_init);
+    beta        = std::move(beta_init);
 
     max_passes  = args.slot("max_passes");
     tol         = args.slot("tol");
     diagnostics = args.slot("diagnostics");
-    L           = lipschitz_constant;
   }
 
+  template <typename T>
   Results
-  fit(const arma::mat& x,
+  fit(const T& x,
       const arma::mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
@@ -125,13 +126,19 @@ public:
       timer.tic();
     }
 
-    family->eval(x, y, intercept, beta);
+    family->eval(x, y, intercept, beta, x_scaled_center);
 
     while (!accepted && i < max_passes) {
       // gradient
       double f = family->primal();
       pseudo_g = family->gradient(y);
       g = x.t() * pseudo_g;
+
+      // adjust gradient if sparse and standardizing
+      if (is_sparse && standardize) {
+        for (uword j = 0; j < p; ++j)
+          g(j) -= accu(x_scaled_center(j)*pseudo_g);
+      }
 
       if (fit_intercept) {
         g_intercept = mean(pseudo_g);
@@ -169,7 +176,7 @@ public:
         if (fit_intercept)
           intercept_tilde = intercept - (1.0/L)*g_intercept;
 
-        family->eval(x, y, intercept_tilde, beta_tilde);
+        family->eval(x, y, intercept_tilde, beta_tilde, x_scaled_center);
 
         f = family->primal();
         mat q = f_old + d.t()*g + 0.5*L*d.t()*d;
@@ -188,7 +195,7 @@ public:
         intercept = intercept_tilde
                     + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
 
-      family->eval(x, y, intercept, beta);
+      family->eval(x, y, intercept, beta, x_scaled_center);
 
       i++;
     }

@@ -4,11 +4,11 @@
 #include "penalties.h"
 #include "families.h"
 
-// [[Rcpp::export]]
+template <typename T>
 Rcpp::List
-golemDense(const arma::mat& x,
-           const arma::mat& y,
-           const Rcpp::List control)
+golemCpp(const T& x,
+         const arma::mat& y,
+         const Rcpp::List control)
 {
   using namespace arma;
   using Rcpp::as;
@@ -27,9 +27,16 @@ golemDense(const arma::mat& x,
   auto family_args = as<Rcpp::S4>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
   bool diagnostics = solver_args.slot("diagnostics");
+  bool standardize_features = as<bool>(control["standardize_features"]);
+  bool is_sparse = as<bool>(control["is_sparse"]);
 
-  // // setup family and response
-  auto family = setupFamily(family_args.slot("name"), fit_intercept);
+  // get scaled vector of feature matrix centers for use in sparse fitting
+  vec x_scaled_center = as<vec>(control["x_scaled_center"]);
+
+  // setup family and response
+  auto family = setupFamily(family_args.slot("name"),
+                            fit_intercept,
+                            standardize_features);
   auto penalty = setupPenalty(penalty_args);
   auto n_penalties = penalty->pathLength();
 
@@ -49,6 +56,9 @@ golemDense(const arma::mat& x,
   FISTA solver(std::move(intercept),
                std::move(beta),
                lipschitz_constant,
+               standardize_features,
+               x_scaled_center,
+               is_sparse,
                solver_args);
 
   for (uword i = 0; i < n_penalties; ++i) {
@@ -76,4 +86,23 @@ golemDense(const arma::mat& x,
     Named("infeasibilities") = wrap(infeasibilities),
     Named("time")            = wrap(timings)
   );
+}
+
+
+// [[Rcpp::export]]
+Rcpp::List
+golemSparse(const arma::sp_mat& x,
+            const arma::mat& y,
+            const Rcpp::List control)
+{
+  return golemCpp(x, y, control);
+}
+
+// [[Rcpp::export]]
+Rcpp::List
+golemDense(const arma::mat& x,
+           const arma::mat& y,
+           const Rcpp::List control)
+{
+  return golemCpp(x, y, control);
 }

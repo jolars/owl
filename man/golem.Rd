@@ -6,11 +6,10 @@
 \usage{
 golem(x, y, groups = NULL, family = c("gaussian", "binomial"),
   penalty = c("slope", "group_slope", "lasso"), solver = "fista",
-  intercept = TRUE, standardize = c("features", "response", "both",
-  "none"), orthogonalize = TRUE, sigma = NULL, lambda = NULL,
-  fdr = 0.2, n_lambda = 100, lambda_min_ratio = ifelse(NROW(x) <
-  NCOL(x), 0.01, 1e-04), tol = 1e-06, max_passes = 10000,
-  diagnostics = FALSE, ...)
+  intercept = TRUE, standardize_features = TRUE,
+  orthogonalize = TRUE, sigma = NULL, lambda = NULL, fdr = 0.2,
+  n_lambda = 100, lambda_min_ratio = ifelse(NROW(x) < NCOL(x), 0.01,
+  1e-04), tol = 1e-06, max_passes = 10000, diagnostics = FALSE, ...)
 }
 \arguments{
 \item{x}{input matrix}
@@ -36,12 +35,9 @@ either a function, the function's output, or a character vector.
 Control arguments (such as convergence threshold) are set in the
 solver function itself. Please see \strong{Solvers} for more information.}
 
-\item{intercept}{whether to fit an intercept or not}
+\item{intercept}{whether to fit an intercept}
 
-\item{standardize}{the type of standardization to carry out. Note that
-currently, standardization of response has no real effect. The
-response is always standardized for Gaussian responses and never
-for binomial}
+\item{standardize_features}{whether to standardize features (predictors)}
 
 \item{orthogonalize}{whether \code{x} should be orthogonalized}
 

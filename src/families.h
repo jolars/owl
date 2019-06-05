@@ -5,13 +5,29 @@
 #include "utils.h"
 
 class Family {
+protected:
+  const bool fit_intercept;
+  const bool standardize;
+
 public:
+  Family(const bool fit_intercept, const bool standardize)
+         : fit_intercept(fit_intercept), standardize(standardize) {}
+
   virtual
   void
   eval(const arma::mat& x,
        const arma::mat& y,
        const arma::vec& intercept,
-       const arma::mat& beta) = 0;
+       const arma::mat& beta,
+       const arma::vec& x_scaled_center) = 0;
+
+  virtual
+  void
+  eval(const arma::sp_mat& x,
+       const arma::mat& y,
+       const arma::vec& intercept,
+       const arma::mat& beta,
+       const arma::vec& x_scaled_center) = 0;
 
   virtual
   double
@@ -33,21 +49,43 @@ public:
 
 class Gaussian : public Family {
 private:
-  bool fit_intercept;
   arma::vec residuals;
   arma::mat lin_pred;
   double loss = 0.0;
 
 public:
-  Gaussian(const bool fit_intercept) : fit_intercept(fit_intercept) {};
+  Gaussian(const bool fit_intercept, const bool standardize)
+           : Family(fit_intercept, standardize) {}
 
   void
   eval(const arma::mat& x,
        const arma::mat& y,
        const arma::vec& intercept,
-       const arma::mat& beta)
+       const arma::mat& beta,
+       const arma::vec& x_scaled_center)
   {
     lin_pred = x * beta;
+
+    if (fit_intercept)
+      lin_pred += intercept(0);
+
+    residuals = lin_pred - y;
+    loss = 0.5*std::pow(arma::norm(residuals), 2);
+  }
+
+  void
+  eval(const arma::sp_mat& x,
+       const arma::mat& y,
+       const arma::vec& intercept,
+       const arma::mat& beta,
+       const arma::vec& x_scaled_center)
+  {
+    if (standardize)
+      lin_pred = x * beta - arma::dot(x_scaled_center, beta);
+    else
+      lin_pred = x * beta;
+//
+//     lin_pred = innerProduct(x, beta, x_scaled_center);
 
     if (fit_intercept)
       lin_pred += intercept(0);
@@ -83,20 +121,39 @@ public:
 
 class Binomial : public Family {
 private:
-  const bool fit_intercept;
   arma::mat lin_pred;
   arma::mat exp_y_lin_pred;
 
 public:
-  Binomial(const bool fit_intercept) : fit_intercept(fit_intercept) {};
+  Binomial(const bool fit_intercept, const bool standardize)
+           : Family(fit_intercept, standardize) {}
 
   void
   eval(const arma::mat& x,
        const arma::mat& y,
        const arma::vec& intercept,
-       const arma::mat& beta)
+       const arma::mat& beta,
+       const arma::vec& x_scaled_center)
   {
     lin_pred = x * beta;
+
+    if (fit_intercept)
+      lin_pred += intercept(0);
+
+    exp_y_lin_pred = arma::exp(y % lin_pred);
+  }
+
+  void
+  eval(const arma::sp_mat& x,
+       const arma::mat& y,
+       const arma::vec& intercept,
+       const arma::mat& beta,
+       const arma::vec& x_scaled_center)
+  {
+    if (standardize)
+      lin_pred = x*beta - arma::dot(x_scaled_center, beta);
+    else
+      lin_pred = x*beta;
 
     if (fit_intercept)
       lin_pred += intercept(0);
@@ -111,7 +168,7 @@ public:
   }
 
   double
-  dual(const arma::mat&y)
+  dual(const arma::mat& y)
   {
     using namespace arma;
     const arma::vec r = 1.0/(1.0 + exp_y_lin_pred);
@@ -140,11 +197,14 @@ public:
 inline
 std::unique_ptr<Family>
 setupFamily(const std::string& family_choice,
-            const bool fit_intercept)
+            const bool fit_intercept,
+            const bool standardize)
 {
   if (family_choice == "binomial")
-    return std::unique_ptr<Binomial>(new Binomial{fit_intercept});
+    return std::unique_ptr<Binomial>(new Binomial{fit_intercept,
+                                                  standardize});
   else
-    return std::unique_ptr<Gaussian>(new Gaussian{fit_intercept});
+    return std::unique_ptr<Gaussian>(new Gaussian{fit_intercept,
+                                                  standardize});
 }
 

@@ -1,18 +1,30 @@
 #' @include penalties.R
 
-orthogonalizeGroups <- function(x, group_id) {
+orthogonalizeGroups <- function(x,
+                                group_id,
+                                x_center,
+                                x_scale,
+                                standardize_features) {
   getGroupQR <- function(ids) {
-    submat <- as.matrix(x[, ids, drop = FALSE])
+    submat <- x[, ids, drop = FALSE]
 
     if (length(ids) == 1) {
       Q <- submat
       R <- 1
       P <- 1
     } else {
-      submat_qr <- qr(submat, LAPACK = TRUE)
-      Q <- qr.Q(submat_qr)
-      R <- qr.R(submat_qr)
-      P <- submat_qr$pivot
+
+      if (inherits(submat, "sparseMatrix")) {
+        submat_qr <- Matrix::qr(submat)
+        Q <- Matrix::qr.Q(submat_qr)
+        R <- Matrix::qrR(submat_qr)
+        P <- submat_qr@q + 1
+      } else {
+        submat_qr <- qr(as.matrix(submat), LAPACK = TRUE)
+        Q <- qr.Q(submat_qr)
+        R <- qr.R(submat_qr)
+        P <- submat_qr$pivot
+      }
     }
     list(Q = Q, R = R, P = P)
   }
@@ -20,7 +32,7 @@ orthogonalizeGroups <- function(x, group_id) {
   lapply(group_id, getGroupQR)
 }
 
-orthogonalize <- function(x, penalty) {
+orthogonalize <- function(x, penalty, x_center, x_scale, standardize_features) {
 
   orthogonalize <- penalty@orthogonalize
   group_id      <- penalty@group_id
@@ -29,11 +41,14 @@ orthogonalize <- function(x, penalty) {
   group_names <- names(group_id)
 
   n <- NROW(x)
-  p <- NCOL(x)
-  x_attr <- attributes(x)
+  # p <- NCOL(x)
 
   if (orthogonalize) {
-    ortho <- orthogonalizeGroups(x, group_id)
+    ortho <- orthogonalizeGroups(x,
+                                 group_id,
+                                 x_center,
+                                 x_scale,
+                                 standardize_features)
 
     # determine sizes of orthogonalized groups:
     ortho_group_length <- rep(NA, n_groups)
@@ -55,7 +70,7 @@ orthogonalize <- function(x, penalty) {
     for (i in seq_len(n_groups)) {
       ind <- block_start[i]:block_end[i]
       grp[ind] <- group_names[i]
-      x[, ind] <- ortho[[i]]$Q
+      x[, ind] <- as.matrix(ortho[[i]]$Q)
     }
 
     ortho_group_id <- groupID(grp)
@@ -63,88 +78,75 @@ orthogonalize <- function(x, penalty) {
     wt <- sqrt(ortho_group_length)
     wt_per_coef <- rep(NA, ncol(x))
 
-    for (i in 1:n_groups) {
+    for (i in 1:n_groups)
       wt_per_coef[ortho_group_id[[i]]] <- wt[i]
-    }
 
     penalty@ortho <- ortho
     penalty@ortho_group_length <- ortho_group_length
-
-    attr(x, "center") <- x_attr$center
-    attr(x, "scale") <- x_attr$scale
+    penalty@ortho_group_id <- ortho_group_id
 
   } else {
     # set prior weights per group:
     wt <- sqrt(lengths(group_id))
     wt_per_coef <- rep(NA, ncol(x))
 
-    for (i in seq_len(n_groups)) {
+    for (i in seq_len(n_groups))
       wt_per_coef[group_id[[i]]] <- wt[i]
-    }
   }
 
   penalty@wt <- wt
-  penalty@ortho_group_id <- ortho_group_id
   penalty@wt_per_coef <- wt_per_coef
-
-  attr(x, "n") <- n
-  attr(x, "p") <- p
 
   list(x = x, penalty = penalty)
 }
 
-standardize <- function(x, standardize) {
-    x <- as.matrix(x)
-
+standardize <- function(x, standardize_features) {
     p <- NCOL(x)
-    n <- NROW(x)
 
-    x_center <- double(p)
-    x_scale  <- rep.int(1, p)
+    if (standardize_features) {
+      x_center <- Matrix::colMeans(x)
 
-    if (standardize %in% c("both", "features")) {
-      x_center <- colMeans(x)
-
-      x <- sweep(x, 2, x_center, check.margin = FALSE)
-
-      x_scale  <- colNorms(x)
-      x_scale[x_scale == 0] <- 1
-
-      x <- sweep(x, 2, x_scale, "/", check.margin = FALSE)
+      if (!inherits(x, "sparseMatrix")) {
+        x <- sweep(x, 2, x_center)
+        x_scale <- apply(x, 2, norm, type = "2")
+        x_scale[x_scale == 0] <- 1
+        x <- sweep(x, 2, x_scale, "/")
+      } else {
+        x_scale <- standardizedSparseColNorms(x, x_center)
+        x_scale[x_scale == 0] <- 1
+        for (j in seq_len(p))
+          x[, j] <- x[, j]/x_scale[j]
+      }
+    } else {
+      x_center <- rep.int(0, p)
+      x_scale  <- rep.int(1, p)
     }
 
-    attr(x, "n")      <- n
-    attr(x, "p")      <- p
-    attr(x, "center") <- x_center
-    attr(x, "scale")  <- x_scale
-
-    x
+    list(x, x_center, x_scale)
 }
 
 
-setGeneric("preprocessFeatures",
-           function(penalty, x, standardize)
-             standardGeneric("preprocessFeatures"))
+setGeneric(
+  "preprocessFeatures",
+  function(penalty, x, x_center, x_scale, standardize_features)
+    standardGeneric("preprocessFeatures")
+)
 
 setMethod(
   "preprocessFeatures",
   "Penalty",
-  function(penalty, x, standardize) {
-    x <- standardize(x, standardize)
-    list(x = x, penalty = penalty)
+  function(penalty, x, x_center, x_scale, standardize_features) {
+    list(penalty = penalty, x = x)
   }
 )
 
 setMethod(
   "preprocessFeatures",
   "GroupSlope",
-  function(penalty, x, standardize) {
-    # first perform standardization if required
-    x <- standardize(x, standardize)
-
+  function(penalty, x, x_center, x_scale, standardize_features) {
     # orthogonalize (if required)
-    res <- orthogonalize(x, penalty)
+    res <- orthogonalize(x, penalty, x_center, x_scale, standardize_features)
 
-    list(x = res$x, penalty = res$penalty)
+    list(penalty = res$penalty, x = res$x)
   }
 )

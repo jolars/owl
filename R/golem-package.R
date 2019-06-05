@@ -11,4 +11,5 @@
 #' @useDynLib golem, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @import methods
+#' @import zeallot
 NULL

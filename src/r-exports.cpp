@@ -13,9 +13,26 @@ prox_slope_cpp(const arma::vec& y, const Rcpp::List& args)
   return penalty.eval(y, 1.0);
 }
 
+
 // [[Rcpp::export]]
 arma::vec
-colNorms(const arma::mat& x, const arma::uword norm_type = 2)
+standardizedSparseColNorms(const arma::sp_mat& x,
+                           const arma::vec& x_center)
+{
+  using namespace arma;
+
+  const uword p = x.n_cols;
+  vec norms(p, fill::zeros);
+
+  for (uword j = 0; j < p; ++j)
+    norms(j) = norm(x.col(j) - x_center(j), 2);
+
+  return norms;
+}
+
+template <typename T>
+arma::vec
+colNorms(const T& x, const arma::uword norm_type = 2)
 {
   using namespace arma;
 
@@ -23,16 +40,29 @@ colNorms(const arma::mat& x, const arma::uword norm_type = 2)
 
   arma::vec norms(p);
 
-  for (decltype(p) i = 0; i < p; ++i) {
+  for (decltype(p) i = 0; i < p; ++i)
     norms(i) = arma::norm(x.col(i), norm_type);
-  }
 
   return norms;
 }
 
 // [[Rcpp::export]]
 arma::vec
-rowNorms(const arma::mat& x, const arma::uword norm_type = 2)
+colNormsSparse(const arma::sp_mat& x, const arma::uword norm_type = 2)
+{
+  return colNorms(x, norm_type);
+}
+
+// [[Rcpp::export]]
+arma::vec
+colNormsDense(const arma::mat& x, const arma::uword norm_type = 2)
+{
+  return colNorms(x, norm_type);
+}
+
+template <typename T>
+arma::vec
+rowNorms(const T& x, const arma::uword norm_type = 2)
 {
   using namespace arma;
 
@@ -40,9 +70,78 @@ rowNorms(const arma::mat& x, const arma::uword norm_type = 2)
 
   vec norms(p);
 
-  for (decltype(p) i = 0; i < p; ++i) {
+  for (decltype(p) i = 0; i < p; ++i)
     norms(i) = norm(x.row(i), norm_type);
-  }
 
   return norms;
+}
+
+// [[Rcpp::export]]
+arma::vec
+rowNormsSparse(const arma::sp_mat& x,
+               const arma::uword norm_type = 2)
+{
+  return rowNorms(x, norm_type);
+}
+
+// [[Rcpp::export]]
+arma::vec
+rowNormsDense(const arma::mat& x, const arma::uword norm_type = 2)
+{
+  return rowNorms(x, norm_type);
+}
+
+
+double
+maxSquaredRowNorm(const arma::mat& x,
+                  const arma::rowvec& x_scaled_center,
+                  const bool standardize_features)
+{
+  using namespace arma;
+
+  return sum(square(x), 1).max();
+}
+
+double
+maxSquaredRowNorm(const arma::sp_mat& x,
+                  const arma::rowvec& x_scaled_center,
+                  const bool standardize_features)
+{
+  using namespace arma;
+
+  double max_squared_row_norms = 0.0;
+
+  if (standardize_features) {
+    const uword n = x.n_rows;
+
+    vec squared_row_norms(n);
+
+    for (uword i = 0; i < n; ++i)
+      squared_row_norms(i) = accu(square(x.row(i) - x_scaled_center));
+
+    max_squared_row_norms = squared_row_norms.max();
+
+  } else {
+    max_squared_row_norms = sum(square(x), 1).max();
+  }
+
+  return max_squared_row_norms;
+}
+
+// [[Rcpp::export]]
+double
+maxSquaredRowNorm(SEXP x,
+                  const arma::rowvec& x_scaled_center,
+                  const bool standardize_features)
+{
+  if (Rf_isS4(x)) {
+    if (Rf_inherits(x, "dgCMatrix"))
+      return maxSquaredRowNorm(Rcpp::as<arma::sp_mat>(x),
+                               x_scaled_center,
+                               standardize_features);
+  }
+
+  return maxSquaredRowNorm(Rcpp::as<arma::mat>(x),
+                           x_scaled_center,
+                           standardize_features);
 }
