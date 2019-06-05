@@ -127,23 +127,6 @@ setClass("Lasso",
                    n_lambda = "numeric",
                    lambda_scale = "numeric"))
 
-#' Lasso
-#'
-#' The lasso penalty penalized coefficients via the L1 norm, which induces
-#' sparse solutions if the regularization strength (lambda) is sufficiently
-#' strong.
-#'
-#' @param lambda the regularization strength, which can either be a
-#'   user-supplied vector of (theoretical) any length, or `NULL`, in which
-#'   case golem automatically computes a sequence so that the first value
-#'   leads to the null (intercept-only) model.
-#' @param lambda_min_ratio the lowest permissible value of the
-#'   lambda penalty
-#' @param n_lambda the length of the \eqn{\lambda} sequence -- ignored if
-#'   a value is supplied to `lambda`.
-#'
-#' @return A parameter pack for the lasso penalty.
-#' @export
 Lasso <- function(lambda = NULL,
                   lambda_min_ratio = 0.0001,
                   n_lambda = 100) {

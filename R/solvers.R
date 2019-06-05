@@ -11,14 +11,6 @@ setClass("Solver",
 setClass("Fista",
          contains = "Solver")
 
-#' FISTA solver
-#'
-#' @param tol tolerance threshold for convergence
-#' @param max_passes maximum number of passes for the solver
-#' @param diagnostics whether to save diagnostics (wall-clock time and loss)
-#'
-#' @return A set of parameters for the FISTA solver.
-#' @export
 Fista <- function(tol = 1e-5, max_passes = 1e4, diagnostics = FALSE) {
 
   stopifnot(tol > 0,

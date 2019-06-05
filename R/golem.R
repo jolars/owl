@@ -17,71 +17,117 @@ setClass("Golem",
 #' This functions fits a generalized linear model (GLM) using efficient
 #' optimization routines suitable to big data problems.
 #'
-#' @section Regularization Penalties:
-#' There is a multitude of ways to penalize the models created by
-#' [golem::golem()], currently they are:
+#' The objective for each model is simply the loss function for
+#' each family plus a penalty term.
 #'
-#' * SLOPE
-#' * Group SLOPE
-#' * LASSO
+#' @section Families:
 #'
-#' These functions are in fact only parameter packs for the actual
-#' implementations of the penalties and will be passed on to
-#' the respective C++ creator functions, where the magic happens.
+#' **Gaussian**
 #'
-#' Do *not* attempt to create your own penalty functions using this interface.
-#' Such attempts will most likely be caught in assertions before anything bad
-#' happens, but all bets are off if you are able to sneak them through
-#' the various checks.
+#' The Gaussian model (Ordinary Least Squares) minimizes the following
+#' objective.
+#'
+#' \deqn{
+#'   ||\boldsymbol{y} - \boldsymbol{X\beta}||_2^2
+#' }{
+#'   ||y - X\beta||_2^2
+#' }
+#'
+#' **Binomial**
+#'
+#' The binomial model (logistic regression) has the following objective.
+#'
+#' \deqn{
+#'   \sum_{i=1}^n \log\left[1+ \exp\left(- y_i\boldsymbol{x}_i'\boldsymbol{\beta} \right) \right]
+#' }{
+#'   \sum log[1+ exp(- y_i x_i' \beta)]
+#' }
+#'
+#' @section Penalties:
+#' Models fit by [golem::golem()] can be regularized via several
+#' penalties.
+#'
+#' **Lasso**
+#'
+#' The Lasso penalizes coefficients using the L1 norm. The penalty
+#' term in the lagrangian form of the loss function is
+#'
+#' \deqn{
+#'   \lambda \sum_{j=1}^p |\beta_j|
+#' }{
+#'   \lambda \sum |\beta|
+#' }
+#'
+#' **SLOPE**
+#'
+#' SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
+#' Unlike the latter, however, SLOPE uses a non-increasing
+#' sequence of \eqn{\lambda}---one
+#' for each coefficient. The penalty term looks like
+#'
+#' \deqn{
+#'   \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
+#' }{
+#'   \sigma \sum \lambda |\beta|(j)
+#' }
+#'
+#' **Group SLOPE**
+#'
+#' Group SLOPE is an extension of Group LASSO. It applies the following
+#' penalty
+#'
+#' \deqn{
+#'   J_\lambda(\beta) = \sum_{j=1}^p \lambda_j |W||\beta||_{I,X}|_{(j)}
+#' }{
+#'   J_\lambda(\beta) = \sum \lambda_j |W||\beta||_{I,X}|_(j)
+#' }
 #'
 #' @section Solvers:
-#' There is currently a single solver available for [golem::golem], namely
+#' There is currently a single solver available for [golem::golem].
 #'
 #' **FISTA**
 #'
-#' We use the accelerated version of FISTA.
+#' FISTA (Fast Iterative Shrinking-Tresholding Algorithm) is an extension
+#' of the classical gradient algorithm.
 #'
-#' @param x input matrix
-#' @param y response variable
-#' @param family response type, one of `'gaussian'`, `'binomial'`,
-#'   `'multinomial'`, or `'mgaussian'`. See **Supported families** for details.
-#' @param penalty the regularization penalty to use, either in the
-#'   form of the output from one of this package's penalty functions,
-#'   the function itself, or a character vector specifying one such function.
-#'   Each function has its respective set of parameters, such as the
-#'   regularization strength. Please see
-#'   *Regularization Penalties* for more information.
-#' @param solver the solver to use to optimize the loss function (objective).
-#'   Just like the `penalty` parameter, this argument may be
-#'   either a function, the function's output, or a character vector.
-#'   Control arguments (such as convergence threshold) are set in the
-#'   solver function itself. Please see **Solvers** for more information.
+#' @param x feature matrix
+#' @param y response
+#' @param family response type. See **Families** for details.
+#' @param penalty the regularization penalty to use. See **Penalties** for
+#'   details.
+#' @param solver the numerical solver to use. See **Solvers** for details.
 #' @param intercept whether to fit an intercept
 #' @param standardize_features whether to standardize features (predictors)
 #' @param ... currently ignored
 #' @param groups vector of integers to indicate group membership of each
-#'   feature (only relevant for Group SLOPE)
-#' @param sigma noise estimate (only relevant for SLOPE and Group SLOPE)
+#'   feature (only applies to Group SLOPE)
+#' @param sigma noise estimate (only applies to SLOPE and Group SLOPE)
 #' @param lambda either a character vector indicating the method used
 #'   to construct the lambda path or
-#' @param fdr target false discovery rate (only relevant for SLOPE and
+#' @param fdr target false discovery rate (only applies to SLOPE and
 #'   Group SLOPE)
 #' @param n_lambda length of regularization path (only relevant for lasso)
 #' @param lambda_min_ratio smallest value for `lambda` as a fraction of
-#'   \eqn{\lambda_\mathrm{max}}{\lambda_max}
+#'   \eqn{\lambda_\mathrm{max}}{\lambda_max} (only applies to lasso)
 #' @param tol tolerance for optimizer
 #' @param max_passes maximum number of passes for optimizer
 #' @param diagnostics should diagnostics be saved for the model fit (timings,
 #'   primal and dual objectives, and infeasibility)
-#' @param orthogonalize whether `x` should be orthogonalized
+#' @param orthogonalize whether `x` should be orthogonalized. Note that
+#'   setting this to TRUE when `x` is sparse will through an error.
+#'   (only applies to Group SLOPE)
 #' @return An object of class `"Golem"`.
 #' @export
 #'
 #' @examples
-#' X <- with(mtcars, cbind(cyl, wt, disp, hp, drat))
-#' y <- mtcars$mpg
 #'
-#' golem_fit <- golem::golem(X, y, family = "gaussian")
+#' # Gaussian response, slope penalty (default)
+#' gaussian_fit <- golem(abalone$x, abalone$y, family = "gaussian")
+#'
+#' # Binomial response, lasso penalty
+#' binomial_fit <- golem(heart$x, heart$y, family = "binomial",
+#'                       penalty = "lasso")
+#'
 golem <- function(x,
                   y,
                   groups = NULL,
