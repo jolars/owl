@@ -5,13 +5,13 @@ test_that("predictions work for all models", {
     x <- xy$x
     y <- xy$y
 
-    fit <- golem(x, y, family = family)
+    fit <- golem(family = family)$fit(x, y)
 
     for (type in c("link", "response", "class")) {
       if (type == "class" && family == "gaussian")
         next
 
-      expect_silent(predict(fit, x, type = type))
+      expect_silent(fit$predict(x, type = type))
     }
   }
 })

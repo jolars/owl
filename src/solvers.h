@@ -62,7 +62,7 @@ public:
         const bool standardize,
         const arma::vec x_scaled_center,
         const bool is_sparse,
-        const Rcpp::S4& args)
+        const Rcpp::List& args)
         : L(lipschitz_constant),
           standardize(standardize),
           x_scaled_center(x_scaled_center),
@@ -73,10 +73,10 @@ public:
     intercept   = std::move(intercept_init);
     beta        = std::move(beta_init);
 
-    max_passes  = args.slot("max_passes");
-    diagnostics = args.slot("diagnostics");
-    tol_rel_gap = args.slot("tol_rel_gap");
-    tol_infeas  = args.slot("tol_infeas");
+    max_passes  = as<arma::uword>(args["max_passes"]);
+    diagnostics = as<bool>(args["diagnostics"]);
+    tol_rel_gap = as<double>(args["tol_rel_gap"]);
+    tol_infeas  = as<double>(args["tol_infeas"]);
   }
 
   template <typename T>

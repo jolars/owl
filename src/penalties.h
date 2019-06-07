@@ -217,25 +217,26 @@ public:
 // helper to choose penalty
 inline
 std::unique_ptr<Penalty>
-setupPenalty(const Rcpp::S4& args)
+setupPenalty(const Rcpp::List& args)
 {
   using namespace arma;
+  using Rcpp::as;
 
-  std::string name = args.slot("name");
-  vec lambda = args.slot("lambda");
+  std::string name = as<std::string>(args["name"]);
+  vec lambda = as<vec>(args["lambda"]);
 
   if (name == "slope") {
 
-    double sigma = args.slot("sigma");
+    double sigma = as<double>(args["sigma"]);
     return std::unique_ptr<SLOPE>(new SLOPE{sigma, lambda});
 
   } else if (name == "group_slope") {
 
-    double sigma = args.slot("sigma");
-    bool orthogonalize = args.slot("orthogonalize");
+    double sigma = as<double>(args["sigma"]);
+    bool orthogonalize = as<bool>(args["do_orthogonalize"]);
 
-    field<uvec> groups = orthogonalize ? args.slot("ortho_group_id")
-                                       : args.slot("group_id");
+    field<uvec> groups = orthogonalize ? as<field<uvec>>(args["ortho_group_id"])
+                                       : as<field<uvec>>(args["group_id"]);
 
     groups.for_each([](uvec& x) {x -= 1;}); // fix indexing for c++
 
@@ -243,7 +244,7 @@ setupPenalty(const Rcpp::S4& args)
   }
 
   // else lasso
-  double lambda_scale = args.slot("lambda_scale");
+  double lambda_scale = as<double>(args["lambda_scale"]);
 
   lambda /= lambda_scale;
 

@@ -32,74 +32,6 @@ orthogonalizeGroups <- function(x,
   lapply(group_id, getGroupQR)
 }
 
-orthogonalize <- function(x, penalty, x_center, x_scale, standardize_features) {
-
-  orthogonalize <- penalty@orthogonalize
-  group_id      <- penalty@group_id
-
-  n_groups <- length(group_id)
-  group_names <- names(group_id)
-
-  n <- NROW(x)
-  # p <- NCOL(x)
-
-  if (orthogonalize) {
-    ortho <- orthogonalizeGroups(x,
-                                 group_id,
-                                 x_center,
-                                 x_scale,
-                                 standardize_features)
-
-    # determine sizes of orthogonalized groups:
-    ortho_group_length <- rep(NA, n_groups)
-    names(ortho_group_length) <- group_names
-
-    for (i in 1:n_groups) {
-      ortho_group_length[i] <- ncol(ortho[[i]]$Q)
-    }
-
-    # overwrite x with a matrix that contains orthogonalizations
-    # of the original blocks of x
-    # and set up grouping info for the orthogonalized version of x
-    # to be used in the optimization
-    x <- matrix(nrow = n, ncol = sum(ortho_group_length))
-    grp <- rep(NA, sum(ortho_group_length))
-    block_end <- cumsum(ortho_group_length)
-    block_start <- utils::head(c(1, block_end + 1), n_groups)
-
-    for (i in seq_len(n_groups)) {
-      ind <- block_start[i]:block_end[i]
-      grp[ind] <- group_names[i]
-      x[, ind] <- as.matrix(ortho[[i]]$Q)
-    }
-
-    ortho_group_id <- groupID(grp)
-    # set prior weights per group:
-    wt <- sqrt(ortho_group_length)
-    wt_per_coef <- rep(NA, ncol(x))
-
-    for (i in 1:n_groups)
-      wt_per_coef[ortho_group_id[[i]]] <- wt[i]
-
-    penalty@ortho <- ortho
-    penalty@ortho_group_length <- ortho_group_length
-    penalty@ortho_group_id <- ortho_group_id
-
-  } else {
-    # set prior weights per group:
-    wt <- sqrt(lengths(group_id))
-    wt_per_coef <- rep(NA, ncol(x))
-
-    for (i in seq_len(n_groups))
-      wt_per_coef[group_id[[i]]] <- wt[i]
-  }
-
-  penalty@wt <- wt
-  penalty@wt_per_coef <- wt_per_coef
-
-  list(x = x, penalty = penalty)
-}
-
 standardize <- function(x, standardize_features) {
     p <- NCOL(x)
 
@@ -124,29 +56,3 @@ standardize <- function(x, standardize_features) {
 
     list(x, x_center, x_scale)
 }
-
-
-setGeneric(
-  "preprocessFeatures",
-  function(penalty, x, x_center, x_scale, standardize_features)
-    standardGeneric("preprocessFeatures")
-)
-
-setMethod(
-  "preprocessFeatures",
-  "Penalty",
-  function(penalty, x, x_center, x_scale, standardize_features) {
-    list(penalty = penalty, x = x)
-  }
-)
-
-setMethod(
-  "preprocessFeatures",
-  "GroupSlope",
-  function(penalty, x, x_center, x_scale, standardize_features) {
-    # orthogonalize (if required)
-    res <- orthogonalize(x, penalty, x_center, x_scale, standardize_features)
-
-    list(penalty = res$penalty, x = res$x)
-  }
-)

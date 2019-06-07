@@ -1,20 +1,14 @@
-#' Return Coefficients from a Golem Model
+#' Obtain Coefficients from Model fit by Golem
 #'
-#' Returns the coefficients for a model fit via [golem::golem()].
-#' Unlike retrieving the coefficients using simple indexing, such as
-#' `fit$coefficients`, this function attempts to reduce the dimensions of
-#' the coefficients---that are otherwise always a three-dimensional array---by
-#' calling [base::drop()].
+#' This function is equivalent to calling `$coef()` on a model fit by
+#' [golem()].
 #'
-#' @param object an object of class `"Golem"`
-#' @param ... parameters passed onto [stats::coef()]
+#' @param object an object of class `'Golem'`.
+#' @param ... ignored
 #'
-#' @return The coefficients, including the intercept if it was fit.
+#' @return Coefficients from the model after having dropped extraneous
+#'   dimensions by calling drop.
 #' @export
-#' @include golem.R
-setMethod(
-  "coef",
-  "Golem",
-  function(object, ...)
-    drop(object@coefficients)
-)
+coef.Golem <- function(object, ...) {
+  object$coef()
+}

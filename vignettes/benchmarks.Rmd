@@ -32,7 +32,7 @@ library(lattice)
 library(latticeExtra)
 
 plot_optim <- function(fit) {
-  d <- fit@diagnostics
+  d <- fit$diagnostics
   
   p1 <- xyplot(primal + dual ~ time, data = d, type = "l", 
                ylab = "Objetive",
@@ -50,11 +50,12 @@ plot_optim <- function(fit) {
 ### Gaussian model
 
 ```{r, fig.cap = "Objective loss over time for the abalone data set (Gaussian response)."}
-x <- as.matrix(abalone$x)
+x <- abalone$x
 y <- abalone$y
 
-fit <- golem(x, y, family = "gaussian", diagnostics = TRUE)
-plot_optim(fit)
+model <- golem(family = "gaussian", diagnostics = TRUE)
+model$fit(x, y)
+plot_optim(model)
 ```
 
 ### Binomial model
@@ -63,9 +64,10 @@ plot_optim(fit)
 x <- as.matrix(heart$x)
 y <- heart$y
 
-fit <- golem(x, y, family = "binomial", diagnostics = TRUE)
+model <- golem(family = "binomial", diagnostics = TRUE)
+model$fit(x, y)
 
-plot_optim(fit)
+plot_optim(model)
 ```
 
 

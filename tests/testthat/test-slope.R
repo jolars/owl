@@ -9,13 +9,14 @@ test_that("SLOPE and golem agree for gaussian designs", {
   set.seed(0)
   res_slope <- SLOPE::SLOPE(x, y, sigma = 1, normalize = FALSE)
   set.seed(0)
-  res_golem <- golem::golem(x, y, intercept = FALSE,
-                            penalty = "slope",
-                            sigma = 1,
-                            diagnostics = TRUE,
-                            standardize_features = FALSE)
+  g <- golem(intercept = FALSE,
+             penalty = "slope",
+             sigma = 1,
+             diagnostics = TRUE,
+             standardize_features = FALSE)
+  g$fit(x, y)
 
-  expect_equivalent(res_slope$beta, coef(res_golem), tol = 0.01)
+  expect_equivalent(res_slope$beta, g$coef(), tol = 1e-5)
 })
 
 test_that("SLOPE and golem agree when computing lambda sequences", {
@@ -28,8 +29,8 @@ test_that("SLOPE and golem agree when computing lambda sequences", {
 
   for (lambda in c("bhq", "gaussian")) {
     slope_lambda <- SLOPE::SLOPE(x, y, sigma = 1, lambda = lambda)$lambda
-    golem_lambda <- golem::golem(x, y, sigma = 1, lambda = lambda,
-                                 penalty = "slope")@penalty@lambda
+    golem_lambda <- golem(sigma = 1, lambda = lambda,
+                          penalty = "slope")$fit(x, y)$penalty$lambda
     expect_equivalent(golem_lambda, slope_lambda)
   }
 })
@@ -44,8 +45,8 @@ test_that("sigma estimation for SLOPE", {
   y <- problem$y
 
   slope_fit <- SLOPE::SLOPE(x, y)
-  golem_fit <- golem::golem(x, y, penalty = "slope", intercept = FALSE)
+  golem_fit <- golem(penalty = "slope", intercept = FALSE)$fit(x, y)
 
   expect_equal(slope_fit$sigma[length(slope_fit$sigma)],
-               golem_fit@penalty@sigma)
+               golem_fit$penalty$sigma)
 })

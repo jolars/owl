@@ -8,15 +8,12 @@ test_that("results from group slope mirror those from grpSLOPE package", {
   fdr <- 0.1 # target false discovery rate
   sigma  <- 1
 
-  golem_fit <- golem(x, y,
-                     penalty = "group_slope",
-                     groups = grp,
-                     fdr = fdr,
-                     sigma = sigma)
+  g <- golem(penalty = "group_slope", fdr = fdr, sigma = sigma)
+  g$fit(x, y, groups = grp)
 
   gslope_fit <- grpSLOPE::grpSLOPE(x, y, group = grp, fdr = fdr, sigma = sigma)
 
-  expect_equivalent(coef(golem_fit), coef(gslope_fit, scaled = FALSE),
+  expect_equivalent(g$coef(), coef(gslope_fit, scaled = FALSE),
                     tol = 1e-5)
 })
 
@@ -30,15 +27,13 @@ test_that("uneven group input is handled correctly", {
   fdr <- 0.1 # target false discovery rate
   sigma  <- 1
 
-  golem_fit <- golem(x, y,
-                     penalty = "group_slope",
-                     groups = grp,
-                     fdr = fdr,
-                     sigma = sigma)
+  g <- golem(penalty = "group_slope", fdr = fdr, sigma = sigma)
+  g$fit(x, y, groups = grp)
 
   gslope_fit <- grpSLOPE::grpSLOPE(x, y, group = grp, fdr = fdr, sigma = sigma)
 
-  expect_equivalent(coef(golem_fit), coef(gslope_fit, scaled = FALSE),
+  expect_equivalent(g$coef(),
+                    coef(gslope_fit, scaled = FALSE),
                     tol = 1e-6)
 })
 
@@ -55,13 +50,12 @@ test_that("binomial group slope models work", {
   y <- rbinom(1000, 1, pr)
 
   df <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3)
-  golem_fit <- golem(cbind(x1, x2, x3), y,
-                     family = "binomial",
-                     penalty = "group_slope",
-                     groups = c(1, 1, 2),
-                     sigma = 3)
+  g <- golem(family = "binomial",
+             penalty = "group_slope",
+             sigma = 3)
+  g$fit(cbind(x1, x2, x3), y, groups = c(1, 1, 2))
 
-  expect_equivalent(coef(golem_fit) != 0, c(TRUE, TRUE, TRUE, FALSE))
+  expect_equivalent(g$coef() != 0, c(TRUE, TRUE, TRUE, FALSE))
 })
 
 test_that("group_slope lambda sequences are computed properly", {
@@ -75,24 +69,18 @@ test_that("group_slope lambda sequences are computed properly", {
   y <- rnorm(n)
 
   set.seed(1)
+  g <- golem(penalty = "group_slope")
 
   for (lambda in c("corrected", "mean", "max")) {
     groups <- sample(1:p, replace = TRUE)
-
-    golem_fit <- golem(x, y, penalty = "group_slope", lambda = lambda,
-                       fdr = fdr,
-                       groups = groups)
+    g$fit(x, y, groups = groups, lambda = lambda, fdr = fdr)
 
     grps_lambda <- grpSLOPE:::lambdaGroupSLOPE(fdr = fdr, group = groups,
-                                               wt = golem_fit@penalty@wt,
+                                               wt = g$penalty$wt,
                                                n.obs = n,
                                                method = lambda)
-    expect_equal(golem_fit@penalty@lambda,
-                 grps_lambda)
+    expect_equal(g$penalty$lambda, grps_lambda)
   }
-
-
-
 })
 
 test_that("sigma estimation for Group SLOPE", {
@@ -105,10 +93,9 @@ test_that("sigma estimation for Group SLOPE", {
   groups <- c(1, 1, 2, 2, 2)
 
   slope_fit <- grpSLOPE::grpSLOPE(x, y, group = groups, fdr = 0.2)
-  golem_fit <- golem::golem(x, y, penalty = "group_slope",
-                            fdr = 0.2,
-                            groups = groups)
+  g <- golem(penalty = "group_slope", fdr = 0.2)
+  g$fit(x, y, groups = groups)
 
   expect_equal(slope_fit$sigma[length(slope_fit$sigma)],
-               golem_fit@penalty@sigma)
+               g$penalty$sigma)
 })
