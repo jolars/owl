@@ -93,7 +93,7 @@
       <h1>Benchmarks</h1>
                         <h4 class="author">Johan Larsson</h4>
             
-            <h4 class="date">2019-06-05</h4>
+            <h4 class="date">2019-06-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jolars/golem/blob/master/vignettes/benchmarks.Rmd"><code>vignettes/benchmarks.Rmd</code></a></small>
       <div class="hidden name"><code>benchmarks.Rmd</code></div>
@@ -115,7 +115,7 @@
 <a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co">#&gt; Loading required package: RColorBrewer</span></a>
 <a class="sourceLine" id="cb1-7" data-line-number="7"></a>
 <a class="sourceLine" id="cb1-8" data-line-number="8">plot_optim &lt;-<span class="st"> </span><span class="cf">function</span>(fit) {</a>
-<a class="sourceLine" id="cb1-9" data-line-number="9">  d &lt;-<span class="st"> </span>fit<span class="op">@</span>diagnostics</a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">  d &lt;-<span class="st"> </span>fit<span class="op">$</span>diagnostics</a>
 <a class="sourceLine" id="cb1-10" data-line-number="10">  </a>
 <a class="sourceLine" id="cb1-11" data-line-number="11">  p1 &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/lattice/topics/xyplot">xyplot</a></span>(primal <span class="op">+</span><span class="st"> </span>dual <span class="op">~</span><span class="st"> </span>time, <span class="dt">data =</span> d, <span class="dt">type =</span> <span class="st">"l"</span>, </a>
 <a class="sourceLine" id="cb1-12" data-line-number="12">               <span class="dt">ylab =</span> <span class="st">"Objetive"</span>,</a>
@@ -131,11 +131,12 @@
 <div id="gaussian-model" class="section level3">
 <h3 class="hasAnchor">
 <a href="#gaussian-model" class="anchor"></a>Gaussian model</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">x &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/matrix">as.matrix</a></span>(abalone<span class="op">$</span>x)</a>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">x &lt;-<span class="st"> </span>abalone<span class="op">$</span>x</a>
 <a class="sourceLine" id="cb2-2" data-line-number="2">y &lt;-<span class="st"> </span>abalone<span class="op">$</span>y</a>
 <a class="sourceLine" id="cb2-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(x, y, <span class="dt">family =</span> <span class="st">"gaussian"</span>, <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="kw">plot_optim</span>(fit)</a></code></pre></div>
+<a class="sourceLine" id="cb2-4" data-line-number="4">model &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(<span class="dt">family =</span> <span class="st">"gaussian"</span>, <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">model<span class="op">$</span><span class="kw">fit</span>(x, y)</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="kw">plot_optim</span>(model)</a></code></pre></div>
 <div class="figure">
 <img src="benchmarks_files/figure-html/unnamed-chunk-2-1.png" alt="Objective loss over time for the abalone data set (Gaussian response)." width="700"><p class="caption">
 Objective loss over time for the abalone data set (Gaussian response).
@@ -153,9 +154,10 @@ Objective loss over time for the abalone data set (Gaussian response).
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">x &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/matrix">as.matrix</a></span>(heart<span class="op">$</span>x)</a>
 <a class="sourceLine" id="cb3-2" data-line-number="2">y &lt;-<span class="st"> </span>heart<span class="op">$</span>y</a>
 <a class="sourceLine" id="cb3-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4">fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(x, y, <span class="dt">family =</span> <span class="st">"binomial"</span>, <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="kw">plot_optim</span>(fit)</a></code></pre></div>
+<a class="sourceLine" id="cb3-4" data-line-number="4">model &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(<span class="dt">family =</span> <span class="st">"binomial"</span>, <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">model<span class="op">$</span><span class="kw">fit</span>(x, y)</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="kw">plot_optim</span>(model)</a></code></pre></div>
 <div class="figure">
 <img src="benchmarks_files/figure-html/unnamed-chunk-3-1.png" alt="Objective loss over time for the heart data set (binomial response)." width="700"><p class="caption">
 Objective loss over time for the heart data set (binomial response).

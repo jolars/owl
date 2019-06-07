@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • golem</title>
+<title>Obtain Coefficients from Model fit by Golem — coef.Golem • golem</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -37,7 +37,10 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Obtain Coefficients from Model fit by Golem — coef.Golem" />
+
+<meta property="og:description" content="This function is equivalent to calling $coef() on a model fit by
+golem()." />
 
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
@@ -57,7 +60,7 @@
   </head>
 
   <body>
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -122,78 +125,51 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Obtain Coefficients from Model fit by Golem</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/coef.R'><code>R/coef.R</code></a></small>
+    <div class="hidden name"><code>coef.Golem.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    
+    <p>This function is equivalent to calling <code>$coef()</code> on a model fit by
+<code><a href='golem.html'>golem()</a></code>.</p>
+    
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
-
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      <tr>
-        
-        <td>
-          <p><code><a href="abalone.html">abalone</a></code> </p>
-        </td>
-        <td><p>Abalone</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="coef.Golem.html">coef(<i>&lt;Golem&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Obtain Coefficients from Model fit by Golem</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="golem-package.html">golem-package</a></code> </p>
-        </td>
-        <td><p>Golem: Generalized Linear Models for Big Data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="golem.html">golem()</a></code> </p>
-        </td>
-        <td><p>Regularized Generalized Linear Models</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="heart.html">heart</a></code> </p>
-        </td>
-        <td><p>Heart Disease</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="student.html">student</a></code> </p>
-        </td>
-        <td><p>Student Performance</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="wine.html">wine</a></code> </p>
-        </td>
-        <td><p>Wine Cultivars</p></td>
-      </tr>
-    </tbody>
+    <pre class="usage"><span class='co'># S3 method for Golem</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>(<span class='no'>object</span>, <span class='no'>...</span>)</pre>
+    
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>object</th>
+      <td><p>an object of class <code>'Golem'</code>.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>ignored</p></td>
+    </tr>
     </table>
-  </div>
+    
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
+    <p>Coefficients from the model after having dropped extraneous
+dimensions by calling drop.</p>
+    
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
-    </ul>
+      <li><a href="#arguments">Arguments</a></li>
+      
+      <li><a href="#value">Value</a></li>
+          </ul>
+
   </div>
 </div>
 

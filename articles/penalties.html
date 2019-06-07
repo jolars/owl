@@ -93,7 +93,7 @@
       <h1>Regularization penalties in golem</h1>
                         <h4 class="author">Johan Larsson</h4>
             
-            <h4 class="date">2019-06-05</h4>
+            <h4 class="date">2019-06-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jolars/golem/blob/master/vignettes/penalties.Rmd"><code>vignettes/penalties.Rmd</code></a></small>
       <div class="hidden name"><code>penalties.Rmd</code></div>
@@ -120,25 +120,26 @@
 <a class="sourceLine" id="cb1-11" data-line-number="11"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/seq">seq_along</a></span>(q)) {</a>
 <a class="sourceLine" id="cb1-12" data-line-number="12">  n &lt;-<span class="st"> </span><span class="dv">1000</span></a>
 <a class="sourceLine" id="cb1-13" data-line-number="13">  p &lt;-<span class="st"> </span>n<span class="op">/</span><span class="dv">2</span></a>
-<a class="sourceLine" id="cb1-14" data-line-number="14">  k &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Round">floor</a></span>(q[i]<span class="op">*</span>p)</a>
-<a class="sourceLine" id="cb1-15" data-line-number="15">  sigma &lt;-<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb1-16" data-line-number="16">  problem &lt;-<span class="st"> </span>golem<span class="op">:::</span><span class="kw">random_problem</span>(n, p, k, <span class="dt">sigma =</span> sigma)</a>
-<a class="sourceLine" id="cb1-17" data-line-number="17">  </a>
-<a class="sourceLine" id="cb1-18" data-line-number="18">  x &lt;-<span class="st"> </span>problem<span class="op">$</span>x</a>
-<a class="sourceLine" id="cb1-19" data-line-number="19">  y &lt;-<span class="st"> </span>problem<span class="op">$</span>y</a>
-<a class="sourceLine" id="cb1-20" data-line-number="20">  signals &lt;-<span class="st"> </span>problem<span class="op">$</span>nonzero</a>
-<a class="sourceLine" id="cb1-21" data-line-number="21">  </a>
-<a class="sourceLine" id="cb1-22" data-line-number="22">  fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(x, y, <span class="dt">penalty =</span> <span class="st">"slope"</span>, <span class="dt">lambda =</span> <span class="st">"bhq"</span>, <span class="dt">sigma =</span> <span class="dv">1</span>,</a>
-<a class="sourceLine" id="cb1-23" data-line-number="23">               <span class="dt">intercept =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb1-24" data-line-number="24">  </a>
-<a class="sourceLine" id="cb1-25" data-line-number="25">  selected_golem &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/coef">coef</a></span>(fit) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)</a>
-<a class="sourceLine" id="cb1-26" data-line-number="26">  V &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sets">setdiff</a></span>(selected_golem, signals))</a>
-<a class="sourceLine" id="cb1-27" data-line-number="27">  R &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(selected_golem)</a>
-<a class="sourceLine" id="cb1-28" data-line-number="28">  fdr[i] &lt;-<span class="st"> </span>V<span class="op">/</span>R</a>
-<a class="sourceLine" id="cb1-29" data-line-number="29">}</a>
-<a class="sourceLine" id="cb1-30" data-line-number="30"></a>
-<a class="sourceLine" id="cb1-31" data-line-number="31"><span class="kw"><a href="https://www.rdocumentation.org/packages/lattice/topics/xyplot">xyplot</a></span>(fdr <span class="op">~</span><span class="st"> </span>q, <span class="dt">type =</span> <span class="st">"b"</span>, <span class="dt">ylab =</span> <span class="st">"FDR"</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb1-32" data-line-number="32"><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/latticeExtra/topics/layer">layer_</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/lattice/topics/panel.functions">panel.refline</a></span>(<span class="dt">h =</span> <span class="fl">0.2</span>)) </a></code></pre></div>
+<a class="sourceLine" id="cb1-14" data-line-number="14">  sigma &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb1-15" data-line-number="15">  problem &lt;-<span class="st"> </span>golem<span class="op">:::</span><span class="kw">randomProblem</span>(n, p, <span class="dt">q =</span> q[i], <span class="dt">sigma =</span> sigma)</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16">  </a>
+<a class="sourceLine" id="cb1-17" data-line-number="17">  x &lt;-<span class="st"> </span>problem<span class="op">$</span>x</a>
+<a class="sourceLine" id="cb1-18" data-line-number="18">  y &lt;-<span class="st"> </span>problem<span class="op">$</span>y</a>
+<a class="sourceLine" id="cb1-19" data-line-number="19">  signals &lt;-<span class="st"> </span>problem<span class="op">$</span>nonzero</a>
+<a class="sourceLine" id="cb1-20" data-line-number="20">  </a>
+<a class="sourceLine" id="cb1-21" data-line-number="21">  fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(<span class="dt">penalty =</span> <span class="st">"slope"</span>, </a>
+<a class="sourceLine" id="cb1-22" data-line-number="22">               <span class="dt">lambda =</span> <span class="st">"gaussian"</span>, </a>
+<a class="sourceLine" id="cb1-23" data-line-number="23">               <span class="dt">sigma =</span> sigma,</a>
+<a class="sourceLine" id="cb1-24" data-line-number="24">               <span class="dt">intercept =</span> <span class="ot">FALSE</span>)<span class="op">$</span><span class="kw">fit</span>(x, y)</a>
+<a class="sourceLine" id="cb1-25" data-line-number="25">  </a>
+<a class="sourceLine" id="cb1-26" data-line-number="26">  selected_golem &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/MathFun">abs</a></span>(fit<span class="op">$</span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/coef">coef</a></span>()) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb1-27" data-line-number="27">  V &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sets">setdiff</a></span>(selected_golem, signals))</a>
+<a class="sourceLine" id="cb1-28" data-line-number="28">  R &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(selected_golem)</a>
+<a class="sourceLine" id="cb1-29" data-line-number="29">  fdr[i] &lt;-<span class="st"> </span>V<span class="op">/</span>R</a>
+<a class="sourceLine" id="cb1-30" data-line-number="30">}</a>
+<a class="sourceLine" id="cb1-31" data-line-number="31"></a>
+<a class="sourceLine" id="cb1-32" data-line-number="32"><span class="kw"><a href="https://www.rdocumentation.org/packages/lattice/topics/xyplot">xyplot</a></span>(fdr <span class="op">~</span><span class="st"> </span>q, <span class="dt">type =</span> <span class="st">"b"</span>, <span class="dt">ylab =</span> <span class="st">"FDR"</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb1-33" data-line-number="33"><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/latticeExtra/topics/layer">layer_</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/lattice/topics/panel.functions">panel.refline</a></span>(<span class="dt">h =</span> <span class="fl">0.2</span>)) </a></code></pre></div>
 <div class="figure">
 <img src="penalties_files/figure-html/unnamed-chunk-1-1.png" alt="Control of false discovery rate using SLOPE." width="700"><p class="caption">
 Control of false discovery rate using SLOPE.
