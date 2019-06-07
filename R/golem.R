@@ -1,16 +1,325 @@
 #' @include families.R penalties.R solvers.R
-setClass("Golem",
-         slots = c(coefficients = "array",
-                   nonzeros = "numeric",
-                   family = "Family",
-                   penalty = "Penalty",
-                   class_names = "character",
-                   n = "numeric",
-                   p = "numeric",
-                   m = "numeric",
-                   diagnostics = "data.frame",
-                   passes = "numeric",
-                   call = "call"))
+Golem <- R6::R6Class(
+  "Golem",
+  public = list(
+    args = list(),
+
+    family = NULL,
+    penalty = NULL,
+    solver = NULL,
+
+    coefficients = NULL,
+    nonzeros = NULL,
+    class_names = NULL,
+    diagnostics = NULL,
+    passes = 0L,
+
+    initialize = function(family,
+                          penalty,
+                          solver,
+                          intercept,
+                          standardize_features,
+                          orthogonalize,
+                          sigma,
+                          lambda,
+                          fdr,
+                          n_lambda,
+                          lambda_min_ratio,
+                          tol_rel_gap,
+                          tol_infeas,
+                          max_passes,
+                          diagnostics) {
+
+      self$args <- list(family = family,
+                        penalty = penalty,
+                        solver = solver,
+                        intercept = intercept,
+                        standardize_features = standardize_features,
+                        orthogonalize = orthogonalize,
+                        sigma = sigma,
+                        lambda = lambda,
+                        fdr = fdr,
+                        n_lambda = n_lambda,
+                        lambda_min_ratio = lambda_min_ratio,
+                        tol_rel_gap = tol_rel_gap,
+                        tol_infeas = tol_infeas,
+                        max_passes = max_passes,
+                        diagnostics = diagnostics)
+    },
+
+    fit = function(x, y, groups = NULL, ...) {
+
+      self$args <- utils::modifyList(self$args, list(...))
+      args <- self$args
+
+      fit_intercept <- args$intercept
+
+      if (NROW(y) != NROW(x))
+        stop("the number of samples in 'x' and 'y' must match")
+
+      if (NROW(y) == 0)
+        stop("the response (y) is empty")
+
+      if (NROW(x) == 0)
+        stop("the feature matrix (x) is empty")
+
+      if (anyNA(y) || anyNA(x))
+        stop("missing values are not allowed")
+
+      private$n <- n <- NROW(x)
+      private$p <- p <- NCOL(x)
+      private$m <- m <- NCOL(y)
+
+      # convert sparse x to dgCMatrix class from package Matrix.
+      is_sparse <- inherits(x, "sparseMatrix")
+
+      if (is_sparse) {
+        x <- methods::as(x, "dgCMatrix")
+      } else {
+        x <- as.matrix(x)
+      }
+
+      if (args$penalty == "group_slope" &&
+          args$standardize_features &&
+          is_sparse &&
+          args$orthogonalize)
+        stop("orthogonalization is currently not implemented for sparse data ",
+             "when standardization is required")
+
+      # setup penalty settings
+      penalty <- switch(
+        args$penalty,
+
+        slope = Slope$new(lambda = args$lambda,
+                          sigma = args$sigma,
+                          fdr = args$fdr),
+
+        group_slope = GroupSlope$new(groups = groups,
+                                     lambda = args$lambda,
+                                     sigma = args$sigma,
+                                     fdr = args$fdr,
+                                     orthogonalize = args$orthogonalize),
+
+        lasso = Lasso$new(lambda = args$lambda,
+                          lambda_min_ratio = args$lambda_min_ratio,
+                          n_lambda = args$n_lambda)
+      )
+
+      # setup family
+      family <- switch(args$family,
+                       gaussian = Gaussian$new(),
+                       binomial = Binomial$new())
+
+      y_center <- y_scale <- double(m)
+      n_classes <- integer(0)
+      class_names <- character(0)
+
+      c(y, y_center, y_scale, n_classes, class_names) %<-%
+        family$preprocessResponse(y)
+
+      x_center <- x_scale <- double(p)
+      c(x, x_center, x_scale) %<-% standardize(x, args$standardize_features)
+
+      x <- penalty$preprocessFeatures(x,
+                                      x_center,
+                                      x_scale,
+                                      args$standardize_features)
+
+      penalty$setup(family, x, y, y_scale)
+
+      is_slope <- inherits(penalty, "Slope") || inherits(penalty, "GroupSlope")
+
+      # setup solver settings
+      solver <- Fista$new(tol_rel_gap = args$tol_rel_gap,
+                          tol_infeas = args$tol_infeas,
+                          max_passes = args$max_passes,
+                          diagnostics = args$diagnostics)
+
+      # collect response and variable names (if they are given) and otherwise
+      # make new
+      response_names <- colnames(y)
+      variable_names <- colnames(x)
+
+      if (is.null(variable_names))
+        variable_names <- paste0("V", seq_len(p))
+      if (is.null(response_names))
+        response_names <- paste0("y", seq_len(m))
+
+      weights <- penalty$getWeights(x)
+
+      for (j in seq_len(p))
+        x[, j] <- x[, j]/weights[j]
+
+      x_center <- x_center/weights
+
+      lipschitz_constant <-
+        family$lipschitzConstant(x,
+                                 args$intercept,
+                                 x_center,
+                                 x_scale,
+                                 args$standardize_features)
+
+      control <- list(family = family,
+                      penalty = penalty,
+                      solver = solver,
+                      fit_intercept = fit_intercept,
+                      is_sparse = is_sparse,
+                      weights = weights,
+                      standardize_features = args$standardize_features,
+                      x_scaled_center = x_center/x_scale,
+                      lipschitz_constant = lipschitz_constant)
+
+      golemFit <- if (is_sparse) golemSparse else golemDense
+
+      if (is_sparse)
+        x <- methods::as(x, "dgCMatrix")
+
+      if (is_slope && is.null(args$sigma)) {
+        if (inherits(family, "Gaussian")) {
+          control$penalty$sigma <- penalty$sigma <- stats::sd(y)
+          res <- golemFit(x, y, control)
+
+          S_new <- which(res$beta != 0)
+          S <- c()
+
+          while(!isTRUE(all.equal(S, S_new)) && (length(S_new) > 0)) {
+            S <- S_new
+            if (length(S) > n) {
+              stop("sigma estimation fails because more predictors got ",
+                   "selected than there are observations.")
+            }
+
+            new_x <- x[, S, drop = FALSE]
+
+            if (args$intercept)
+              new_x <- Matrix::cbind2(1, new_x)
+
+            OLS <- stats::lm.fit(as.matrix(new_x), y)
+            if (args$standardize_features) {
+              sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S) - 1))
+            } else {
+              sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S)))
+            }
+
+            control$penalty$sigma <- penalty$sigma <- sigma
+
+            res <- golemFit(x, y, control)
+            S_new <- which(res$beta != 0)
+          }
+        } else if (inherits(family, "Binomial")) {
+          control$penalty$sigma <- penalty$sigma <- 0.5
+          res <- golemFit(x, y, control)
+        }
+      } else {
+        res <- golemFit(x, y, control)
+      }
+
+      beta <- sweep(res$beta, 1, weights, "/")
+      x_center <- x_center*weights
+
+      nonzeros <- integer(0)
+
+      c(intercept, beta, nonzeros) %<-% penalty$postProcess(res$intercept,
+                                                            beta,
+                                                            x,
+                                                            y,
+                                                            fit_intercept,
+                                                            x_center,
+                                                            x_scale,
+                                                            y_center,
+                                                            y_scale)
+
+      n_penalties <- dim(beta)[3]
+
+      if (args$intercept) {
+        coefficients <- array(NA, dim = c(p + 1, m, n_penalties))
+
+        for (i in seq_len(n_penalties)) {
+          coefficients[1, , i] <- intercept[, , i]
+          coefficients[-1, , i] <- beta[, , i]
+        }
+        dimnames(coefficients) <- list(c("(Intercept)", variable_names),
+                                       response_names,
+                                       paste0("p", seq_len(n_penalties)))
+      } else {
+        coefficients <- beta
+        dimnames(coefficients) <- list(variable_names,
+                                       response_names,
+                                       paste0("p", seq_len(n_penalties)))
+      }
+
+      diagnostics <- solver$diagnostics
+
+      if (diagnostics) {
+        nl <- length(res$time)
+        nn <- lengths(res$time)
+        time <- unlist(res$time)
+        primal <- unlist(res$primals)
+        dual <- unlist(res$duals)
+        infeasibility <- unlist(res$infeasibilities)
+
+        diag <- data.frame(time = time,
+                           primal = primal,
+                           dual = dual,
+                           infeasibility = infeasibility,
+                           penalty = rep(seq_len(nl), nn))
+      } else {
+        diag <- data.frame()
+      }
+
+      self$diagnostics <- diag
+
+      self$coefficients <- coefficients
+      self$nonzeros <- nonzeros
+
+      self$family <- family
+      self$penalty <- penalty
+      self$solver <- solver
+
+      self$class_names <- class_names
+      self$passes <- as.integer(res$passes)
+
+      private$n <- n
+      private$p <- p
+      private$m <- m
+
+      invisible(self)
+    },
+
+    coef = function() {
+      drop(self$coefficients)
+    },
+
+    predict = function(x, type = c("link", "response", "class")) {
+      beta <- self$coef()
+
+      if (inherits(x, "sparseMatrix"))
+        x <- methods::as(x, "dgCMatrix")
+
+      if (inherits(x, "data.frame"))
+        x <- as.matrix(x)
+
+      if (names(beta)[1] == "(Intercept)") {
+        x <- methods::cbind2(1, x)
+      }
+
+      lin_pred <- x %*% beta
+
+      switch(
+        match.arg(type),
+        link = lin_pred,
+        response = self$family$link(lin_pred),
+        class = self$family$predictClass(lin_pred, self$class_names)
+      )
+    }
+  ),
+
+  private = list(
+    n = NULL,
+    p = NULL,
+    m = NULL
+  )
+)
 
 #' Regularized Generalized Linear Models
 #'
@@ -19,6 +328,26 @@ setClass("Golem",
 #'
 #' The objective for each model is simply the loss function for
 #' each family plus a penalty term.
+#'
+#' @section Methods:
+#'
+#' \describe{
+#'   \item{`fit(x, y)`}{
+#'     \tabular{lll}{
+#'     `x` \tab\tab a feature matrix. can be either a dense matrix of the
+#'              regular kind or a sparse matrix inheriting from
+#'              [Matrix::sparseMatrix] \cr
+#'     `y` \tab\tab response \cr
+#'     }
+#'     This method does the actual fitting of data with models constructed
+#'     from [golem()].
+#'   }
+#'   \item{`coef()`}{
+#'     Return the coefficients from the model fit (after dropping extraneous
+#'     dimensions). If you prefer to always return a three-dimensional array,
+#'     call `model$coefficients` instead.
+#'   }
+#' }
 #'
 #' @section Families:
 #'
@@ -90,17 +419,12 @@ setClass("Golem",
 #' FISTA (Fast Iterative Shrinking-Tresholding Algorithm) is an extension
 #' of the classical gradient algorithm.
 #'
-#' @param x feature matrix
-#' @param y response
 #' @param family response type. See **Families** for details.
 #' @param penalty the regularization penalty to use. See **Penalties** for
 #'   details.
 #' @param solver the numerical solver to use. See **Solvers** for details.
 #' @param intercept whether to fit an intercept
 #' @param standardize_features whether to standardize features (predictors)
-#' @param ... currently ignored
-#' @param groups vector of integers to indicate group membership of each
-#'   feature (only applies to Group SLOPE)
 #' @param sigma noise estimate (only applies to SLOPE and Group SLOPE)
 #' @param lambda either a character vector indicating the method used
 #'   to construct the lambda path or
@@ -122,17 +446,24 @@ setClass("Golem",
 #'
 #' @examples
 #'
-#' # Gaussian response, slope penalty (default)
-#' gaussian_fit <- golem(abalone$x, abalone$y, family = "gaussian")
+#' # Gaussian response, slope penalty (default) --------------------------------
 #'
-#' # Binomial response, lasso penalty
-#' binomial_fit <- golem(heart$x, heart$y, family = "binomial",
-#'                       penalty = "lasso")
+#' # Specify the model
+#' gaussian_model <- golem(family = "gaussian")
 #'
-golem <- function(x,
-                  y,
-                  groups = NULL,
-                  family = c("gaussian", "binomial"),
+#' # Fit the model
+#' gaussian_model$fit(abalone$x, abalone$y)
+#'
+#' # Get coefficients from the model fit
+#' gaussian_model$coef()
+#'
+#' # Binomial response, lasso penalty ------------------------------------------
+#'
+#' binomial_model <- golem(family = "binomial", penalty = "lasso")
+#'
+#' binomial_model$fit(heart$x, heart$y)
+#'
+golem <- function(family = c("gaussian", "binomial"),
                   penalty = c("slope", "group_slope", "lasso"),
                   solver = "fista",
                   intercept = TRUE,
@@ -142,248 +473,49 @@ golem <- function(x,
                   lambda = NULL,
                   fdr = 0.2,
                   n_lambda = 100,
-                  lambda_min_ratio = ifelse(NROW(x) < NCOL(x), 0.01, 0.0001),
+                  lambda_min_ratio = "auto",
                   tol_rel_gap = 1e-6,
                   tol_infeas = 1e-6,
                   max_passes = 1e4,
-                  diagnostics = FALSE,
-                  ...) {
-
-  stopifnot(is.logical(intercept),
-            is.logical(standardize_features),
-            is.character(family),
-            is.character(solver),
-            is.character(penalty))
-
-  # collect the call so we can use it in update() later on
-  ocall <- match.call()
+                  diagnostics = FALSE) {
 
   family <- match.arg(family)
   penalty <- match.arg(penalty)
   solver <- match.arg(solver)
 
-  fit_intercept <- intercept
+  stopifnot(is.character(lambda_min_ratio) ||
+              (lambda_min_ratio > 0 && lambda_min_ratio < 1),
+            tol_rel_gap > 0,
+            tol_infeas > 0,
+            max_passes > 0,
+            n_lambda >= 1,
+            fdr > 0,
+            fdr < 1,
+            is.null(sigma) || (sigma >= 0 && is.finite(sigma)),
+            is.null(lambda) || is.character(lambda) || is.numeric(lambda),
+            is.finite(max_passes),
+            is.finite(tol_rel_gap),
+            is.finite(tol_infeas),
+            is.finite(n_lambda),
+            is.logical(diagnostics),
+            is.logical(intercept),
+            is.logical(standardize_features),
+            is.logical(orthogonalize))
 
-  if (NROW(y) != NROW(x))
-    stop("the number of samples in 'x' and 'y' must match")
-
-  if (NROW(y) == 0)
-    stop("the response (y) is empty")
-
-  if (NROW(x) == 0)
-    stop("the feature matrix (x) is empty")
-
-  if (anyNA(y) || anyNA(x))
-    stop("missing values are not allowed")
-
-  n <- NROW(x)
-  p <- NCOL(x)
-  m <- NCOL(y)
-
-  # convert sparse x to dgCMatrix class from package Matrix.
-  is_sparse <- inherits(x, "sparseMatrix")
-
-  if (is_sparse) {
-    x <- methods::as(x, "dgCMatrix")
-  } else {
-    x <- as.matrix(x)
-  }
-
-  if (penalty == "group_slope" && standardize_features && is_sparse &&
-      orthogonalize)
-    stop("orthogonalization is currently not implemented for sparse data ",
-         "when standardization is required")
-
-  # setup penalty settings
-  penalty <- switch(penalty,
-                    slope = Slope(lambda = lambda,
-                                  sigma = sigma,
-                                  fdr = fdr),
-                    group_slope = GroupSlope(groups = groups,
-                                             lambda = lambda,
-                                             sigma = sigma,
-                                             fdr = fdr,
-                                             orthogonalize = orthogonalize),
-                    lasso = Lasso(lambda = lambda,
-                                  lambda_min_ratio = lambda_min_ratio,
-                                  n_lambda = n_lambda))
-
-  # setup family
-  family <- switch(family,
-                   gaussian = Gaussian(),
-                   binomial = Binomial())
-
-  y_center <- y_scale <- double(m)
-  n_classes <- integer(0)
-  class_names <- character(0)
-
-  c(y, y_center, y_scale, n_classes, class_names) %<-%
-    preprocessResponse(family, y)
-
-  x_center <- x_scale <- double(p)
-  c(x, x_center, x_scale) %<-% standardize(x, standardize_features)
-
-  c(penalty, x) %<-% preprocessFeatures(penalty,
-                                        x,
-                                        x_center,
-                                        x_scale,
-                                        standardize_features)
-
-  penalty <- setup(penalty, family, x, y, y_scale)
-
-  is_slope <- inherits(penalty, "Slope") || inherits(penalty, "GroupSlope")
-
-  # setup solver settings
-  solver <- Fista(tol_rel_gap = tol_rel_gap,
-                  tol_infeas = tol_infeas,
-                  max_passes = max_passes,
-                  diagnostics = diagnostics)
-
-  # collect response and variable names (if they are given) and otherwise
-  # make new
-  response_names <- colnames(y)
-  variable_names <- colnames(x)
-
-  if (is.null(variable_names))
-    variable_names <- paste0("V", seq_len(p))
-  if (is.null(response_names))
-    response_names <- paste0("y", seq_len(m))
-
-  weights <- getWeights(penalty, x)
-
-  for (j in seq_len(p))
-    x[, j] <- x[, j]/weights[j]
-
-  x_center <- x_center/weights
-
-  lipschitz_constant <- lipschitzConstant(family,
-                                          penalty,
-                                          x,
-                                          fit_intercept,
-                                          x_center,
-                                          x_scale,
-                                          standardize_features)
-
-  control <- list(family = family,
-                  penalty = penalty,
-                  solver = solver,
-                  fit_intercept = fit_intercept,
-                  is_sparse = is_sparse,
-                  weights = weights,
-                  standardize_features = standardize_features,
-                  x_scaled_center = x_center/x_scale,
-                  lipschitz_constant = lipschitz_constant)
-
-  golemFit <- if (is_sparse) golemSparse else golemDense
-
-  if (is_sparse)
-    x <- methods::as(x, "dgCMatrix")
-
-  if (is_slope && is.null(sigma)) {
-    if (inherits(family, "Gaussian")) {
-      control$penalty@sigma <- penalty@sigma <- stats::sd(y)
-      res <- golemFit(x, y, control)
-
-      S_new <- which(res$beta != 0)
-      S <- c()
-
-      while(!isTRUE(all.equal(S, S_new)) && (length(S_new) > 0)) {
-        S <- S_new
-        if (length(S) > n) {
-          stop("sigma estimation fails because more predictors got ",
-               "selected than there are observations.")
-        }
-
-        new_x <- x[, S, drop = FALSE]
-
-        if (fit_intercept)
-          new_x <- Matrix::cbind2(1, new_x)
-
-        OLS <- stats::lm.fit(as.matrix(new_x), y)
-        if (standardize_features) {
-          sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S) - 1))
-        } else {
-          sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S)))
-        }
-
-        control$penalty@sigma <- penalty@sigma <- sigma
-
-        res <- golemFit(x, y, control)
-        S_new <- which(res$beta != 0)
-      }
-    } else if (inherits(family, "Binomial")) {
-      control$penalty@sigma <- penalty@sigma <- 0.5
-      res <- golemFit(x, y, control)
-    }
-  } else {
-    res <- golemFit(x, y, control)
-  }
-
-  beta <- sweep(res$beta, 1, weights, "/")
-  x_center <- x_center*weights
-
-  nonzeros <- integer(0)
-
-  c(intercept, beta, nonzeros) %<-% postProcess(penalty,
-                                                res$intercept,
-                                                beta,
-                                                x,
-                                                y,
-                                                fit_intercept,
-                                                x_center,
-                                                x_scale,
-                                                y_center,
-                                                y_scale)
-
-  n_penalties <- dim(beta)[3]
-
-  if (fit_intercept) {
-    coefficients <- array(NA, dim = c(p + 1, m, n_penalties))
-
-    for (i in seq_len(n_penalties)) {
-      coefficients[1, , i] <- intercept[, , i]
-      coefficients[-1, , i] <- beta[, , i]
-    }
-    dimnames(coefficients) <- list(c("(Intercept)", variable_names),
-                                   response_names,
-                                   paste0("p", seq_len(n_penalties)))
-  } else {
-    coefficients <- beta
-    dimnames(coefficients) <- list(variable_names,
-                                   response_names,
-                                   paste0("p", seq_len(n_penalties)))
-  }
-
-  diagnostics <- solver@diagnostics
-
-  if (diagnostics) {
-    nl <- length(res$time)
-    nn <- lengths(res$time)
-    time <- unlist(res$time)
-    primal <- unlist(res$primals)
-    dual <- unlist(res$duals)
-    infeasibility <- unlist(res$infeasibilities)
-
-    diag <- data.frame(time = time,
-                       primal = primal,
-                       dual = dual,
-                       infeasibility = infeasibility,
-                       penalty = rep(seq_len(nl), nn))
-  } else {
-    diag <- data.frame()
-  }
-
-  new("Golem",
-      coefficients = coefficients,
-      nonzeros = nonzeros,
-      family = family,
-      penalty = penalty,
-      class_names = class_names,
-      n = n,
-      p = p,
-      m = m,
-      diagnostics = diag,
-      passes = as.integer(res$passes),
-      call = ocall)
+  Golem$new(family = family,
+            penalty = penalty,
+            solver = solver,
+            intercept = intercept,
+            standardize_features = standardize_features,
+            orthogonalize = orthogonalize,
+            sigma = sigma,
+            lambda = lambda,
+            fdr = fdr,
+            n_lambda = n_lambda,
+            lambda_min_ratio = lambda_min_ratio,
+            tol_rel_gap = tol_rel_gap,
+            tol_infeas = tol_infeas,
+            max_passes = max_passes,
+            diagnostics = diagnostics)
 }
 

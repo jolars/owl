@@ -50,7 +50,8 @@ Imports:
     methods,
     Rcpp,
     grpSLOPE,
-    zeallot
+    zeallot,
+    R6
 LinkingTo:
     Rcpp (>= 1.0.0),
     RcppArmadillo (>= 0.9.200.7.0)
@@ -74,16 +75,14 @@ BugReports: https://github.com/jolars/golem/issues
 VignetteBuilder: knitr
 Collate: 
     'RcppExports.R'
-    'solvers.R'
-    'utils.R'
-    'families.R'
-    'penalties.R'
-    'golem.R'
     'coef.R'
     'data.R'
+    'families.R'
     'golem-package.R'
+    'solvers.R'
+    'utils.R'
+    'penalties.R'
+    'golem.R'
     'groupslope-lambda.R'
-    'lipschitz-constant.R'
     'post-processing.R'
     'pre-processing.R'
-    'predict.R'

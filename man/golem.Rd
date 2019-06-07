@@ -4,22 +4,14 @@
 \alias{golem}
 \title{Regularized Generalized Linear Models}
 \usage{
-golem(x, y, groups = NULL, family = c("gaussian", "binomial"),
-  penalty = c("slope", "group_slope", "lasso"), solver = "fista",
-  intercept = TRUE, standardize_features = TRUE,
-  orthogonalize = TRUE, sigma = NULL, lambda = NULL, fdr = 0.2,
-  n_lambda = 100, lambda_min_ratio = ifelse(NROW(x) < NCOL(x), 0.01,
-  1e-04), tol_rel_gap = 1e-06, tol_infeas = 1e-06,
-  max_passes = 10000, diagnostics = FALSE, ...)
+golem(family = c("gaussian", "binomial"), penalty = c("slope",
+  "group_slope", "lasso"), solver = "fista", intercept = TRUE,
+  standardize_features = TRUE, orthogonalize = TRUE, sigma = NULL,
+  lambda = NULL, fdr = 0.2, n_lambda = 100,
+  lambda_min_ratio = "auto", tol_rel_gap = 1e-06, tol_infeas = 1e-06,
+  max_passes = 10000, diagnostics = FALSE)
 }
 \arguments{
-\item{x}{feature matrix}
-
-\item{y}{response}
-
-\item{groups}{vector of integers to indicate group membership of each
-feature (only applies to Group SLOPE)}
-
 \item{family}{response type. See \strong{Families} for details.}
 
 \item{penalty}{the regularization penalty to use. See \strong{Penalties} for
@@ -56,8 +48,6 @@ Group SLOPE)}
 
 \item{diagnostics}{should diagnostics be saved for the model fit (timings,
 primal and dual objectives, and infeasibility)}
-
-\item{...}{currently ignored}
 }
 \value{
 An object of class \code{"Golem"}.
@@ -70,6 +60,28 @@ optimization routines suitable to big data problems.
 The objective for each model is simply the loss function for
 each family plus a penalty term.
 }
+\section{Methods}{
+
+
+\describe{
+\item{\code{fit(x, y)}}{
+\tabular{lll}{
+\code{x} \tab\tab a feature matrix. can be either a dense matrix of the
+regular kind or a sparse matrix inheriting from
+\link[Matrix:sparseMatrix]{Matrix::sparseMatrix} \cr
+\code{y} \tab\tab response \cr
+}
+This method does the actual fitting of data with models constructed
+from \code{\link[=golem]{golem()}}.
+}
+\item{\code{coef()}}{
+Return the coefficients from the model fit (after dropping extraneous
+dimensions). If you prefer to always return a three-dimensional array,
+call \code{model$coefficients} instead.
+}
+}
+}
+
 \section{Families}{
 
 
@@ -148,11 +160,21 @@ of the classical gradient algorithm.
 
 \examples{
 
-# Gaussian response, slope penalty (default)
-gaussian_fit <- golem(abalone$x, abalone$y, family = "gaussian")
+# Gaussian response, slope penalty (default) --------------------------------
 
-# Binomial response, lasso penalty
-binomial_fit <- golem(heart$x, heart$y, family = "binomial",
-                      penalty = "lasso")
+# Specify the model
+gaussian_model <- golem(family = "gaussian")
+
+# Fit the model
+gaussian_model$fit(abalone$x, abalone$y)
+
+# Get coefficients from the model fit
+gaussian_model$coef()
+
+# Binomial response, lasso penalty ------------------------------------------
+
+binomial_model <- golem(family = "binomial", penalty = "lasso")
+
+binomial_model$fit(heart$x, heart$y)
 
 }

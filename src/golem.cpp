@@ -20,13 +20,13 @@ golemCpp(const T& x,
   auto p = x.n_cols;
 
   // parameter packs for penalty and solver
-  auto penalty_args = as<Rcpp::S4>(control["penalty"]);
-  auto solver_args = as<Rcpp::S4>(control["solver"]);
+  auto penalty_args = as<Rcpp::List>(control["penalty"]);
+  auto solver_args = as<Rcpp::List>(control["solver"]);
   auto lipschitz_constant = as<double>(control["lipschitz_constant"]);
 
-  auto family_args = as<Rcpp::S4>(control["family"]);
+  auto family_args = as<Rcpp::List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
-  bool diagnostics = solver_args.slot("diagnostics");
+  bool diagnostics = as<bool>(solver_args["diagnostics"]);
   bool standardize_features = as<bool>(control["standardize_features"]);
   bool is_sparse = as<bool>(control["is_sparse"]);
 
@@ -34,7 +34,7 @@ golemCpp(const T& x,
   vec x_scaled_center = as<vec>(control["x_scaled_center"]);
 
   // setup family and response
-  auto family = setupFamily(family_args.slot("name"),
+  auto family = setupFamily(as<std::string>(family_args["name"]),
                             fit_intercept,
                             standardize_features);
   auto penalty = setupPenalty(penalty_args);
