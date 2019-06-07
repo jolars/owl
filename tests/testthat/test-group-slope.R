@@ -86,7 +86,7 @@ test_that("group_slope lambda sequences are computed properly", {
 test_that("sigma estimation for Group SLOPE", {
   set.seed(1)
 
-  problem <- golem:::random_problem(10, 5, sigma = 1)
+  problem <- golem:::randomProblem(10, 5, sigma = 1)
 
   x <- problem$x
   y <- problem$y
