@@ -22,6 +22,7 @@ golemCpp(const T& x,
   // parameter packs for penalty and solver
   auto penalty_args = as<Rcpp::List>(control["penalty"]);
   auto solver_args = as<Rcpp::List>(control["solver"]);
+  auto groups = as<Rcpp::List>(control["groups"]);
   auto lipschitz_constant = as<double>(control["lipschitz_constant"]);
 
   auto family_args = as<Rcpp::List>(control["family"]);
@@ -37,7 +38,8 @@ golemCpp(const T& x,
   auto family = setupFamily(as<std::string>(family_args["name"]),
                             fit_intercept,
                             standardize_features);
-  auto penalty = setupPenalty(penalty_args);
+
+  auto penalty = setupPenalty(penalty_args, groups);
   auto n_penalties = penalty->pathLength();
 
   cube betas(p, m, n_penalties);

@@ -1,37 +1,5 @@
 #' @include penalties.R
 
-orthogonalizeGroups <- function(x,
-                                group_id,
-                                x_center,
-                                x_scale,
-                                standardize_features) {
-  getGroupQR <- function(ids) {
-    submat <- x[, ids, drop = FALSE]
-
-    if (length(ids) == 1) {
-      Q <- submat
-      R <- 1
-      P <- 1
-    } else {
-
-      if (inherits(submat, "sparseMatrix")) {
-        submat_qr <- Matrix::qr(submat)
-        Q <- Matrix::qr.Q(submat_qr)
-        R <- Matrix::qrR(submat_qr)
-        P <- submat_qr@q + 1
-      } else {
-        submat_qr <- qr(as.matrix(submat), LAPACK = TRUE)
-        Q <- qr.Q(submat_qr)
-        R <- qr.R(submat_qr)
-        P <- submat_qr$pivot
-      }
-    }
-    list(Q = Q, R = R, P = P)
-  }
-
-  lapply(group_id, getGroupQR)
-}
-
 standardize <- function(x, standardize_features) {
     p <- NCOL(x)
 

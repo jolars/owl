@@ -75,8 +75,9 @@ test_that("group_slope lambda sequences are computed properly", {
     groups <- sample(1:p, replace = TRUE)
     g$fit(x, y, groups = groups, lambda = lambda, fdr = fdr)
 
-    grps_lambda <- grpSLOPE:::lambdaGroupSLOPE(fdr = fdr, group = groups,
-                                               wt = g$penalty$wt,
+    grps_lambda <- grpSLOPE:::lambdaGroupSLOPE(fdr = fdr,
+                                               group = groups,
+                                               wt = sqrt(table(groups)),
                                                n.obs = n,
                                                method = lambda)
     expect_equal(g$penalty$lambda, grps_lambda)

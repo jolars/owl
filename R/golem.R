@@ -53,6 +53,8 @@ Golem <- R6::R6Class(
       args <- self$args
 
       fit_intercept <- args$intercept
+      orthogonalize <- args$orthogonalize && args$penalty == "group_slope"
+      group_penalty <- args$penalty == "group_slope"
 
       if (NROW(y) != NROW(x))
         stop("the number of samples in 'x' and 'y' must match")
@@ -65,6 +67,9 @@ Golem <- R6::R6Class(
 
       if (anyNA(y) || anyNA(x))
         stop("missing values are not allowed")
+
+      if (anyNA(groups))
+        stop("NA values are not allowed in 'groups'")
 
       private$n <- n <- NROW(x)
       private$p <- p <- NCOL(x)
@@ -86,25 +91,6 @@ Golem <- R6::R6Class(
         stop("orthogonalization is currently not implemented for sparse data ",
              "when standardization is required")
 
-      # setup penalty settings
-      penalty <- switch(
-        args$penalty,
-
-        slope = Slope$new(lambda = args$lambda,
-                          sigma = args$sigma,
-                          fdr = args$fdr),
-
-        group_slope = GroupSlope$new(groups = groups,
-                                     lambda = args$lambda,
-                                     sigma = args$sigma,
-                                     fdr = args$fdr,
-                                     orthogonalize = args$orthogonalize),
-
-        lasso = Lasso$new(lambda = args$lambda,
-                          lambda_min_ratio = args$lambda_min_ratio,
-                          n_lambda = args$n_lambda)
-      )
-
       # setup family
       family <- switch(args$family,
                        gaussian = Gaussian$new(),
@@ -120,12 +106,40 @@ Golem <- R6::R6Class(
       x_center <- x_scale <- double(p)
       c(x, x_center, x_scale) %<-% standardize(x, args$standardize_features)
 
-      x <- penalty$preprocessFeatures(x,
-                                      x_center,
-                                      x_scale,
-                                      args$standardize_features)
+      if (group_penalty) {
+        c(x, groups) %<-% groupify(x,
+                                   x_center,
+                                   x_scale,
+                                   groups,
+                                   args$standardize_features,
+                                   orthogonalize)
+      }
 
-      penalty$setup(family, x, y, y_scale)
+      # setup penalty settings
+      penalty <- switch(
+        args$penalty,
+
+        slope = Slope$new(x = x,
+                          y = y,
+                          lambda = args$lambda,
+                          sigma = args$sigma,
+                          fdr = args$fdr),
+
+        group_slope = GroupSlope$new(x = x,
+                                     y = y,
+                                     groups = groups,
+                                     lambda = args$lambda,
+                                     sigma = args$sigma,
+                                     fdr = args$fdr),
+
+        lasso = Lasso$new(x = x,
+                          y = y,
+                          y_scale = y_scale,
+                          family = family,
+                          lambda = args$lambda,
+                          lambda_min_ratio = args$lambda_min_ratio,
+                          n_lambda = args$n_lambda)
+      )
 
       is_slope <- inherits(penalty, "Slope") || inherits(penalty, "GroupSlope")
 
@@ -145,12 +159,14 @@ Golem <- R6::R6Class(
       if (is.null(response_names))
         response_names <- paste0("y", seq_len(m))
 
-      weights <- penalty$getWeights(x)
+      if (group_penalty) {
+        weights <- groups$wt_per_coef
 
-      for (j in seq_len(p))
-        x[, j] <- x[, j]/weights[j]
+        for (j in seq_len(p))
+          x[, j] <- x[, j]/weights[j]
 
-      x_center <- x_center/weights
+        x_center <- x_center/weights
+      }
 
       lipschitz_constant <-
         family$lipschitzConstant(x,
@@ -162,6 +178,7 @@ Golem <- R6::R6Class(
       control <- list(family = family,
                       penalty = penalty,
                       solver = solver,
+                      groups = groups,
                       fit_intercept = fit_intercept,
                       is_sparse = is_sparse,
                       weights = weights,
@@ -214,10 +231,19 @@ Golem <- R6::R6Class(
         res <- golemFit(x, y, control)
       }
 
-      beta <- sweep(res$beta, 1, weights, "/")
-      x_center <- x_center*weights
+      beta <- res$beta
+
+      # reverse scaling when using group penalty type
+      if (group_penalty) {
+        beta <- sweep(beta, 1, weights, "/")
+        x_center <- x_center*weights
+      }
 
       nonzeros <- integer(0)
+
+      if (group_penalty && orthogonalize) {
+        beta <- unorthogonalize(beta, groups)
+      }
 
       c(intercept, beta, nonzeros) %<-% penalty$postProcess(res$intercept,
                                                             beta,
@@ -227,7 +253,8 @@ Golem <- R6::R6Class(
                                                             x_center,
                                                             x_scale,
                                                             y_center,
-                                                            y_scale)
+                                                            y_scale,
+                                                            groups)
 
       n_penalties <- dim(beta)[3]
 

@@ -83,6 +83,7 @@ Collate:
     'utils.R'
     'penalties.R'
     'golem.R'
+    'groupify.R'
     'groupslope-lambda.R'
     'post-processing.R'
     'pre-processing.R'
