@@ -1,7 +1,7 @@
 test_that("SLOPE and golem agree for gaussian designs", {
   set.seed(1)
 
-  problem <- golem:::random_problem(1000, 50, sigma = 1)
+  problem <- golem:::randomProblem(1000, 50, sigma = 1)
 
   x <- scale(problem$x)
   y <- problem$y
@@ -22,7 +22,7 @@ test_that("SLOPE and golem agree for gaussian designs", {
 test_that("SLOPE and golem agree when computing lambda sequences", {
   set.seed(1)
 
-  problem <- golem:::random_problem(10, 5, sigma = 1)
+  problem <- golem:::randomProblem(10, 5, sigma = 1)
 
   x <- problem$x
   y <- problem$y
@@ -39,7 +39,7 @@ test_that("SLOPE and golem agree when computing lambda sequences", {
 test_that("sigma estimation for SLOPE", {
   set.seed(1)
 
-  problem <- golem:::random_problem(10, 5, sigma = 1)
+  problem <- golem:::randomProblem(10, 5, sigma = 1)
 
   x <- problem$x
   y <- problem$y

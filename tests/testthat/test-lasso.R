@@ -9,5 +9,5 @@ test_that("lasso induces sparse models", {
                standardize_features = FALSE,
                n_lambda = 10)$fit(x, y)
 
-  expect_equivalent(glm_fit$lambda, fit$penalty$lambda)
+  expect_equivalent(glm_fit$lambda, fit$penalty$lambda, tol = 1e-4)
 })

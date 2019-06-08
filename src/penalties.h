@@ -25,10 +25,6 @@ public:
   step(const arma::uword i) = 0;
 
   virtual
-  arma::uword
-  pathLength() = 0;
-
-  virtual
   double
   lambdaInfeas() = 0;
 };
@@ -69,12 +65,6 @@ public:
     // lambda paths are currently not implemented for SLOPE
   }
 
-  arma::uword
-  pathLength()
-  {
-    return 1;
-  }
-
   double
   lambdaInfeas()
   {
@@ -86,16 +76,16 @@ class GroupSLOPE : public Penalty {
 public:
   const double sigma;
   const arma::vec lambda;
-  const arma::field<arma::uvec> groups;
+  const arma::field<arma::uvec> group_id;
   const arma::uword n_groups;
 
   GroupSLOPE(const double sigma,
              const arma::vec& lambda,
-             const arma::field<arma::uvec>& groups)
+             const arma::field<arma::uvec>& group_id)
              : sigma(sigma),
                lambda(lambda),
-               groups(groups),
-               n_groups(groups.n_elem) {}
+               group_id(group_id),
+               n_groups(group_id.n_elem) {}
 
   arma::mat
   eval(const arma::mat& beta, const double step_size)
@@ -105,14 +95,14 @@ public:
     vec group_norms(n_groups);
 
     for (uword i = 0; i < n_groups; ++i)
-      group_norms(i) = norm(beta(groups(i)), "fro");
+      group_norms(i) = norm(beta(group_id(i)), "fro");
 
     auto prox_norms = slopeProx(group_norms, step_size, lambda, sigma);
 
     vec prox_solution(size(beta));
 
     for (uword i = 0; i < n_groups; ++i) {
-      uvec idx = groups(i);
+      uvec idx = group_id(i);
       prox_solution(idx) = beta(idx) * (prox_norms(i)/group_norms(i));
     }
 
@@ -127,7 +117,7 @@ public:
     vec beta_norms(n_groups);
 
     for (uword i = 0; i < n_groups; ++i)
-      beta_norms(i) = norm(beta(groups(i)), "fro");
+      beta_norms(i) = norm(beta(group_id(i)), "fro");
 
     return dot(sigma*lambda, sort(beta_norms, "descending"));
   }
@@ -140,7 +130,7 @@ public:
     vec grad_norms(n_groups);
 
     for (uword i = 0; i < n_groups; ++i)
-      grad_norms(i) = norm(grad(groups(i)), "fro");
+      grad_norms(i) = norm(grad(group_id(i)), "fro");
 
     const vec grad_norms_sorted = sort(grad_norms, "descending");
     return std::max(cumsum(grad_norms_sorted - sigma*lambda).max(), 0.0);
@@ -150,12 +140,6 @@ public:
   step(const arma::uword i)
   {
     // lambda paths are currently not implemented for SLOPE
-  }
-
-  arma::uword
-  pathLength()
-  {
-    return 1;
   }
 
   double
@@ -201,12 +185,6 @@ public:
       lambda = lambda_path(i);
   }
 
-  arma::uword
-  pathLength()
-  {
-    return lambda_path.n_elem;
-  }
-
   double
   lambdaInfeas()
   {
@@ -217,7 +195,7 @@ public:
 // helper to choose penalty
 inline
 std::unique_ptr<Penalty>
-setupPenalty(const Rcpp::List& args)
+setupPenalty(const Rcpp::List& args, const Rcpp::List& groups)
 {
   using namespace arma;
   using Rcpp::as;
@@ -233,14 +211,15 @@ setupPenalty(const Rcpp::List& args)
   } else if (name == "group_slope") {
 
     double sigma = as<double>(args["sigma"]);
-    bool orthogonalize = as<bool>(args["do_orthogonalize"]);
+    bool orthogonalize = as<bool>(groups["orthogonalize"]);
 
-    field<uvec> groups = orthogonalize ? as<field<uvec>>(args["ortho_group_id"])
-                                       : as<field<uvec>>(args["group_id"]);
+    field<uvec> group_id =
+      orthogonalize ? as<field<uvec>>(groups["ortho_group_id"])
+                    : as<field<uvec>>(groups["group_id"]);
 
-    groups.for_each([](uvec& x) {x -= 1;}); // fix indexing for c++
+    group_id.for_each([](uvec& x) {x -= 1;}); // fix indexing for c++
 
-    return std::unique_ptr<GroupSLOPE>(new GroupSLOPE{sigma, lambda, groups});
+    return std::unique_ptr<GroupSLOPE>(new GroupSLOPE{sigma, lambda, group_id});
   }
 
   // else lasso

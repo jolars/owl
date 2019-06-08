@@ -22,13 +22,15 @@ golemCpp(const T& x,
   // parameter packs for penalty and solver
   auto penalty_args = as<Rcpp::List>(control["penalty"]);
   auto solver_args = as<Rcpp::List>(control["solver"]);
+  auto groups = as<Rcpp::List>(control["groups"]);
   auto lipschitz_constant = as<double>(control["lipschitz_constant"]);
 
   auto family_args = as<Rcpp::List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
-  bool diagnostics = as<bool>(solver_args["diagnostics"]);
-  bool standardize_features = as<bool>(control["standardize_features"]);
-  bool is_sparse = as<bool>(control["is_sparse"]);
+  auto diagnostics = as<bool>(solver_args["diagnostics"]);
+  auto standardize_features = as<bool>(control["standardize_features"]);
+  auto is_sparse = as<bool>(control["is_sparse"]);
+  auto n_penalties = as<uword>(control["n_penalties"]);
 
   // get scaled vector of feature matrix centers for use in sparse fitting
   vec x_scaled_center = as<vec>(control["x_scaled_center"]);
@@ -37,8 +39,8 @@ golemCpp(const T& x,
   auto family = setupFamily(as<std::string>(family_args["name"]),
                             fit_intercept,
                             standardize_features);
-  auto penalty = setupPenalty(penalty_args);
-  auto n_penalties = penalty->pathLength();
+
+  auto penalty = setupPenalty(penalty_args, groups);
 
   cube betas(p, m, n_penalties);
   cube intercepts(1, m, n_penalties);

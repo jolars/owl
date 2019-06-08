@@ -75,18 +75,19 @@ test_that("group_slope lambda sequences are computed properly", {
     groups <- sample(1:p, replace = TRUE)
     g$fit(x, y, groups = groups, lambda = lambda, fdr = fdr)
 
-    grps_lambda <- grpSLOPE:::lambdaGroupSLOPE(fdr = fdr, group = groups,
-                                               wt = g$penalty$wt,
+    grps_lambda <- grpSLOPE:::lambdaGroupSLOPE(fdr = fdr,
+                                               group = groups,
+                                               wt = sqrt(table(groups)),
                                                n.obs = n,
                                                method = lambda)
-    expect_equal(g$penalty$lambda, grps_lambda)
+    expect_equivalent(g$penalty$lambda, grps_lambda)
   }
 })
 
 test_that("sigma estimation for Group SLOPE", {
   set.seed(1)
 
-  problem <- golem:::random_problem(10, 5, sigma = 1)
+  problem <- golem:::randomProblem(10, 5, sigma = 1)
 
   x <- problem$x
   y <- problem$y
