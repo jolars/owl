@@ -141,6 +141,8 @@ Golem <- R6::R6Class(
                           n_lambda = args$n_lambda)
       )
 
+      n_penalties <- NCOL(penalty$lambda)
+
       is_slope <- inherits(penalty, "Slope") || inherits(penalty, "GroupSlope")
 
       # setup solver settings
@@ -184,7 +186,8 @@ Golem <- R6::R6Class(
                       weights = weights,
                       standardize_features = args$standardize_features,
                       x_scaled_center = x_center/x_scale,
-                      lipschitz_constant = lipschitz_constant)
+                      lipschitz_constant = lipschitz_constant,
+                      n_penalties = n_penalties)
 
       golemFit <- if (is_sparse) golemSparse else golemDense
 
@@ -500,7 +503,7 @@ golem <- function(family = c("gaussian", "binomial"),
                   lambda = NULL,
                   fdr = 0.2,
                   n_lambda = 100,
-                  lambda_min_ratio = "auto",
+                  lambda_min_ratio = NULL,
                   tol_rel_gap = 1e-6,
                   tol_infeas = 1e-6,
                   max_passes = 1e4,
@@ -510,7 +513,7 @@ golem <- function(family = c("gaussian", "binomial"),
   penalty <- match.arg(penalty)
   solver <- match.arg(solver)
 
-  stopifnot(is.character(lambda_min_ratio) ||
+  stopifnot(is.null(lambda_min_ratio) ||
               (lambda_min_ratio > 0 && lambda_min_ratio < 1),
             tol_rel_gap > 0,
             tol_infeas > 0,

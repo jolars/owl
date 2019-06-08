@@ -8,7 +8,7 @@ golem(family = c("gaussian", "binomial"), penalty = c("slope",
   "group_slope", "lasso"), solver = "fista", intercept = TRUE,
   standardize_features = TRUE, orthogonalize = TRUE, sigma = NULL,
   lambda = NULL, fdr = 0.2, n_lambda = 100,
-  lambda_min_ratio = "auto", tol_rel_gap = 1e-06, tol_infeas = 1e-06,
+  lambda_min_ratio = NULL, tol_rel_gap = 1e-06, tol_infeas = 1e-06,
   max_passes = 10000, diagnostics = FALSE)
 }
 \arguments{

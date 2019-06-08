@@ -25,10 +25,6 @@ public:
   step(const arma::uword i) = 0;
 
   virtual
-  arma::uword
-  pathLength() = 0;
-
-  virtual
   double
   lambdaInfeas() = 0;
 };
@@ -67,12 +63,6 @@ public:
   step(const arma::uword i)
   {
     // lambda paths are currently not implemented for SLOPE
-  }
-
-  arma::uword
-  pathLength()
-  {
-    return 1;
   }
 
   double
@@ -152,12 +142,6 @@ public:
     // lambda paths are currently not implemented for SLOPE
   }
 
-  arma::uword
-  pathLength()
-  {
-    return 1;
-  }
-
   double
   lambdaInfeas()
   {
@@ -199,12 +183,6 @@ public:
   {
     if (i < lambda_path.n_elem)
       lambda = lambda_path(i);
-  }
-
-  arma::uword
-  pathLength()
-  {
-    return lambda_path.n_elem;
   }
 
   double

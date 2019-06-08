@@ -99,7 +99,7 @@ Slope <- R6::R6Class(
           stop("lambda sequence cannot contain negative values")
       }
 
-      self$lambda <- lambda
+      self$lambda <- matrix(lambda, p, 1)
       self$sigma  <- sigma
     }
   )
@@ -191,7 +191,7 @@ GroupSlope <- R6::R6Class(
           stop("lambda sequence cannot contain negative values")
       }
 
-      self$lambda <- lambda
+      self$lambda <- matrix(lambda, n_groups, 1)
       self$sigma <- sigma
     },
 
@@ -253,10 +253,10 @@ Lasso <- R6::R6Class(
                           y_scale,
                           family,
                           lambda = NULL,
-                          lambda_min_ratio = "auto",
+                          lambda_min_ratio = NULL,
                           n_lambda = 100) {
 
-      if (lambda_min_ratio == "auto")
+      if (is.null(lambda_min_ratio))
         lambda_min_ratio <- ifelse(NROW(x) < NCOL(x), 0.01, 0.0001)
 
       # lambda (regularization strength)
@@ -275,7 +275,7 @@ Lasso <- R6::R6Class(
       }
 
       self$lambda_scale <- lambda_scale/NROW(x)
-      self$lambda <- lambda
+      self$lambda <- matrix(lambda, 1, length(lambda))
     }
   )
 )
