@@ -80,7 +80,7 @@ test_that("group_slope lambda sequences are computed properly", {
                                                wt = sqrt(table(groups)),
                                                n.obs = n,
                                                method = lambda)
-    expect_equal(g$penalty$lambda, grps_lambda)
+    expect_equivalent(g$penalty$lambda, grps_lambda)
   }
 })
 
