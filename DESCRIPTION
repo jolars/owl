@@ -51,7 +51,8 @@ Imports:
     Rcpp,
     grpSLOPE,
     zeallot,
-    R6
+    R6,
+    gridExtra
 LinkingTo:
     Rcpp (>= 1.0.0),
     RcppArmadillo (>= 0.9.200.7.0)
