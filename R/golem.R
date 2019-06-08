@@ -278,26 +278,12 @@ Golem <- R6::R6Class(
                                        paste0("p", seq_len(n_penalties)))
       }
 
-      diagnostics <- solver$diagnostics
-
-      if (diagnostics) {
-        nl <- length(res$time)
-        nn <- lengths(res$time)
-        time <- unlist(res$time)
-        primal <- unlist(res$primals)
-        dual <- unlist(res$duals)
-        infeasibility <- unlist(res$infeasibilities)
-
-        diag <- data.frame(time = time,
-                           primal = primal,
-                           dual = dual,
-                           infeasibility = infeasibility,
-                           penalty = rep(seq_len(nl), nn))
-      } else {
-        diag <- data.frame()
+      if (args$diagnostics) {
+        self$diagnostics <- Diagnostics$new(res$time,
+                                            res$primals,
+                                            res$duals,
+                                            res$infeasibilities)
       }
-
-      self$diagnostics <- diag
 
       self$coefficients <- coefficients
       self$nonzeros <- nonzeros
