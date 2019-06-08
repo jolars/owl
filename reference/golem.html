@@ -143,7 +143,7 @@ optimization routines suitable to big data problems.</p>
   <span class='st'>"group_slope"</span>, <span class='st'>"lasso"</span>), <span class='kw'>solver</span> <span class='kw'>=</span> <span class='st'>"fista"</span>, <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>, <span class='kw'>n_lambda</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-  <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='st'>"auto"</span>, <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
+  <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
   <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -231,18 +231,32 @@ each family plus a penalty term.</p>
 
     
     <dl class='dl-horizontal'>
-<dt><code>fit(x, y)</code></dt><dd><p><table class='table'>
-<tr><td></td><td><code>x</code></td><td></td></tr>
-<tr><td></td><td>a feature matrix. can be either a dense matrix of the</td><td>regular kind or a sparse matrix inheriting from</td></tr>
-<tr><td><a href='https://www.rdocumentation.org/packages/Matrix/topics/sparseMatrix'>Matrix::sparseMatrix</a></td><td></td><td></td></tr>
-<tr><td><code>y</code></td><td></td><td></td></tr>
-<tr><td>response</td><td></td><td></td></tr>
-</table>
-    This method does the actual fitting of data with models constructed
-from <code>golem()</code>.</p></dd>
+<dt><code>fit(x, y, groups = NULL, ...)</code></dt><dd><p>This method fits models specified by <code>golem()</code>.
+<dl class='dl-horizontal'>
+<dt><code>x</code></dt><dd><p>the feature matrix, which can be either a dense
+matrix of the standard <em>matrix</em> class, or a sparse matrix
+inheriting from <a href='https://www.rdocumentation.org/packages/Matrix/topics/sparseMatrix'>Matrix::sparseMatrix</a> Data frames will
+be converted to matrices internally.</p></dd>
+<dt><code>y</code></dt><dd><p>the response. For Gaussian models, this must be numeric; for
+binomial models, it can be a factor.</p></dd>
+<dt><code>groups</code></dt><dd><p>a vector of integers giving the group membership of each
+feature (only applies to Group SLOPE)</p></dd>
+<dt><code>&#8230;</code></dt><dd><p>arguments that will be used to modify the original model
+specification from the call to <code>golem()</code>. Note that arguments
+pushed through this interface will modify the model, which
+might have unintended consequences.</p></dd>
+</dl></p></dd>
 <dt><code><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef()</a></code></dt><dd><p>Return the coefficients from the model fit (after dropping extraneous
 dimensions). If you prefer to always return a three-dimensional array,
 call <code>model$coefficients</code> instead.</p></dd>
+<dt><code><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict(x, type = c("link", "response", "class"))</a></code></dt><dd><p>Return predictions from models fit by <code>golem()</code> based on
+new data.
+<dl class='dl-horizontal'>
+<dt><code>x</code></dt><dd><p>new data to make predictions for.</p></dd>
+<dt><code>type</code></dt><dd><p>type of predictions to make. <code>"link"</code> gives the linear
+predictors, <code>"response"</code> gives the result of applying the link
+function, and <code>"class"</code> gives class predictions.</p></dd>
+</dl></p></dd>
 </dl>
     
     <h2 class="hasAnchor" id="families"><a class="anchor" href="#families"></a>Families</h2>
