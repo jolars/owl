@@ -77,6 +77,7 @@ Collate:
     'RcppExports.R'
     'coef.R'
     'data.R'
+    'diagnostics.R'
     'families.R'
     'golem-package.R'
     'solvers.R'
