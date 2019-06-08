@@ -362,20 +362,47 @@ Golem <- R6::R6Class(
 #' @section Methods:
 #'
 #' \describe{
-#'   \item{`fit(x, y)`}{
-#'     \tabular{lll}{
-#'     `x` \tab\tab a feature matrix. can be either a dense matrix of the
-#'              regular kind or a sparse matrix inheriting from
-#'              [Matrix::sparseMatrix] \cr
-#'     `y` \tab\tab response \cr
+#'   \item{`fit(x, y, groups = NULL, ...)`}{
+#'     This method fits models specified by [golem()].
+#'     \describe{
+#'       \item{`x`}{
+#'         the feature matrix, which can be either a dense
+#'         matrix of the standard *matrix* class, or a sparse matrix
+#'         inheriting from [Matrix::sparseMatrix] Data frames will
+#'         be converted to matrices internally.
+#'       }
+#'       \item{`y`}{
+#'         the response. For Gaussian models, this must be numeric; for
+#'         binomial models, it can be a factor.
+#'       }
+#'       \item{`groups`}{
+#'         a vector of integers giving the group membership of each
+#'         feature (only applies to Group SLOPE)
+#'       }
+#'       \item{`\dots`}{
+#'         arguments that will be used to modify the original model
+#'         specification from the call to [golem()]. Note that arguments
+#'         pushed through this interface will modify the model, which
+#'         might have unintended consequences.
+#'       }
 #'     }
-#'     This method does the actual fitting of data with models constructed
-#'     from [golem()].
 #'   }
 #'   \item{`coef()`}{
 #'     Return the coefficients from the model fit (after dropping extraneous
 #'     dimensions). If you prefer to always return a three-dimensional array,
 #'     call `model$coefficients` instead.
+#'   }
+#'   \item{`predict(x, type = c("link", "response", "class"))`}{
+#'     Return predictions from models fit by [golem()] based on
+#'     new data.
+#'     \describe{
+#'       \item{`x`}{new data to make predictions for.}
+#'       \item{`type`}{
+#'         type of predictions to make. `"link"` gives the linear
+#'         predictors, `"response"` gives the result of applying the link
+#'         function, and `"class"` gives class predictions.
+#'       }
+#'     }
 #'   }
 #' }
 #'

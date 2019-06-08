@@ -64,20 +64,47 @@ each family plus a penalty term.
 
 
 \describe{
-\item{\code{fit(x, y)}}{
-\tabular{lll}{
-\code{x} \tab\tab a feature matrix. can be either a dense matrix of the
-regular kind or a sparse matrix inheriting from
-\link[Matrix:sparseMatrix]{Matrix::sparseMatrix} \cr
-\code{y} \tab\tab response \cr
+\item{\code{fit(x, y, groups = NULL, ...)}}{
+This method fits models specified by \code{\link[=golem]{golem()}}.
+\describe{
+\item{\code{x}}{
+the feature matrix, which can be either a dense
+matrix of the standard \emph{matrix} class, or a sparse matrix
+inheriting from \link[Matrix:sparseMatrix]{Matrix::sparseMatrix} Data frames will
+be converted to matrices internally.
 }
-This method does the actual fitting of data with models constructed
-from \code{\link[=golem]{golem()}}.
+\item{\code{y}}{
+the response. For Gaussian models, this must be numeric; for
+binomial models, it can be a factor.
+}
+\item{\code{groups}}{
+a vector of integers giving the group membership of each
+feature (only applies to Group SLOPE)
+}
+\item{\code{\dots}}{
+arguments that will be used to modify the original model
+specification from the call to \code{\link[=golem]{golem()}}. Note that arguments
+pushed through this interface will modify the model, which
+might have unintended consequences.
+}
+}
 }
 \item{\code{coef()}}{
 Return the coefficients from the model fit (after dropping extraneous
 dimensions). If you prefer to always return a three-dimensional array,
 call \code{model$coefficients} instead.
+}
+\item{\code{predict(x, type = c("link", "response", "class"))}}{
+Return predictions from models fit by \code{\link[=golem]{golem()}} based on
+new data.
+\describe{
+\item{\code{x}}{new data to make predictions for.}
+\item{\code{type}}{
+type of predictions to make. \code{"link"} gives the linear
+predictors, \code{"response"} gives the result of applying the link
+function, and \code{"class"} gives class predictions.
+}
+}
 }
 }
 }
