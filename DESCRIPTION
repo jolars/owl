@@ -86,4 +86,4 @@ Collate:
     'groupify.R'
     'groupslope-lambda.R'
     'post-processing.R'
-    'pre-processing.R'
+    'standardize.R'
