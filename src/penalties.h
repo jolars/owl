@@ -10,23 +10,21 @@ class Penalty {
 public:
   virtual
   arma::mat
-  eval(const arma::mat& y, const double L) = 0;
+  eval(const arma::mat& y,
+       const double L,
+       const arma::uword path_iter) = 0;
 
   virtual
   double
-  primal(const arma::mat& beta) = 0;
+  primal(const arma::mat& beta, const arma::uword path_iter) = 0;
 
   virtual
   double
-  infeasibility(const arma::mat& grad) = 0;
-
-  virtual
-  void
-  step(const arma::uword i) = 0;
+  infeasibility(const arma::mat& grad, const arma::uword path_iter) = 0;
 
   virtual
   double
-  lambdaInfeas() = 0;
+  lambdaInfeas(const arma::uword path_iter) = 0;
 };
 
 class SLOPE : public Penalty {
@@ -38,20 +36,22 @@ public:
         : sigma(sigma), lambda(lambda) {}
 
   arma::mat
-  eval(const arma::mat& beta, const double step_size)
+  eval(const arma::mat& beta,
+       const double step_size,
+       const arma::uword path_iter)
   {
     return slopeProx(beta, step_size, lambda, sigma);
   };
 
   double
-  primal(const arma::mat& beta)
+  primal(const arma::mat& beta, const arma::uword path_iter)
   {
     using namespace arma;
     return dot(sigma*lambda, sort(abs(beta), "descending"));
   }
 
   double
-  infeasibility(const arma::mat& grad)
+  infeasibility(const arma::mat& grad, const arma::uword path_iter)
   {
     using namespace arma;
 
@@ -59,14 +59,8 @@ public:
     return std::max(cumsum(grad_sorted - sigma*lambda).max(), 0.0);
   }
 
-  void
-  step(const arma::uword i)
-  {
-    // lambda paths are currently not implemented for SLOPE
-  }
-
   double
-  lambdaInfeas()
+  lambdaInfeas(const arma::uword path_iter)
   {
     return lambda(0)*sigma;
   }
@@ -88,7 +82,9 @@ public:
                n_groups(group_id.n_elem) {}
 
   arma::mat
-  eval(const arma::mat& beta, const double step_size)
+  eval(const arma::mat& beta,
+       const double step_size,
+       const arma::uword path_iter)
   {
     using namespace arma;
 
@@ -110,7 +106,7 @@ public:
   };
 
   double
-  primal(const arma::mat& beta)
+  primal(const arma::mat& beta, const arma::uword path_iter)
   {
     using namespace arma;
 
@@ -123,7 +119,7 @@ public:
   }
 
   double
-  infeasibility(const arma::mat& grad)
+  infeasibility(const arma::mat& grad, const arma::uword path_iter)
   {
     using namespace arma;
 
@@ -136,14 +132,8 @@ public:
     return std::max(cumsum(grad_norms_sorted - sigma*lambda).max(), 0.0);
   }
 
-  void
-  step(const arma::uword i)
-  {
-    // lambda paths are currently not implemented for SLOPE
-  }
-
   double
-  lambdaInfeas()
+  lambdaInfeas(const arma::uword path_iter)
   {
     return lambda(0)*sigma;
   }
@@ -151,44 +141,41 @@ public:
 
 class Lasso : public Penalty {
 public:
-  const arma::vec lambda_path;
-  double lambda;
+  const arma::vec lambda;
 
-  Lasso(const arma::vec& lambda_path)
-        : lambda_path(lambda_path), lambda(lambda_path(0)) {}
+  Lasso(const arma::vec& lambda)
+        : lambda(lambda) {}
 
   arma::mat
-  eval(const arma::mat& beta, const double step_size)
+  eval(const arma::mat& beta,
+       const double step_size,
+       const arma::uword path_iter)
   {
     using namespace arma;
 
-    return sign(beta) % clamp(abs(beta) - step_size*lambda, 0.0, datum::inf);
+    return sign(beta) % clamp(abs(beta) - step_size*lambda(path_iter),
+                0.0,
+                datum::inf);
   };
 
   double
-  primal(const arma::mat& beta)
+  primal(const arma::mat& beta, const arma::uword path_iter)
   {
-    return lambda*arma::norm(beta, 1);
+    return lambda(path_iter)*arma::norm(beta, 1);
   }
 
   double
-  infeasibility(const arma::mat& grad)
+  infeasibility(const arma::mat& grad, const arma::uword path_iter)
   {
     using namespace arma;
-    return std::max(cumsum(sort(abs(grad), "descending") - lambda).max(), 0.0);
-  }
-
-  void
-  step(const arma::uword i)
-  {
-    if (i < lambda_path.n_elem)
-      lambda = lambda_path(i);
+    return std::max(
+      cumsum(sort(abs(grad), "descending") - lambda(path_iter)).max(), 0.0);
   }
 
   double
-  lambdaInfeas()
+  lambdaInfeas(const arma::uword path_iter)
   {
-    return lambda;
+    return lambda(path_iter);
   }
 };
 
