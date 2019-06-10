@@ -56,8 +56,8 @@ private:
   double tol_infeas = 1e-6;
 
 public:
-  FISTA(arma::rowvec&& intercept_init,
-        arma::mat&& beta_init,
+  FISTA(const arma::rowvec& intercept_init,
+        const arma::mat& beta_init,
         const double lipschitz_constant,
         const bool standardize,
         const arma::vec x_scaled_center,
@@ -70,8 +70,8 @@ public:
   {
     using Rcpp::as;
 
-    intercept   = std::move(intercept_init);
-    beta        = std::move(beta_init);
+    intercept   = intercept_init;
+    beta        = beta_init;
 
     max_passes  = as<arma::uword>(args["max_passes"]);
     diagnostics = as<bool>(args["diagnostics"]);
@@ -127,6 +127,7 @@ public:
 
     family->eval(x, y, intercept, beta, x_scaled_center);
 
+    // main loop
     while (!accepted && i < max_passes) {
       // gradient
       double f = family->primal();
@@ -139,12 +140,10 @@ public:
           g(j) -= accu(x_scaled_center(j)*pseudo_g);
       }
 
-      if (fit_intercept) {
+      if (fit_intercept)
         g_intercept = mean(pseudo_g);
-        intercept_tilde_old = intercept_tilde;
-      }
 
-      double primal = f + penalty->primal(beta_tilde);
+      double primal = f + penalty->primal(beta);
       double dual = family->dual(y);
       double infeasibility = penalty->infeasibility(g);
 
@@ -162,9 +161,12 @@ public:
         break;
 
       beta_tilde_old = beta_tilde;
+
+      if (fit_intercept)
+        intercept_tilde_old = intercept_tilde;
+
       double f_old = f;
       double t_old = t;
-      beta_tilde_old = beta_tilde;
 
       // // Lipschitz search
       while (true) {

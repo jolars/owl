@@ -64,7 +64,7 @@ each family plus a penalty term.
 
 
 \describe{
-\item{\code{fit(x, y, groups = NULL, ...)}}{
+\item{\code{fit(x, y, groups = NULL, warm_start = TRUE, ...)}}{
 This method fits models specified by \code{\link[=golem]{golem()}}.
 \describe{
 \item{\code{x}}{
@@ -80,6 +80,13 @@ binomial models, it can be a factor.
 \item{\code{groups}}{
 a vector of integers giving the group membership of each
 feature (only applies to Group SLOPE)
+}
+\item{\code{warm_start}}{
+whether to use the coefficient estimates from the previous
+fit when refitting the model using new data. Provided that
+the same penalty (with approximately the same parameters)
+id used, setting this to true might lead to
+substantial performance boosts.
 }
 \item{\code{\dots}}{
 arguments that will be used to modify the original model
