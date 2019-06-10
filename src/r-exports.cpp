@@ -10,7 +10,7 @@ prox_slope_cpp(const arma::vec& y, const Rcpp::List& args)
 
   SLOPE penalty{sigma, lambda};
 
-  return penalty.eval(y, 1.0);
+  return penalty.eval(y, 1.0, 0);
 }
 
 

@@ -85,7 +85,8 @@ public:
       const arma::mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
-      const bool fit_intercept)
+      const bool fit_intercept,
+      const arma::uword path_iter)
   {
     using namespace arma;
 
@@ -110,7 +111,7 @@ public:
     uword i = 0;
     bool accepted = false;
 
-    tol_infeas *= penalty->lambdaInfeas();
+    tol_infeas *= penalty->lambdaInfeas(path_iter);
     tol_infeas =
       tol_infeas < std::sqrt(datum::eps) ? std::sqrt(datum::eps) : tol_infeas;
 
@@ -143,9 +144,9 @@ public:
       if (fit_intercept)
         g_intercept = mean(pseudo_g);
 
-      double primal = f + penalty->primal(beta);
+      double primal = f + penalty->primal(beta, path_iter);
       double dual = family->dual(y);
-      double infeasibility = penalty->infeasibility(g);
+      double infeasibility = penalty->infeasibility(g, path_iter);
 
       accepted = (std::abs(primal - dual)/std::max(1.0, primal) < tol_rel_gap)
                   && (infeasibility <= tol_infeas);
@@ -171,7 +172,7 @@ public:
       // // Lipschitz search
       while (true) {
         // Update beta and intercept
-        beta_tilde = penalty->eval(beta - (1.0/L)*g, 1.0/L);
+        beta_tilde = penalty->eval(beta - (1.0/L)*g, 1.0/L, path_iter);
 
         mat d = beta_tilde - beta;
         if (fit_intercept)

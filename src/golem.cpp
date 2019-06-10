@@ -63,13 +63,12 @@ golemCpp(const T& x,
                is_sparse,
                solver_args);
 
-  for (uword i = 0; i < n_penalties; ++i) {
-    Results res = solver.fit(x, y, family, penalty, fit_intercept);
+  for (uword path_iter = 0; path_iter < n_penalties; ++path_iter) {
+    Results res = solver.fit(x, y, family, penalty, fit_intercept, path_iter);
 
-    betas.slice(i) = res.beta;
-    intercepts.slice(i) = res.intercept;
-    passes(i) = res.passes;
-    penalty->step(i + 1); // move a step on the regularization path
+    betas.slice(path_iter) = res.beta;
+    intercepts.slice(path_iter) = res.intercept;
+    passes(path_iter) = res.passes;
 
     if (diagnostics) {
       primals.push_back(res.primals);
