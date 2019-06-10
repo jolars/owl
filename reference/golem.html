@@ -231,7 +231,7 @@ each family plus a penalty term.</p>
 
     
     <dl class='dl-horizontal'>
-<dt><code>fit(x, y, groups = NULL, ...)</code></dt><dd><p>This method fits models specified by <code>golem()</code>.
+<dt><code>fit(x, y, groups = NULL, warm_start = TRUE, ...)</code></dt><dd><p>This method fits models specified by <code>golem()</code>.
 <dl class='dl-horizontal'>
 <dt><code>x</code></dt><dd><p>the feature matrix, which can be either a dense
 matrix of the standard <em>matrix</em> class, or a sparse matrix
@@ -241,6 +241,11 @@ be converted to matrices internally.</p></dd>
 binomial models, it can be a factor.</p></dd>
 <dt><code>groups</code></dt><dd><p>a vector of integers giving the group membership of each
 feature (only applies to Group SLOPE)</p></dd>
+<dt><code>warm_start</code></dt><dd><p>whether to use the coefficient estimates from the previous
+fit when refitting the model using new data. Provided that
+the same penalty (with approximately the same parameters)
+id used, setting this to true might lead to
+substantial performance boosts.</p></dd>
 <dt><code>&#8230;</code></dt><dd><p>arguments that will be used to modify the original model
 specification from the call to <code>golem()</code>. Note that arguments
 pushed through this interface will modify the model, which
