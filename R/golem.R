@@ -1,6 +1,14 @@
 #' @include families.R penalties.R solvers.R
 Golem <- R6::R6Class(
   "Golem",
+  private = list(
+    n = NULL,
+    p = NULL,
+    m = NULL,
+
+    intercept = NULL,
+    beta = NULL
+  ),
   public = list(
     args = list(),
 
@@ -47,7 +55,9 @@ Golem <- R6::R6Class(
                         diagnostics = diagnostics)
     },
 
-    fit = function(x, y, groups = NULL, ...) {
+    fit = function(x, y, groups = NULL, warm_start = TRUE, ...) {
+
+      stopifnot(is.logical(warm_start))
 
       self$args <- utils::modifyList(self$args, list(...))
       args <- self$args
@@ -74,6 +84,24 @@ Golem <- R6::R6Class(
       private$n <- n <- NROW(x)
       private$p <- p <- NCOL(x)
       private$m <- m <- NCOL(y)
+
+      # use warm starts if applicable
+      if (!warm_start || is.null(private$beta)) {
+
+        intercept_init <- double(m)
+        beta_init <- matrix(0, p, m)
+
+      } else if (warm_start &&
+                 p == NROW(private$beta) &&
+                 m == NCOL(private$beta)) {
+
+        # use the coefficients at the end of the regularization path
+        # TODO(jolars): perhaps this could be set more intellegently
+        #               based on the penalty strength and penalty?
+        last <- dim(private$intercept)[3]
+        intercept_init <- private$intercept[, , last]
+        beta_init <- matrix(private$beta[, , last], p, m)
+      }
 
       # convert sparse x to dgCMatrix class from package Matrix.
       is_sparse <- inherits(x, "sparseMatrix")
@@ -177,7 +205,9 @@ Golem <- R6::R6Class(
                                  x_scale,
                                  args$standardize_features)
 
-      control <- list(family = family,
+      control <- list(intercept_init = intercept_init,
+                      beta_init = beta_init,
+                      family = family,
                       penalty = penalty,
                       solver = solver,
                       groups = groups,
@@ -234,7 +264,12 @@ Golem <- R6::R6Class(
         res <- golemFit(x, y, control)
       }
 
+      intercept <- res$intercept
       beta <- res$beta
+
+      # store coefficients for warm starts
+      private$intercept <- intercept
+      private$beta <- beta
 
       # reverse scaling when using group penalty type
       if (group_penalty) {
@@ -248,7 +283,7 @@ Golem <- R6::R6Class(
         beta <- unorthogonalize(beta, groups)
       }
 
-      c(intercept, beta, nonzeros) %<-% penalty$postProcess(res$intercept,
+      c(intercept, beta, nonzeros) %<-% penalty$postProcess(intercept,
                                                             beta,
                                                             x,
                                                             y,
@@ -295,10 +330,6 @@ Golem <- R6::R6Class(
       self$class_names <- class_names
       self$passes <- as.integer(res$passes)
 
-      private$n <- n
-      private$p <- p
-      private$m <- m
-
       invisible(self)
     },
 
@@ -328,12 +359,6 @@ Golem <- R6::R6Class(
         class = self$family$predictClass(lin_pred, self$class_names)
       )
     }
-  ),
-
-  private = list(
-    n = NULL,
-    p = NULL,
-    m = NULL
   )
 )
 
@@ -348,7 +373,7 @@ Golem <- R6::R6Class(
 #' @section Methods:
 #'
 #' \describe{
-#'   \item{`fit(x, y, groups = NULL, ...)`}{
+#'   \item{`fit(x, y, groups = NULL, warm_start = TRUE, ...)`}{
 #'     This method fits models specified by [golem()].
 #'     \describe{
 #'       \item{`x`}{
@@ -364,6 +389,13 @@ Golem <- R6::R6Class(
 #'       \item{`groups`}{
 #'         a vector of integers giving the group membership of each
 #'         feature (only applies to Group SLOPE)
+#'       }
+#'       \item{`warm_start`}{
+#'         whether to use the coefficient estimates from the previous
+#'         fit when refitting the model using new data. Provided that
+#'         the same penalty (with approximately the same parameters)
+#'         id used, setting this to true might lead to
+#'         substantial performance boosts.
 #'       }
 #'       \item{`\dots`}{
 #'         arguments that will be used to modify the original model

@@ -45,9 +45,9 @@ golemCpp(const T& x,
   cube betas(p, m, n_penalties);
   cube intercepts(1, m, n_penalties);
 
-  // setup a few return values
-  rowvec intercept(m, fill::zeros);
-  mat beta(p, m, fill::zeros);
+  // initialize estimates
+  auto intercept_init = as<rowvec>(control["intercept_init"]);
+  auto beta_init      = as<mat>(control["beta_init"]);
 
   uvec passes(n_penalties);
   std::vector<std::vector<double>> primals;
@@ -55,8 +55,8 @@ golemCpp(const T& x,
   std::vector<std::vector<double>> timings;
   std::vector<std::vector<double>> infeasibilities;
 
-  FISTA solver(std::move(intercept),
-               std::move(beta),
+  FISTA solver(intercept_init,
+               beta_init,
                lipschitz_constant,
                standardize_features,
                x_scaled_center,

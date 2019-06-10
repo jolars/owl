@@ -7,7 +7,7 @@ test_that("unregularized gaussian models work as expected", {
   g <- golem(family = "gaussian",
              sigma = 1e-4,
              penalty = "slope")
-  g$fit(x, y)
+  g$fit(x, y, warm_start = FALSE)
 
   expect_equivalent(coef(lm_fit),
                     g$coef(),
