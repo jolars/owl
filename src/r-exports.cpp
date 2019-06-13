@@ -97,9 +97,7 @@ maxSquaredRowNorm(const arma::mat& x,
                   const arma::rowvec& x_scaled_center,
                   const bool standardize_features)
 {
-  using namespace arma;
-
-  return sum(square(x), 1).max();
+  return arma::norm(arma::square(x), "inf");
 }
 
 double
