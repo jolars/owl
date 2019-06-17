@@ -326,9 +326,9 @@ of the classical gradient algorithm.</p>
 
 <span class='co'># Get coefficients from the model fit</span>
 <span class='no'>gaussian_model</span>$<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>()</div><div class='output co'>#&gt;    (Intercept)            sex         infant         length       diameter 
-#&gt;      4.7343417      0.0000000     -0.8427958      0.0000000      7.1484161 
+#&gt;      4.7343105      0.0000000     -0.8427948      0.0000000      7.1485564 
 #&gt;         height   weight_whole weight_shucked weight_viscera   weight_shell 
-#&gt;     10.8508506      0.0000000     -8.0753268      0.0000000     16.5077169 </div><div class='input'>
+#&gt;     10.8508101      0.0000000     -8.0753432      0.0000000     16.5076554 </div><div class='input'>
 <span class='co'># Binomial response, lasso penalty ------------------------------------------</span>
 
 <span class='no'>binomial_model</span> <span class='kw'>&lt;-</span> <span class='fu'>golem</span>(<span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>, <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='st'>"lasso"</span>)
