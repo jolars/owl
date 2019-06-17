@@ -252,6 +252,8 @@ Golem <- R6::R6Class(
             }
 
             control$penalty$sigma <- penalty$sigma <- sigma
+            control$intercept_init <- res$intercept
+            control$beta_init <- as.matrix(res$beta)
 
             res <- golemFit(x, y, control)
             S_new <- which(res$beta != 0)
