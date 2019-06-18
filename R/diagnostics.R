@@ -20,9 +20,20 @@
 #' @section Methods:
 #'
 #' \describe{
-#'   \item{`plot()`}{
+#'   \item{`plot(ind = "last", what = c("objectives", "infeasibility"))`}{
 #'     Plot objectives and infeasibility side-by-side using
 #'     trellis graphics.
+#'     \describe{
+#'       \item{`ind`}{
+#'         index of the fit for which diagnostics should be plotted
+#'       }
+#'       \item{`what`}{
+#'         type of diagnostics to plot. `objectives` returns the
+#'         primal and dual objectives whereas `infeasibility` returns
+#'         the infeasibility metric. If both are provided, all plots
+#'         will be arranged using [gridExtra::grid.arrange()]
+#'       }
+#'     }
 #'   }
 #' }
 #'
@@ -47,27 +58,49 @@ Diagnostics <- R6::R6Class(
                               penalty = rep(seq_len(nl), nn))
     },
 
-    plot = function() {
+    plot = function(ind = "last", what = c("objectives", "infeasibility")) {
       d <- self$data
 
-      p1 <- lattice::xyplot(primal + dual ~ time,
-                            data = d,
-                            type = "l",
-                            ylab = "Objetive",
-                            xlab = "Time (Seconds)",
-                            grid = TRUE,
-                            auto.key = list(space = "inside",
-                                            lines = TRUE,
-                                            points = FALSE))
+      n_penalties <- length(unique(d$penalty))
 
-      p2 <- lattice::xyplot(infeasibility ~ time,
-                            data = d,
-                            type = "l",
-                            grid = TRUE,
-                            xlab = "Time (Seconds)",
-                            ylab = "Infeasibility")
+      if (ind == "last") {
+        ind <- unique(d$penalty)[n_penalties]
+      } else {
+        stopifnot(ind <= n_penalties,
+                  ind >= 1)
+      }
 
-      gridExtra::grid.arrange(p1, p2, ncol = 2)
+      d <- subset(d, subset = d$penalty == ind)
+
+      p <- vector("list", length(what))
+      i <- 1
+
+      if ("objectives" %in% what) {
+        p[[i]] <- lattice::xyplot(primal + dual ~ time,
+                                  data = d,
+                                  type = "l",
+                                  ylab = "Objective",
+                                  xlab = "Time (Seconds)",
+                                  grid = TRUE,
+                                  auto.key = list(space = "inside",
+                                                  lines = TRUE,
+                                                  points = FALSE))
+        i <- i + 1
+      }
+
+      if ("infeasibility" %in% what) {
+        p[[i]] <- lattice::xyplot(infeasibility ~ time,
+                                  data = d,
+                                  type = "l",
+                                  grid = TRUE,
+                                  xlab = "Time (Seconds)",
+                                  ylab = "Infeasibility")
+      }
+
+      if (length(what) > 1)
+        gridExtra::grid.arrange(grobs = p, ncol = length(p))
+      else
+        p[[1]]
     }
   )
 )

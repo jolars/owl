@@ -45,8 +45,23 @@ test_that("sigma estimation for SLOPE", {
   y <- problem$y
 
   slope_fit <- SLOPE::SLOPE(x, y)
-  golem_fit <- golem(penalty = "slope", intercept = FALSE)$fit(x, y)
+  golem_fit <- golem(penalty = "slope", intercept = FALSE, sigma = "estimate")$fit(x, y)
 
   expect_equal(slope_fit$sigma[length(slope_fit$sigma)],
                golem_fit$penalty$sigma)
+})
+
+test_that("fitting SLOPE path works", {
+  set.seed(239)
+
+  problem <- golem:::randomProblem(100, 5, sigma = 1)
+
+  x <- problem$x
+  y <- problem$y
+
+  model <- golem(penalty = "slope",
+                 sigma = "sequence")
+  model$fit(x, y)
+
+  expect_silent(model$fit(x, y))
 })

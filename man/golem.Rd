@@ -6,10 +6,11 @@
 \usage{
 golem(family = c("gaussian", "binomial"), penalty = c("slope",
   "group_slope", "lasso"), solver = "fista", intercept = TRUE,
-  standardize_features = TRUE, orthogonalize = TRUE, sigma = NULL,
-  lambda = NULL, fdr = 0.2, n_lambda = 100,
-  lambda_min_ratio = NULL, tol_rel_gap = 1e-06, tol_infeas = 1e-06,
-  max_passes = 10000, diagnostics = FALSE)
+  standardize_features = TRUE, orthogonalize = TRUE,
+  sigma = c("sequence", "estimate"), n_sigma = 100,
+  sigma_min_ratio = NULL, lambda = NULL, n_lambda = 100,
+  lambda_min_ratio = NULL, fdr = 0.2, tol_rel_gap = 1e-06,
+  tol_infeas = 1e-06, max_passes = 10000, diagnostics = FALSE)
 }
 \arguments{
 \item{family}{response type. See \strong{Families} for details.}
@@ -29,16 +30,21 @@ applies to Group SLOPE)}
 
 \item{sigma}{noise estimate (only applies to SLOPE and Group SLOPE)}
 
+\item{n_sigma}{number of sigmas to generate (only relevant for
+SLOPE and Group SLOPE)}
+
+\item{sigma_min_ratio}{smallest value for \code{sigma} as a fraction of}
+
 \item{lambda}{either a character vector indicating the method used
 to construct the lambda path or}
-
-\item{fdr}{target false discovery rate (only applies to SLOPE and
-Group SLOPE)}
 
 \item{n_lambda}{length of regularization path (only relevant for lasso)}
 
 \item{lambda_min_ratio}{smallest value for \code{lambda} as a fraction of
 \eqn{\lambda_\mathrm{max}}{\lambda_max} (only applies to lasso)}
+
+\item{fdr}{target false discovery rate (only applies to SLOPE and
+Group SLOPE)}
 
 \item{tol_rel_gap}{relative tolerance threshold for duality gap check}
 
@@ -111,6 +117,13 @@ type of predictions to make. \code{"link"} gives the linear
 predictors, \code{"response"} gives the result of applying the link
 function, and \code{"class"} gives class predictions.
 }
+}
+}
+\item{\code{plot}(...)}{
+Plot the model's coefficient along the regularization path.
+\describe{\code{\dots}}{
+graphical parameters for the plot passed on
+to \code{\link[lattice:xyplot]{lattice::xyplot()}}.
 }
 }
 }

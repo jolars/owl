@@ -28,9 +28,20 @@ This class encapsulates diagnostics from model fit with
 
 
 \describe{
-\item{\code{plot()}}{
+\item{\code{plot(ind = "last", what = c("objectives", "infeasibility"))}}{
 Plot objectives and infeasibility side-by-side using
 trellis graphics.
+\describe{
+\item{\code{ind}}{
+index of the fit for which diagnostics should be plotted
+}
+\item{\code{what}}{
+type of diagnostics to plot. \code{objectives} returns the
+primal and dual objectives whereas \code{infeasibility} returns
+the infeasibility metric. If both are provided, all plots
+will be arranged using \code{\link[gridExtra:grid.arrange]{gridExtra::grid.arrange()}}
+}
+}
 }
 }
 }

@@ -42,26 +42,31 @@ Slope <- R6::R6Class(
 
     initialize = function(x,
                           y,
+                          y_scale,
                           lambda = c("gaussian", "bhq"),
-                          sigma = NULL,
-                          fdr = 0.2) {
-
-      stopifnot(length(fdr) == 1L, fdr >= 0, fdr <= 1)
-
-      self$name <- "slope"
+                          sigma = c("sequence", "estimate"),
+                          sigma_min_ratio = NULL,
+                          n_sigma = 100,
+                          fdr = 0.2,
+                          family) {
 
       n <- NROW(x)
       p <- NCOL(x)
+
+      if (is.null(sigma_min_ratio))
+        sigma_min_ratio <- if (n < p) 0.01 else 0.0001
+
+      self$name <- "slope"
 
       if (is.null(lambda))
         lambda <- "gaussian"
 
       # noise estimate
-      if (is.null(sigma)) {
-        sigma_type <- "auto"
+      if (is.character(sigma)) {
+        sigma_type <- match.arg(sigma)
         sigma <- NA_real_
       } else {
-        stopifnot(length(sigma) == 1, sigma >= 0, is.finite(sigma))
+        stopifnot(length(sigma) > 0, sigma >= 0, is.finite(sigma))
         sigma_type <- "user"
       }
 
@@ -99,6 +104,13 @@ Slope <- R6::R6Class(
           stop("lambda sequence cannot contain negative values")
       }
 
+      if (sigma_type == "sequence") {
+        lambda_max <- family$lambdaMax(x, y, y_scale)*NROW(x)
+
+        sigma <- lambda_max/min(lambda)
+        sigma <- logSeq(sigma, sigma*sigma_min_ratio, n_sigma)
+      }
+
       self$lambda <- matrix(lambda, p, 1)
       self$sigma  <- sigma
     }
@@ -112,12 +124,14 @@ GroupSlope <- R6::R6Class(
 
     initialize = function(x,
                           y,
+                          y_scale,
                           groups,
                           lambda = c("corrected", "mean", "max"),
-                          sigma = NULL,
-                          fdr = 0.2) {
-
-      stopifnot(length(fdr) == 1, fdr >= 0, fdr <= 1)
+                          sigma = c("sequence", "estimate"),
+                          sigma_min_ratio = NULL,
+                          n_sigma = 100,
+                          fdr = 0.2,
+                          family) {
 
       self$name <- "group_slope"
       group_id <- groups$group_id
@@ -126,11 +140,15 @@ GroupSlope <- R6::R6Class(
       wt <- groups$wt
 
       n <- NROW(x)
+      p <- NCOL(x)
 
       n_groups <- length(group_id)
 
       if (is.null(lambda))
         lambda <- "corrected"
+
+      if (is.null(sigma_min_ratio))
+        sigma_min_ratio <- if (n < p) 0.01 else 0.0001
 
       group_sizes <- if (orthogonalize)
         lengths(ortho_group_id)
@@ -138,11 +156,11 @@ GroupSlope <- R6::R6Class(
         lengths(group_id)
 
       # noise estimate
-      if (is.null(sigma)) {
-        sigma_type <- "auto"
+      if (is.character(sigma)) {
+        sigma_type <- match.arg(sigma)
         sigma <- NA_real_
       } else {
-        stopifnot(length(sigma) == 1, sigma >= 0, is.finite(sigma))
+        stopifnot(length(sigma) > 0, sigma >= 0, is.finite(sigma))
         sigma_type <- "user"
       }
 
@@ -189,6 +207,13 @@ GroupSlope <- R6::R6Class(
 
         if (any(lambda < 0))
           stop("lambda sequence cannot contain negative values")
+      }
+
+      if (sigma_type == "sequence") {
+        lambda_max <- family$lambdaMax(x, y, y_scale)*NROW(x)
+
+        sigma <- lambda_max/min(lambda)
+        sigma <- logSeq(sigma, sigma*sigma_min_ratio, n_sigma)
       }
 
       self$lambda <- matrix(lambda, n_groups, 1)
