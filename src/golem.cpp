@@ -57,14 +57,18 @@ golemCpp(const T& x,
 
   FISTA solver(intercept_init,
                beta_init,
-               lipschitz_constant,
                standardize_features,
                x_scaled_center,
                is_sparse,
                solver_args);
 
   for (uword k = 0; k < n_penalties; ++k) {
-    Results res = solver.fit(x, y, family, penalty, fit_intercept, k);
+    Results res = solver.fit(x, y,
+                             family,
+                             penalty,
+                             fit_intercept,
+                             lipschitz_constant,
+                             k);
 
     betas.slice(k) = res.beta;
     intercepts.slice(k) = res.intercept;

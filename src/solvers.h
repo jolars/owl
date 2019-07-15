@@ -40,7 +40,6 @@ protected:
 
 class FISTA : public Solver {
 private:
-  double L;
   const bool standardize;
   arma::vec x_scaled_center;
   const bool is_sparse;
@@ -52,13 +51,11 @@ private:
 public:
   FISTA(const arma::rowvec& intercept_init,
         const arma::mat& beta_init,
-        const double lipschitz_constant,
         const bool standardize,
         const arma::vec x_scaled_center,
         const bool is_sparse,
         const Rcpp::List& args)
-        : L(lipschitz_constant),
-          standardize(standardize),
+        : standardize(standardize),
           x_scaled_center(x_scaled_center),
           is_sparse(is_sparse)
   {
@@ -80,6 +77,7 @@ public:
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
       const bool fit_intercept,
+      double L,
       const arma::uword k)
   {
     using namespace arma;
@@ -102,12 +100,15 @@ public:
 
     double t = 1;
 
-    uword i = 0;
+    uword passes = 0;
     bool accepted = false;
 
-    tol_infeas *= penalty->lambdaInfeas(k);
-    tol_infeas =
-      tol_infeas < std::sqrt(datum::eps) ? std::sqrt(datum::eps) : tol_infeas;
+    double mod_tol_infeas{tol_infeas};
+
+    mod_tol_infeas *= penalty->lambdaInfeas(k);
+
+    if (mod_tol_infeas < std::sqrt(datum::eps))
+      mod_tol_infeas = std::sqrt(datum::eps);
 
     // diagnostics
     wall_clock timer;
@@ -127,7 +128,8 @@ public:
     family->eval(x, y, intercept, beta, x_scaled_center);
 
     // main loop
-    while (!accepted && i < max_passes) {
+    while (!accepted && passes < max_passes) {
+      ++passes;
       // gradient
       double f = family->primal();
       pseudo_g = family->gradient(y);
@@ -147,7 +149,7 @@ public:
       double infeasibility = penalty->infeasibility(g, k);
 
       accepted = (std::abs(primal - dual)/std::max(1.0, primal) < tol_rel_gap)
-                  && (infeasibility <= tol_infeas);
+                  && (infeasibility <= mod_tol_infeas);
 
       if (diagnostics) {
         time.push_back(timer.toc());
@@ -196,11 +198,15 @@ public:
                     + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
 
       family->eval(x, y, intercept, beta, x_scaled_center);
-
-      i++;
     }
 
-    Results res{intercept, beta, i, primals, duals, infeasibilities, time};
+    Results res{intercept,
+                beta,
+                passes,
+                primals,
+                duals,
+                infeasibilities,
+                time};
 
     return res;
   }
