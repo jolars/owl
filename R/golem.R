@@ -28,6 +28,8 @@ Golem <- R6::R6Class(
       stopifnot(is.logical(warm_start))
 
       self$args <- utils::modifyList(self$args, list(...))
+
+      self$args <- checkArgs(self$args)
       args <- self$args
 
       fit_intercept <- args$intercept
@@ -642,53 +644,70 @@ golem <- function(family = c("gaussian", "binomial"),
                   max_passes = 1e4,
                   diagnostics = FALSE) {
 
-  family <- match.arg(family)
-  penalty <- match.arg(penalty)
-  solver <- match.arg(solver)
-
-  stopifnot(
-    is.null(lambda_min_ratio) || (lambda_min_ratio > 0 && lambda_min_ratio < 1),
-    tol_rel_gap > 0,
-    tol_infeas > 0,
-    max_passes > 0,
-    n_lambda >= 1,
-    fdr > 0,
-    fdr < 1,
-    is.character(sigma) || (all(sigma >= 0 & is.finite(sigma))),
-    is.null(sigma_min_ratio) || (sigma_min_ratio > 0 && sigma_min_ratio < 1),
-    length(n_sigma) == 1,
-    n_sigma >= 1,
-    is.null(lambda) || is.character(lambda) || is.numeric(lambda),
-    is.finite(max_passes),
-    is.finite(tol_rel_gap),
-    is.finite(tol_infeas),
-    is.finite(n_lambda),
-    n_lambda >= 1,
-    is.logical(diagnostics),
-    is.logical(intercept),
-    is.logical(standardize_features),
-    is.logical(orthogonalize)
-  )
-
   out <- Golem$new()
 
-  out$args <- list(family = family,
-                   penalty = penalty,
-                   solver = solver,
-                   intercept = intercept,
-                   standardize_features = standardize_features,
-                   orthogonalize = orthogonalize,
-                   sigma = sigma,
-                   n_sigma = n_sigma,
-                   sigma_min_ratio = sigma_min_ratio,
-                   lambda = lambda,
-                   n_lambda = n_lambda,
-                   lambda_min_ratio = lambda_min_ratio,
-                   fdr = fdr,
-                   tol_rel_gap = tol_rel_gap,
-                   tol_infeas = tol_infeas,
-                   max_passes = max_passes,
-                   diagnostics = diagnostics)
+  args <- list(family = family,
+               penalty = penalty,
+               solver = solver,
+               intercept = intercept,
+               standardize_features = standardize_features,
+               orthogonalize = orthogonalize,
+               sigma = sigma,
+               n_sigma = n_sigma,
+               sigma_min_ratio = sigma_min_ratio,
+               lambda = lambda,
+               n_lambda = n_lambda,
+               lambda_min_ratio = lambda_min_ratio,
+               fdr = fdr,
+               tol_rel_gap = tol_rel_gap,
+               tol_infeas = tol_infeas,
+               max_passes = max_passes,
+               diagnostics = diagnostics)
+
+  args <- checkArgs(args)
+
+  out$args <- args
+
   out
 }
 
+checkArgs <- function(args) {
+  args$family <- match.arg(args$family, c("gaussian", "binomial"))
+  args$penalty <- match.arg(args$penalty, c("slope", "group_slope", "lasso"))
+
+  if (is.character(args$sigma))
+    args$sigma <- match.arg(args$sigma, c("sequence", "estimate"))
+
+  with(
+    args,
+    stopifnot(
+      is.null(lambda_min_ratio) ||
+        (lambda_min_ratio > 0 && lambda_min_ratio < 1),
+      tol_rel_gap > 0,
+      tol_infeas > 0,
+      max_passes > 0,
+      n_lambda >= 1,
+      fdr > 0,
+      fdr < 1,
+      is.character(sigma) ||
+        (all(sigma >= 0 & is.finite(sigma))),
+      is.null(sigma_min_ratio) ||
+        (sigma_min_ratio > 0 && sigma_min_ratio < 1),
+      length(n_sigma) == 1,
+      n_sigma >= 1,
+      is.null(lambda) ||
+        is.character(lambda) || is.numeric(lambda),
+      is.finite(max_passes),
+      is.finite(tol_rel_gap),
+      is.finite(tol_infeas),
+      is.finite(n_lambda),
+      n_lambda >= 1,
+      is.logical(diagnostics),
+      is.logical(intercept),
+      is.logical(standardize_features),
+      is.logical(orthogonalize)
+    )
+  )
+
+  args
+}
