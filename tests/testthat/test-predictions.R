@@ -1,4 +1,5 @@
 test_that("predictions work for all models", {
+  set.seed(1)
 
   for (family in c("gaussian", "binomial")) {
     xy <- golem:::randomProblem(100, 10, response = family)
