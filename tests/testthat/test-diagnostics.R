@@ -1,7 +1,7 @@
 test_that("diagnostics are working properly", {
   xy <- golem:::randomProblem(100, 2, q = 1)
 
-  model <- golem(diagnostics = TRUE, n_sigma = 1)
+  model <- golem(diagnostics = TRUE, n_sigma = 1, sigma = 1)
   model$fit(xy$x, xy$y)
 
   expect_is(model$diagnostics, "Diagnostics")

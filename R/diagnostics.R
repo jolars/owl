@@ -10,6 +10,7 @@
 #'
 #' @field data contains a data frame with variables
 #'   \describe{
+#'     \item{`iteration`}{iteration}
 #'     \item{`time`}{time}
 #'     \item{`primal`}{primal objective}
 #'     \item{`dual`}{dual objective}
@@ -27,11 +28,18 @@
 #'       \item{`ind`}{
 #'         index of the fit for which diagnostics should be plotted
 #'       }
-#'       \item{`what`}{
-#'         type of diagnostics to plot. `objectives` returns the
+#'       \item{`x_var`}{
+#'         what to place on the x axis. `iteration` plots each iteration, `time`
+#'         plots the wall-clock time.
+#'       }
+#'       \item{`y_var`}{
+#'         what to place on the y axis. `objectives` returns the
 #'         primal and dual objectives whereas `infeasibility` returns
-#'         the infeasibility metric. If both are provided, all plots
-#'         will be arranged using [gridExtra::grid.arrange()]
+#'         the infeasibility metric.
+#'       }
+#'       \item{`\dots`}{
+#'         other arguments that will be used to modify the call to
+#'         [lattice::xyplot()]
 #'       }
 #'     }
 #'   }
@@ -51,17 +59,24 @@ Diagnostics <- R6::R6Class(
       dual <- unlist(duals)
       infeasibility <- unlist(infeasibilities)
 
-      self$data <- data.frame(time = time,
+      self$data <- data.frame(iteration = seq_along(time),
+                              time = time,
                               primal = primal,
                               dual = dual,
                               infeasibility = infeasibility,
                               penalty = rep(seq_len(nl), nn))
     },
 
-    plot = function(ind = "last", what = c("objectives", "infeasibility")) {
+    plot = function(ind = "last",
+                    x_var = c("time", "iteration"),
+                    y_var = c("objectives", "infeasibility"),
+                    ...) {
       d <- self$data
 
       n_penalties <- length(unique(d$penalty))
+
+      x_var <- match.arg(x_var)
+      y_var <- match.arg(y_var)
 
       if (ind == "last") {
         ind <- unique(d$penalty)[n_penalties]
@@ -72,35 +87,36 @@ Diagnostics <- R6::R6Class(
 
       d <- subset(d, subset = d$penalty == ind)
 
-      p <- vector("list", length(what))
-      i <- 1
+      args <- list(data = d,
+                   type = "l",
+                   grid = TRUE)
 
-      if ("objectives" %in% what) {
-        p[[i]] <- lattice::xyplot(primal + dual ~ time,
-                                  data = d,
-                                  type = "l",
-                                  ylab = "Objective",
-                                  xlab = "Time (Seconds)",
-                                  grid = TRUE,
-                                  auto.key = list(space = "inside",
-                                                  lines = TRUE,
-                                                  points = FALSE))
-        i <- i + 1
+      if (y_var == "objectives") {
+        args$x <- "primal + dual"
+        args$ylab <- "Objective"
+        args$auto.key <- list(space = "right",
+                              lines = TRUE,
+                              points = FALSE)
+
+      } else if (y_var == "infeasibility") {
+        args$x <- "infeasibility"
+        args$ylab <- "Infeasibility"
       }
 
-      if ("infeasibility" %in% what) {
-        p[[i]] <- lattice::xyplot(infeasibility ~ time,
-                                  data = d,
-                                  type = "l",
-                                  grid = TRUE,
-                                  xlab = "Time (Seconds)",
-                                  ylab = "Infeasibility")
+      if (x_var == "time") {
+        args$x <- paste(args$x, "~ time")
+        args$xlab <- "Time (seconds)"
+      } else if (x_var == "iteration") {
+        args$x <- paste(args$x, "~ iteration")
+        args$xlab <- "Iteration"
       }
 
-      if (length(what) > 1)
-        gridExtra::grid.arrange(grobs = p, ncol = length(p))
-      else
-        p[[1]]
+      args$x <- as.formula(args$x)
+
+      args <- utils::modifyList(args,
+                                list(...))
+
+      do.call(lattice::xyplot, args)
     }
   )
 )
