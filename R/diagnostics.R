@@ -96,7 +96,8 @@ Diagnostics <- R6::R6Class(
       if (y_var == "objectives") {
         args$x <- "primal + dual"
         args$ylab <- "Objective"
-        args$auto.key <- list(space = "right",
+        args$auto.key <- list(space = "inside",
+                              corner = c(0.95, 0.95),
                               lines = TRUE,
                               points = FALSE)
 
