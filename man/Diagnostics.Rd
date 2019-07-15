@@ -16,6 +16,7 @@ This class encapsulates diagnostics from model fit with
 \describe{
 \item{\code{data}}{contains a data frame with variables
 \describe{
+\item{\code{iteration}}{iteration}
 \item{\code{time}}{time}
 \item{\code{primal}}{primal objective}
 \item{\code{dual}}{dual objective}
@@ -35,11 +36,18 @@ trellis graphics.
 \item{\code{ind}}{
 index of the fit for which diagnostics should be plotted
 }
-\item{\code{what}}{
-type of diagnostics to plot. \code{objectives} returns the
+\item{\code{x_var}}{
+what to place on the x axis. \code{iteration} plots each iteration, \code{time}
+plots the wall-clock time.
+}
+\item{\code{y_var}}{
+what to place on the y axis. \code{objectives} returns the
 primal and dual objectives whereas \code{infeasibility} returns
-the infeasibility metric. If both are provided, all plots
-will be arranged using \code{\link[gridExtra:grid.arrange]{gridExtra::grid.arrange()}}
+the infeasibility metric.
+}
+\item{\code{\dots}}{
+other arguments that will be used to modify the call to
+\code{\link[lattice:xyplot]{lattice::xyplot()}}
 }
 }
 }
