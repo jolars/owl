@@ -106,8 +106,7 @@ groupify <- function(x,
 
 
 unorthogonalize <- function(betas,
-                            groups,
-                            orthogonalize) {
+                            groups) {
 
   group_id <- groups$group_id
   n_groups <- length(group_id)
