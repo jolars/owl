@@ -494,11 +494,13 @@ Golem <- R6::R6Class(
 #'       }
 #'     }
 #'   }
-#'   \item{`plot`(...)}{
+#'   \item{`plot(...)`}{
 #'     Plot the model's coefficient along the regularization path.
-#'     \describe{`\dots`}{
-#'       graphical parameters for the plot passed on
-#'       to [lattice::xyplot()].
+#'     \describe{
+#'       \item{`\dots`}{
+#'         graphical parameters for the plot passed on
+#'         to [lattice::xyplot()].
+#'       }
 #'     }
 #'   }
 #' }

@@ -119,12 +119,15 @@ function, and \code{"class"} gives class predictions.
 }
 }
 }
-\item{\code{plot}(...)}{
+\item{\code{plot(...)}}{
 Plot the model's coefficient along the regularization path.
-\describe{\code{\dots}}{
+\describe{
+\item{\code{\dots}}{
 graphical parameters for the plot passed on
 to \code{\link[lattice:xyplot]{lattice::xyplot()}}.
+}\preformatted{}
 }
+
 }
 }
 }
