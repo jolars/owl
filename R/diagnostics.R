@@ -88,8 +88,10 @@ Diagnostics <- R6::R6Class(
       d <- subset(d, subset = d$penalty == ind)
 
       args <- list(data = d,
-                   type = "l",
-                   grid = TRUE)
+                   type = "l")
+
+      if (nrow(d) > 1)
+        args$grid <- TRUE
 
       if (y_var == "objectives") {
         args$x <- "primal + dual"
