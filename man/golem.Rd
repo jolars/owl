@@ -91,7 +91,7 @@ feature (only applies to Group SLOPE)
 whether to use the coefficient estimates from the previous
 fit when refitting the model using new data. Provided that
 the same penalty (with approximately the same parameters)
-id used, setting this to true might lead to
+is used, setting this to true might lead to
 substantial performance boosts.
 }
 \item{\code{\dots}}{
@@ -125,9 +125,8 @@ Plot the model's coefficient along the regularization path.
 \item{\code{\dots}}{
 graphical parameters for the plot passed on
 to \code{\link[lattice:xyplot]{lattice::xyplot()}}.
-}\preformatted{}
 }
-
+}
 }
 }
 }

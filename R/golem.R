@@ -466,7 +466,7 @@ Golem <- R6::R6Class(
 #'         whether to use the coefficient estimates from the previous
 #'         fit when refitting the model using new data. Provided that
 #'         the same penalty (with approximately the same parameters)
-#'         id used, setting this to true might lead to
+#'         is used, setting this to true might lead to
 #'         substantial performance boosts.
 #'       }
 #'       \item{`\dots`}{
