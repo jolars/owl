@@ -93,7 +93,7 @@
       <h1>Benchmarks</h1>
                         <h4 class="author">Johan Larsson</h4>
             
-            <h4 class="date">2019-06-17</h4>
+            <h4 class="date">2019-07-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jolars/golem/blob/master/vignettes/benchmarks.Rmd"><code>vignettes/benchmarks.Rmd</code></a></small>
       <div class="hidden name"><code>benchmarks.Rmd</code></div>
@@ -112,9 +112,10 @@
 <div id="gaussian-model" class="section level3">
 <h3 class="hasAnchor">
 <a href="#gaussian-model" class="anchor"></a>Gaussian model</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">model &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(<span class="dt">family =</span> <span class="st">"gaussian"</span>, <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">model<span class="op">$</span><span class="kw">fit</span>(abalone<span class="op">$</span>x, abalone<span class="op">$</span>y)</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">model<span class="op">$</span>diagnostics<span class="op">$</span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>()</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">model &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(<span class="dt">family =</span> <span class="st">"gaussian"</span>, <span class="dt">penalty =</span> <span class="st">"slope"</span>, <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">               <span class="dt">sigma =</span> <span class="st">"estimate"</span>)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">model<span class="op">$</span><span class="kw">fit</span>(abalone<span class="op">$</span>x, abalone<span class="op">$</span>y)</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">model<span class="op">$</span>diagnostics<span class="op">$</span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>()</a></code></pre></div>
 <div class="figure">
 <img src="benchmarks_files/figure-html/unnamed-chunk-2-1.png" alt="Objective loss over time for the abalone data set (Gaussian response)." width="700"><p class="caption">
 Objective loss over time for the abalone data set (Gaussian response).

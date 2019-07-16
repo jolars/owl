@@ -141,10 +141,11 @@ optimization routines suitable to big data problems.</p>
 
     <pre class="usage"><span class='fu'>golem</span>(<span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>), <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"slope"</span>,
   <span class='st'>"group_slope"</span>, <span class='st'>"lasso"</span>), <span class='kw'>solver</span> <span class='kw'>=</span> <span class='st'>"fista"</span>, <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>, <span class='kw'>n_lambda</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-  <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
-  <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+  <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"sequence"</span>, <span class='st'>"estimate"</span>), <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>sigma_min_ratio</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>n_lambda</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>, <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
+  <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -181,14 +182,18 @@ applies to Group SLOPE)</p></td>
       <td><p>noise estimate (only applies to SLOPE and Group SLOPE)</p></td>
     </tr>
     <tr>
+      <th>n_sigma</th>
+      <td><p>number of sigmas to generate (only relevant for
+SLOPE and Group SLOPE)</p></td>
+    </tr>
+    <tr>
+      <th>sigma_min_ratio</th>
+      <td><p>smallest value for <code>sigma</code> as a fraction of</p></td>
+    </tr>
+    <tr>
       <th>lambda</th>
       <td><p>either a character vector indicating the method used
 to construct the lambda path or</p></td>
-    </tr>
-    <tr>
-      <th>fdr</th>
-      <td><p>target false discovery rate (only applies to SLOPE and
-Group SLOPE)</p></td>
     </tr>
     <tr>
       <th>n_lambda</th>
@@ -198,6 +203,11 @@ Group SLOPE)</p></td>
       <th>lambda_min_ratio</th>
       <td><p>smallest value for <code>lambda</code> as a fraction of
 \(\lambda_\mathrm{max}\) (only applies to lasso)</p></td>
+    </tr>
+    <tr>
+      <th>fdr</th>
+      <td><p>target false discovery rate (only applies to SLOPE and
+Group SLOPE)</p></td>
     </tr>
     <tr>
       <th>tol_rel_gap</th>
@@ -244,7 +254,7 @@ feature (only applies to Group SLOPE)</p></dd>
 <dt><code>warm_start</code></dt><dd><p>whether to use the coefficient estimates from the previous
 fit when refitting the model using new data. Provided that
 the same penalty (with approximately the same parameters)
-id used, setting this to true might lead to
+is used, setting this to true might lead to
 substantial performance boosts.</p></dd>
 <dt><code>&#8230;</code></dt><dd><p>arguments that will be used to modify the original model
 specification from the call to <code>golem()</code>. Note that arguments
@@ -261,6 +271,11 @@ new data.
 <dt><code>type</code></dt><dd><p>type of predictions to make. <code>"link"</code> gives the linear
 predictors, <code>"response"</code> gives the result of applying the link
 function, and <code>"class"</code> gives class predictions.</p></dd>
+</dl></p></dd>
+<dt><code><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot(...)</a></code></dt><dd><p>Plot the model's coefficient along the regularization path.
+<dl class='dl-horizontal'>
+<dt><code>&#8230;</code></dt><dd><p>graphical parameters for the plot passed on
+to <code><a href='https://www.rdocumentation.org/packages/lattice/topics/xyplot'>lattice::xyplot()</a></code>.</p></dd>
 </dl></p></dd>
 </dl>
     
@@ -325,10 +340,226 @@ of the classical gradient algorithm.</p>
 <span class='no'>gaussian_model</span>$<span class='fu'>fit</span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>)
 
 <span class='co'># Get coefficients from the model fit</span>
-<span class='no'>gaussian_model</span>$<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>()</div><div class='output co'>#&gt;    (Intercept)            sex         infant         length       diameter 
-#&gt;      4.7343105      0.0000000     -0.8427948      0.0000000      7.1485564 
-#&gt;         height   weight_whole weight_shucked weight_viscera   weight_shell 
-#&gt;     10.8508101      0.0000000     -8.0753432      0.0000000     16.5076554 </div><div class='input'>
+<span class='no'>gaussian_model</span>$<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>()</div><div class='output co'>#&gt;                      p1       p2       p3       p4       p5           p6
+#&gt; (Intercept)    9.933684 9.933684 9.933684 9.933684 9.933684  9.919905091
+#&gt; sex            0.000000 0.000000 0.000000 0.000000 0.000000  0.000000000
+#&gt; infant         0.000000 0.000000 0.000000 0.000000 0.000000 -0.001658197
+#&gt; length         0.000000 0.000000 0.000000 0.000000 0.000000  0.006448507
+#&gt; diameter       0.000000 0.000000 0.000000 0.000000 0.000000  0.007803517
+#&gt; height         0.000000 0.000000 0.000000 0.000000 0.000000  0.018514809
+#&gt; weight_whole   0.000000 0.000000 0.000000 0.000000 0.000000  0.001579195
+#&gt; weight_shucked 0.000000 0.000000 0.000000 0.000000 0.000000  0.003488961
+#&gt; weight_viscera 0.000000 0.000000 0.000000 0.000000 0.000000  0.007064957
+#&gt; weight_shell   0.000000 0.000000 0.000000 0.000000 0.000000  0.005563255
+#&gt;                        p7         p8         p9        p10        p11
+#&gt; (Intercept)     9.4905148  9.0937463  8.7322232  8.4028082  8.1026558
+#&gt; sex             0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; infant         -0.0586691 -0.1111954 -0.1590557 -0.2026653 -0.2424011
+#&gt; length          0.2281562  0.4324238  0.6185461  0.7881382  0.9426651
+#&gt; diameter        0.2760982  0.5232880  0.7485197  0.9537479  1.1407452
+#&gt; height          0.6550771  1.2415656  1.7759557  2.2628849  2.7065591
+#&gt; weight_whole    0.0558739  0.1058976  0.1514777  0.1930097  0.2308522
+#&gt; weight_shucked  0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_viscera  0.2499670  0.4737617  0.6776765  0.8634809  1.0327800
+#&gt; weight_shell    0.1968349  0.3730606  0.5336320  0.6799425  0.8132560
+#&gt;                       p12        p13        p14        p15        p16
+#&gt; (Intercept)     7.8291681  7.5799762  7.3002355  7.0341917  6.9409952
+#&gt; sex             0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; infant         -0.2786068 -0.3115961 -0.3635287 -0.4130987 -0.3922117
+#&gt; length          1.0834643  1.2117553  1.4137144  1.6064851  1.5252587
+#&gt; diameter        1.3111302  1.4663786  1.7107749  1.9440522  1.8457578
+#&gt; height          3.1108185  3.4791647  4.0590252  4.6125043  4.3792888
+#&gt; weight_whole    0.2653330  0.2967506  0.3462090  0.3934172  0.3735254
+#&gt; weight_shucked  0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_viscera  1.1870389  1.3275940  0.9256714  0.0000000  0.0000000
+#&gt; weight_shell    0.9347262  1.0454054  1.2196395  1.7917495  2.7052111
+#&gt;                       p17        p18        p19        p20        p21
+#&gt; (Intercept)     6.8560139  6.6701010  6.5633817  6.4662006  6.4869965
+#&gt; sex             0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; infant         -0.3732094 -0.3999221 -0.3976222 -0.3955002 -0.4228784
+#&gt; length          1.4513612  1.5552435  1.5462993  1.5380470  1.0924055
+#&gt; diameter        1.7563324  1.8820432  1.8712197  1.8612334  1.9900759
+#&gt; height          4.1671158  4.4653804  4.4397002  4.4160064  4.7217013
+#&gt; weight_whole    0.3554284  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_shucked  0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_viscera  0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_shell    3.5370646  4.9679194  5.4647754  5.9178259  6.4466978
+#&gt;                       p22        p23        p24        p25        p26
+#&gt; (Intercept)     6.5878073  6.5953084  6.5133214  6.4357576  6.4741846
+#&gt; sex             0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; infant         -0.4697341 -0.4968373 -0.5051585 -0.5110325 -0.5412956
+#&gt; length          0.3584548  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; diameter        2.2105798  2.3381280  2.3772879  2.4049311  1.9998392
+#&gt; height          5.2448740  5.5474980  5.6404097  5.7694818  6.1221620
+#&gt; weight_whole    0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_shucked  0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_viscera  0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_shell    7.0157072  7.4125933  7.6459180  7.8559753  8.2215931
+#&gt;                       p27        p28        p29       p30        p31        p32
+#&gt; (Intercept)     6.5192289  6.5255736  6.2345142  6.111974  5.9681565  5.8345496
+#&gt; sex             0.0000000  0.0000000  0.0000000  0.000000  0.0000000  0.0000000
+#&gt; infant         -0.5711672 -0.5986045 -0.6203897 -0.673525 -0.6932731 -0.7224736
+#&gt; length          0.0000000  0.0000000  0.0000000  0.000000  0.0000000  0.0000000
+#&gt; diameter        1.5916000  1.3652400  2.4359633  2.768460  2.9397713  3.3999783
+#&gt; height          6.4637781  6.7858403  6.9563542  7.520327  8.6639519  8.9650305
+#&gt; weight_whole    0.0000000  0.0000000  0.0000000  0.000000  0.0000000  0.0000000
+#&gt; weight_shucked  0.0000000 -0.1272483 -1.0891217 -1.417143 -2.0223982 -2.8395192
+#&gt; weight_viscera  0.0000000  0.0000000  0.0000000  0.000000  0.0000000  0.0000000
+#&gt; weight_shell    8.5708154  8.9710751  9.7381752  9.919010 10.4978399 11.3642277
+#&gt;                       p33        p34        p35        p36        p37
+#&gt; (Intercept)     5.7733737  5.6294988  5.5218879  5.4238236  5.2877247
+#&gt; sex             0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; infant         -0.7606355 -0.7765347 -0.7893852 -0.8010933 -0.8099447
+#&gt; length          0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; diameter        3.5795689  4.0569253  4.2949580  4.5118741  5.0154073
+#&gt; height          9.3406579  9.6255571 10.1903191 10.7049796 10.7865766
+#&gt; weight_whole    0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_shucked -3.5473730 -4.2424524 -4.8515923 -5.4066528 -5.9522416
+#&gt; weight_viscera  0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_shell   12.2106778 12.8986926 13.5466910 14.1371380 14.6322320
+#&gt;                       p38        p39        p40        p41        p42
+#&gt; (Intercept)     5.1565566  5.0370395  4.9281381  4.8289112  4.7384994
+#&gt; sex             0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; infant         -0.8177314 -0.8248262 -0.8312908 -0.8371811 -0.8425482
+#&gt; length          0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; diameter        5.5209930  5.9816644  6.4014262  6.7838976  7.1323913
+#&gt; height         10.8018131 10.8157104 10.8283531 10.8398726 10.8503688
+#&gt; weight_whole    0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_shucked -6.4554766 -6.9140199 -7.3318152 -7.7124947 -8.0593557
+#&gt; weight_viscera  0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+#&gt; weight_shell   15.0767788 15.4818519 15.8509146 16.1871908 16.4935931
+#&gt;                       p43        p44        p45        p46         p47
+#&gt; (Intercept)     4.6561194  4.5810579  4.5126647  4.4583274   4.4243133
+#&gt; sex             0.0000000  0.0000000  0.0000000  0.0000000   0.0000000
+#&gt; infant         -0.8474384 -0.8518942 -0.8559542 -0.8572413  -0.8537435
+#&gt; length          0.0000000  0.0000000  0.0000000  0.0000000   0.0000000
+#&gt; diameter        7.4499258  7.7392514  8.0028741  8.2145499   8.3519778
+#&gt; height         10.8599325 10.8686466 10.8765865 10.8584991  10.7930600
+#&gt; weight_whole    0.0000000  0.0000000  0.0000000  0.1595255   0.6138303
+#&gt; weight_shucked -8.3754025 -8.6633726 -8.9257602 -9.3586032 -10.1282472
+#&gt; weight_viscera  0.0000000  0.0000000  0.0000000  0.0000000   0.0000000
+#&gt; weight_shell   16.7727755 17.0271561 17.2589382 17.2349878  16.7578690
+#&gt;                        p48         p49         p50         p51         p52
+#&gt; (Intercept)      4.4093534   4.4052104   4.3731422   4.3238281   4.2730083
+#&gt; sex              0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+#&gt; infant          -0.8533089  -0.8545281  -0.8601265  -0.8611718  -0.8612814
+#&gt; length           0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+#&gt; diameter         8.4091049   8.4208431   8.5584458   8.7170408   8.9399775
+#&gt; height          10.7175926  10.6396319  10.6320665  10.7782151  10.7521946
+#&gt; weight_whole     0.7818552   0.7908205   0.9068475   1.2756925   1.8091803
+#&gt; weight_shucked -10.5022250 -10.6510749 -10.9575420 -11.4203721 -12.0287734
+#&gt; weight_viscera   0.0000000   0.0000000   0.0000000  -0.5509792  -1.2913071
+#&gt; weight_shell    16.7461216  16.9834673  16.9532145  16.6380287  16.1094866
+#&gt;                        p53         p54         p55         p56         p57
+#&gt; (Intercept)      4.2187978   4.1918737   4.1673422   4.1497105   4.1311047
+#&gt; sex              0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+#&gt; infant          -0.8614747  -0.8614016  -0.8613353  -0.8632578  -0.8633405
+#&gt; length           0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+#&gt; diameter         9.1762672   9.2972691   9.4075190   9.4960919   9.5507382
+#&gt; height          10.7168498  10.7175877  10.7182567  10.7090328  10.7591581
+#&gt; weight_whole     2.2118485   2.8126350   3.3600226   3.8164195   3.9708906
+#&gt; weight_shucked -12.5090635 -13.1540510 -13.7417081 -14.2561783 -14.4851698
+#&gt; weight_viscera  -1.8791832  -2.6581987  -3.3680038  -3.8969613  -4.1141923
+#&gt; weight_shell    15.7237949  15.1041888  14.5396719  14.0606040  13.9888204
+#&gt;                       p58           p59           p60          p61          p62
+#&gt; (Intercept)      4.113761   4.096864050   4.081856971   4.06818315   4.05572407
+#&gt; sex              0.000000  -0.003271313  -0.008093676  -0.01248762  -0.01649122
+#&gt; infant          -0.863852  -0.864894444  -0.866591333  -0.86813749  -0.86954629
+#&gt; length           0.000000   0.000000000   0.000000000   0.00000000   0.00000000
+#&gt; diameter         9.627764   9.710421749   9.786740908   9.85627973   9.91964091
+#&gt; height          10.748095  10.747424181  10.747573167  10.74770925  10.74783325
+#&gt; weight_whole     4.237506   4.658547698   5.042232326   5.39183148   5.71037322
+#&gt; weight_shucked -14.790849 -15.235056725 -15.640824054 -16.01054342 -16.34741793
+#&gt; weight_viscera  -4.516084  -5.058879734  -5.552271823  -6.00183402  -6.41145835
+#&gt; weight_shell    13.775733  13.329222640  12.922485727  12.55188248  12.21420261
+#&gt;                         p63         p64          p65         p66          p67
+#&gt; (Intercept)      4.04437183   4.0340281   4.02460325   4.0160157   4.00819102
+#&gt; sex             -0.02013914  -0.0234630  -0.02649158  -0.0292511  -0.03176548
+#&gt; infant          -0.87082993  -0.8719995  -0.87306524  -0.8740363  -0.87492104
+#&gt; length           0.00000000   0.0000000   0.00000000   0.0000000   0.00000000
+#&gt; diameter         9.97737326  10.0299768  10.07790723  10.1215796  10.16137231
+#&gt; height          10.74794623  10.7480492  10.74814297  10.7482284  10.74830631
+#&gt; weight_whole     6.00061658   6.2650755   6.50604066   6.7255991   6.92565261
+#&gt; weight_shucked -16.65436544 -16.9340446 -17.18887780 -17.4210723 -17.63263935
+#&gt; weight_viscera  -6.78469279  -7.1247701  -7.43463589  -7.7169741  -7.97423007
+#&gt; weight_shell    11.90652129  11.6261735  11.37073108  11.1379814  10.92590864
+#&gt;                         p68          p69          p70          p71          p72
+#&gt; (Intercept)      4.00106148   3.99456531   3.98864624   3.98325300   3.97833888
+#&gt; sex             -0.03405648  -0.03614396  -0.03804599  -0.03977905  -0.04135816
+#&gt; infant          -0.87572721  -0.87646175  -0.87713105  -0.87774088  -0.87829654
+#&gt; length           0.00000000   0.00000000   0.00000000   0.00000000   0.00000000
+#&gt; diameter        10.19762990  10.23066648  10.26076817  10.28819572  10.31318667
+#&gt; height          10.74837727  10.74844192  10.74850083  10.74855450  10.74860341
+#&gt; weight_whole     7.10793390   7.27402182   7.42535495   7.56324406   7.68888349
+#&gt; weight_shucked -17.82541134 -18.00105799 -18.16110067 -18.30692561 -18.43979586
+#&gt; weight_viscera  -8.20863217  -8.42221064  -8.61681538  -8.79413197  -8.95569625
+#&gt; weight_shell    10.73267580  10.55660924  10.39618394  10.25001039  10.11682249
+#&gt;                         p73         p74         p75          p76          p77
+#&gt; (Intercept)      3.97386132   3.9697793   3.9660621   3.96016509   3.95729932
+#&gt; sex             -0.04279697  -0.0441084  -0.0453029  -0.04650632  -0.04748817
+#&gt; infant          -0.87880284  -0.8792636  -0.8796840  -0.87987556  -0.88024136
+#&gt; length           0.00000000   0.0000000   0.0000000   0.00000000   0.00000000
+#&gt; diameter        10.33595750  10.3567179  10.3756216  10.40436359  10.41904749
+#&gt; height          10.74864797  10.7486793  10.7487171  10.74109436  10.74179328
+#&gt; weight_whole     7.80336145   7.9077170   8.0027543   8.08052401   8.16016945
+#&gt; weight_shucked -18.56086228 -18.6712386 -18.7717443 -18.86075263 -18.94440591
+#&gt; weight_viscera  -9.10290760  -9.2370465  -9.3592633  -9.44739524  -9.55083317
+#&gt; weight_shell     9.99546663   9.8848223   9.7840767   9.69668047   9.61269087
+#&gt;                         p78          p79          p80         p81          p82
+#&gt; (Intercept)      3.95469084   3.95231411   3.95014852   3.9481753   3.94637740
+#&gt; sex             -0.04838241  -0.04919721  -0.04993963  -0.0506161  -0.05123246
+#&gt; infant          -0.88057488  -0.88087877  -0.88115567  -0.8814080  -0.88163786
+#&gt; length           0.00000000   0.00000000   0.00000000   0.0000000   0.00000000
+#&gt; diameter        10.43241397  10.44459298  10.45569003  10.4658013  10.47501422
+#&gt; height          10.74244281  10.74303466  10.74357393  10.7440653  10.74451301
+#&gt; weight_whole     8.23277969   8.29893941   8.35922169   8.4141487   8.46419606
+#&gt; weight_shucked -19.02064428 -19.09010973 -19.15340406 -19.2110755 -19.26362356
+#&gt; weight_viscera  -9.64517400  -9.73113405  -9.80945764  -9.8808232  -9.94584881
+#&gt; weight_shell     9.53612060   9.46635270   9.40278279   9.3448603   9.29208339
+#&gt;                         p83         p84          p85          p86          p87
+#&gt; (Intercept)      3.94473921   3.9432466   3.94188650   3.94064727   3.94084074
+#&gt; sex             -0.05179408  -0.0523058  -0.05277206  -0.05319689  -0.05359297
+#&gt; infant          -0.88184732  -0.8820382  -0.88221207  -0.88237052  -0.88243761
+#&gt; length           0.00000000   0.0000000   0.00000000   0.00000000  -0.02502625
+#&gt; diameter        10.48340874  10.4910575  10.49802678  10.50437692  10.53782003
+#&gt; height          10.74492096  10.7452927  10.74563134  10.74593993  10.74687926
+#&gt; weight_whole     8.50979739   8.5513476   8.58920665   8.62370238   8.65507573
+#&gt; weight_shucked -19.31150340 -19.3551297 -19.39488042 -19.43109976 -19.46329761
+#&gt; weight_viscera -10.00509774 -10.0590832 -10.10827265 -10.15309229 -10.19231226
+#&gt; weight_shell     9.24399509   9.2001788   9.16025506   9.12387801   9.09015972
+#&gt;                         p88          p89          p90          p91          p92
+#&gt; (Intercept)      3.94186880   3.94280043   3.94364942   3.94442293   3.94512771
+#&gt; sex             -0.05395939  -0.05429312  -0.05459717  -0.05487423  -0.05512668
+#&gt; infant          -0.88245044  -0.88246292  -0.88247439  -0.88248475  -0.88249420
+#&gt; length          -0.06372406  -0.09878058  -0.13072242  -0.15982876  -0.18634861
+#&gt; diameter        10.58580247  10.62927205  10.66887836  10.70496971  10.73785377
+#&gt; height          10.74817453  10.74936147  10.75044308  10.75142845  10.75232631
+#&gt; weight_whole     8.68353615   8.70948780   8.73311461   8.75465863   8.77428727
+#&gt; weight_shucked -19.49203951 -19.51824987 -19.54211301 -19.56387183 -19.58369624
+#&gt; weight_viscera -10.22690470 -10.25845530 -10.28718269 -10.31337489 -10.33723876
+#&gt; weight_shell     9.05920027   9.03097901   9.00528973   8.98186175   8.96051698
+#&gt;                         p93          p94          p95          p96          p97
+#&gt; (Intercept)      3.94576995   3.94603371   3.94659821   3.94710970   3.94757579
+#&gt; sex             -0.05535668  -0.05561472  -0.05580146  -0.05597152  -0.05612648
+#&gt; infant          -0.88250289  -0.88255068  -0.88255385  -0.88255720  -0.88256025
+#&gt; length          -0.21051113  -0.22623413  -0.24696654  -0.26574216  -0.28285114
+#&gt; diameter        10.76781398  10.78818455  10.81381344  10.83702398  10.85817416
+#&gt; height          10.75314454  10.75374734  10.75443546  10.75506632  10.75564111
+#&gt; weight_whole     8.79215746   8.80849540   8.82332643   8.83685032   8.84917181
+#&gt; weight_shucked -19.60174529 -19.61845766 -19.63341700 -19.64705889 -19.65948791
+#&gt; weight_viscera -10.35896724 -10.37918410 -10.39717963 -10.41359398 -10.42854904
+#&gt; weight_shell     8.94108737   8.92348144   8.90733489   8.89261684   8.87920747
+#&gt;                         p98          p99         p100
+#&gt; (Intercept)      3.94800039   3.94838735   3.94873984
+#&gt; sex             -0.05626768  -0.05639633  -0.05651355
+#&gt; infant          -0.88256300  -0.88256555  -0.88256785
+#&gt; length          -0.29843881  -0.31264230  -0.32558209
+#&gt; diameter        10.87744410  10.89500236  10.91099879
+#&gt; height          10.75616485  10.75664208  10.75707695
+#&gt; weight_whole     8.86040624   8.87063339   8.87995824
+#&gt; weight_shucked -19.67082007 -19.68113657 -19.69054263
+#&gt; weight_viscera -10.44218360 -10.45459710 -10.46591458
+#&gt; weight_shell     8.86697976   8.85585016   8.84570139</div><div class='input'>
 <span class='co'># Binomial response, lasso penalty ------------------------------------------</span>
 
 <span class='no'>binomial_model</span> <span class='kw'>&lt;-</span> <span class='fu'>golem</span>(<span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>, <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='st'>"lasso"</span>)

@@ -147,6 +147,7 @@ golem()." />
     <dl class='dl-horizontal'>
 <dt><code>data</code></dt><dd><p>contains a data frame with variables
 <dl class='dl-horizontal'>
+<dt><code>iteration</code></dt><dd><p>iteration</p></dd>
 <dt><code>time</code></dt><dd><p>time</p></dd>
 <dt><code>primal</code></dt><dd><p>primal objective</p></dd>
 <dt><code>dual</code></dt><dd><p>dual objective</p></dd>
@@ -159,8 +160,18 @@ golem()." />
 
     
     <dl class='dl-horizontal'>
-<dt><code><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot()</a></code></dt><dd><p>Plot objectives and infeasibility side-by-side using
-trellis graphics.</p></dd>
+<dt><code><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot(ind = "last", what = c("objectives", "infeasibility"))</a></code></dt><dd><p>Plot objectives and infeasibility side-by-side using
+trellis graphics.
+<dl class='dl-horizontal'>
+<dt><code>ind</code></dt><dd><p>index of the fit for which diagnostics should be plotted</p></dd>
+<dt><code>x_var</code></dt><dd><p>what to place on the x axis. <code>iteration</code> plots each iteration, <code>time</code>
+plots the wall-clock time.</p></dd>
+<dt><code>y_var</code></dt><dd><p>what to place on the y axis. <code>objectives</code> returns the
+primal and dual objectives whereas <code>infeasibility</code> returns
+the infeasibility metric.</p></dd>
+<dt><code>&#8230;</code></dt><dd><p>other arguments that will be used to modify the call to
+<code><a href='https://www.rdocumentation.org/packages/lattice/topics/xyplot'>lattice::xyplot()</a></code></p></dd>
+</dl></p></dd>
 </dl>
     
 
