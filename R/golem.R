@@ -9,6 +9,7 @@ Golem <- R6::R6Class(
     intercept = NULL,
     beta = NULL
   ),
+
   public = list(
     args = list(),
 
@@ -22,44 +23,15 @@ Golem <- R6::R6Class(
     diagnostics = NULL,
     passes = 0L,
 
-    initialize = function(family,
-                          penalty,
-                          solver,
-                          intercept,
-                          standardize_features,
-                          orthogonalize,
-                          sigma,
-                          lambda,
-                          fdr,
-                          n_lambda,
-                          lambda_min_ratio,
-                          tol_rel_gap,
-                          tol_infeas,
-                          max_passes,
-                          diagnostics) {
+    tuning_result = NULL,
 
-      self$args <- list(family = family,
-                        penalty = penalty,
-                        solver = solver,
-                        intercept = intercept,
-                        standardize_features = standardize_features,
-                        orthogonalize = orthogonalize,
-                        sigma = sigma,
-                        lambda = lambda,
-                        fdr = fdr,
-                        n_lambda = n_lambda,
-                        lambda_min_ratio = lambda_min_ratio,
-                        tol_rel_gap = tol_rel_gap,
-                        tol_infeas = tol_infeas,
-                        max_passes = max_passes,
-                        diagnostics = diagnostics)
-    },
-
-    fit = function(x, y, groups = NULL, warm_start = TRUE, ...) {
+    fit = function(x, y, groups = NULL, warm_start = FALSE, ...) {
 
       stopifnot(is.logical(warm_start))
 
       self$args <- utils::modifyList(self$args, list(...))
+
+      self$args <- checkArgs(self$args)
       args <- self$args
 
       fit_intercept <- args$intercept
@@ -85,7 +57,6 @@ Golem <- R6::R6Class(
       private$p <- p <- NCOL(x)
       private$m <- m <- NCOL(y)
 
-      # use warm starts if applicable
       if (!warm_start || is.null(private$beta)) {
 
         intercept_init <- double(m)
@@ -95,7 +66,8 @@ Golem <- R6::R6Class(
                  p == NROW(private$beta) &&
                  m == NCOL(private$beta)) {
 
-        # use the coefficients at the end of the regularization path
+        # use the last fit solution
+
         # TODO(jolars): perhaps this could be set more intellegently
         #               based on the penalty strength and penalty?
         last <- dim(private$intercept)[3]
@@ -143,22 +115,39 @@ Golem <- R6::R6Class(
                                    orthogonalize)
       }
 
+      if (group_penalty) {
+        weights <- groups$wt_per_coef
+
+        for (j in seq_len(p))
+          x[, j] <- x[, j]/weights[j]
+
+        x_center <- x_center/weights
+      }
+
       # setup penalty settings
       penalty <- switch(
         args$penalty,
 
         slope = Slope$new(x = x,
                           y = y,
+                          y_scale = y_scale,
                           lambda = args$lambda,
                           sigma = args$sigma,
-                          fdr = args$fdr),
+                          sigma_min_ratio = args$sigma_min_ratio,
+                          n_sigma = args$n_sigma,
+                          fdr = args$fdr,
+                          family = family),
 
         group_slope = GroupSlope$new(x = x,
                                      y = y,
+                                     y_scale = y_scale,
                                      groups = groups,
                                      lambda = args$lambda,
                                      sigma = args$sigma,
-                                     fdr = args$fdr),
+                                     sigma_min_ratio = args$sigma_min_ratio,
+                                     n_sigma = args$n_sigma,
+                                     fdr = args$fdr,
+                                     family = family),
 
         lasso = Lasso$new(x = x,
                           y = y,
@@ -169,9 +158,12 @@ Golem <- R6::R6Class(
                           n_lambda = args$n_lambda)
       )
 
-      n_penalties <- NCOL(penalty$lambda)
-
       is_slope <- inherits(penalty, "Slope") || inherits(penalty, "GroupSlope")
+
+      n_penalties <- if (is_slope)
+        length(penalty$sigma)
+      else
+        NCOL(penalty$lambda)
 
       # setup solver settings
       solver <- Fista$new(tol_rel_gap = args$tol_rel_gap,
@@ -188,15 +180,6 @@ Golem <- R6::R6Class(
         variable_names <- paste0("V", seq_len(p))
       if (is.null(response_names))
         response_names <- paste0("y", seq_len(m))
-
-      if (group_penalty) {
-        weights <- groups$wt_per_coef
-
-        for (j in seq_len(p))
-          x[, j] <- x[, j]/weights[j]
-
-        x_center <- x_center/weights
-      }
 
       lipschitz_constant <-
         family$lipschitzConstant(x,
@@ -224,7 +207,7 @@ Golem <- R6::R6Class(
       if (is_sparse)
         x <- methods::as(x, "dgCMatrix")
 
-      if (is_slope && is.null(args$sigma)) {
+      if (is_slope && args$sigma == "estimate") {
         if (inherits(family, "Gaussian")) {
           control$penalty$sigma <- penalty$sigma <- stats::sd(y)
           res <- golemFit(x, y, control)
@@ -335,12 +318,114 @@ Golem <- R6::R6Class(
       invisible(self)
     },
 
+    tune = function(x,
+                    y,
+                    groups = NULL,
+                    method = "cv",
+                    number = 10,
+                    repeats = 1,
+                    measure = "deviance",
+                    n_cores = 1,
+                    ...) {
+
+      n <- NROW(x)
+      p <- NCOL(x)
+
+      y <- as.matrix(y)
+
+      stopifnot(NROW(x) > number)
+
+      # get initial lambda sequence
+      self$fit(x, y, groups = groups, ...)
+
+      name <- self$penalty$name
+      lambda <- self$penalty$lambda
+
+      is_slope <- name == "slope" || name == "group_slope"
+
+      fold_id <- as.numeric(cut(sample(n), number))
+
+      if (is_slope) {
+        sigma <- self$penalty$sigma
+        # fdr <- self$penalty$fdr
+
+        params <- expand.grid(sigma = sigma)
+
+        result <- expand.grid(fold = seq_len(number),
+                              sigma = sigma)
+
+        dim <- c(number, length(sigma), 1)
+      } else {
+        params <- expand.grid(lambda = lambda)
+
+        dim <- c(number, length(lambda), 1)
+      }
+
+      result <- array(dim = dim)
+
+      for (i in seq_len(dim[3])) {
+        for (j in seq_len(dim[1])) {
+          train_ind <- j == fold_id
+          test_ind <- !train_ind
+
+          x_train <- x[train_ind, , drop = FALSE]
+          y_train <- y[train_ind, , drop = FALSE]
+
+          if (!is.null(groups)) {
+            g_train <- groups[train_ind]
+            g_test <- groups[test_ind]
+          } else {
+            g_train <- NULL
+            g_test <- NULL
+          }
+
+          x_test <- x[test_ind, , drop = FALSE]
+          y_test <- y[test_ind, , drop = FALSE]
+
+          if (is_slope)
+            self$fit(x_train,
+                     y_train,
+                     groups = g_train,
+                     sigma = sigma,
+                     lambda = lambda)
+          else
+            self$fit(x_train, y_train,
+                     groups = g_train,
+                     lambda = lambda)
+
+          result[j, , i] <-
+            self$score(x_test, y_test, measure)
+        }
+      }
+      self$tuning_result <- result
+    },
+
+    score = function(x, y, measure) {
+      self$family$score(self, x, y, measure)
+    },
+
     coef = function() {
       drop(self$coefficients)
     },
 
-    predict = function(x, type = c("link", "response", "class")) {
-      beta <- self$coef()
+    predict = function(x,
+                       type = c("link", "response", "class"),
+                       which = "all") {
+
+      stopifnot(is.character(which) || is.numeric(which))
+
+      type <- match.arg(type)
+
+      beta <- self$coefficients
+
+      if (is.numeric(which)) {
+        beta <- beta[, , which, drop = FALSE]
+      }
+
+      p <- NROW(beta)
+      n <- NROW(x)
+      m <- NCOL(beta)
+      n_penalties <- dim(beta)[3]
 
       if (inherits(x, "sparseMatrix"))
         x <- methods::as(x, "dgCMatrix")
@@ -348,18 +433,106 @@ Golem <- R6::R6Class(
       if (inherits(x, "data.frame"))
         x <- as.matrix(x)
 
-      if (names(beta)[1] == "(Intercept)") {
+      if (names(beta[, , 1])[1] == "(Intercept)") {
         x <- methods::cbind2(1, x)
       }
 
-      lin_pred <- x %*% beta
+      stopifnot(p == NCOL(x))
+
+      lin_pred <- array(dim = c(n, m, n_penalties),
+                        dimnames = list(NULL,
+                                        dimnames(beta)[[2]],
+                                        dimnames(beta)[[3]]))
+
+      for (i in seq_len(n_penalties)) {
+        lin_pred[, , i] <- as.matrix(x %*% beta[, , i])
+      }
 
       switch(
-        match.arg(type),
+        type,
         link = lin_pred,
         response = self$family$link(lin_pred),
         class = self$family$predictClass(lin_pred, self$class_names)
       )
+    },
+
+    plot = function(...) {
+      coefs <- self$coefficients
+
+      if (is.null(coefs))
+        stop("nothing to plot since model is yet to be fit")
+
+      p <- NROW(coefs) # number of features
+      m <- NCOL(coefs) # number of responses
+
+      is_slope <- inherits(self$penalty, c("Slope", "GroupSlope"))
+
+      args <- list()
+
+      if (is_slope) {
+        x <- self$penalty$sigma
+        xlab <- expression(sigma)
+      } else {
+        x <- self$penalty$lambda
+        xlab <- expression(lambda)
+      }
+
+      n_x <- length(x)
+      d <- as.data.frame(as.table(coefs))
+      d$x <- rep(x, each = p*m)
+
+      args <- list(
+        x = if (m > 1)
+          quote(Freq ~ x | Var2)
+        else
+          quote(Freq ~ x),
+        type = if (n_x == 1) "p" else "l",
+        groups = quote(Var1),
+        data = quote(d),
+        ylab = expression(hat(beta)),
+        xlab = xlab,
+        # scales = list(x = list(log = "e")),
+        # xscale.components = function(lim, ...) {
+        #   x <- lattice::xscale.components.default(lim, ...)
+        #   x$bottom$labels$labels <- parse(text = x$bottom$labels$labels)
+        #   x
+        # },
+        auto.key = if (p <= 10)
+          list(space = "right", lines = TRUE, points = FALSE)
+        else FALSE,
+        abline = within(lattice::trellis.par.get("reference.line"), {h = 0})
+      )
+
+      # switch(match.arg(xvar),
+      #        norm = {
+      #          plot_args$xlab <-
+      #            expression(group("|", group("|", hat(beta), "|"), "|")[1])
+      #          plot_data$xval <- if (is.list(beta))
+      #            rowSums(vapply(beta,
+      #                           function(x) colSums(abs(as.matrix(x))),
+      #                           double(ncol(beta[[1]]))))
+      #          else
+      #            colSums(abs(as.matrix(beta)))
+      #        },
+      #        lambda = {
+      #          plot_args$xlab <- expression(lambda)
+      #          plot_args$scales <- list(x = list(log = "e"))
+      #          plot_data$xval <- x$lambda
+      #
+      #          # Prettier x scale
+      #          plot_args$xscale.components <- function(lim, ...) {
+      #            x <- lattice::xscale.components.default(lim, ...)
+      #            x$bottom$labels$labels <- parse(text = x$bottom$labels$labels)
+      #            x
+      #          }
+      #        },
+      #        dev = {
+      #          plot_args$xlab <- "Fraction of deviance explained"
+      #          plot_data$xval <- x$dev.ratio
+      #        })
+
+      # Let the user modify the plot parameters
+      do.call(lattice::xyplot, utils::modifyList(args, list(...)))
     }
   )
 )
@@ -396,7 +569,7 @@ Golem <- R6::R6Class(
 #'         whether to use the coefficient estimates from the previous
 #'         fit when refitting the model using new data. Provided that
 #'         the same penalty (with approximately the same parameters)
-#'         id used, setting this to true might lead to
+#'         is used, setting this to true might lead to
 #'         substantial performance boosts.
 #'       }
 #'       \item{`\dots`}{
@@ -421,6 +594,15 @@ Golem <- R6::R6Class(
 #'         type of predictions to make. `"link"` gives the linear
 #'         predictors, `"response"` gives the result of applying the link
 #'         function, and `"class"` gives class predictions.
+#'       }
+#'     }
+#'   }
+#'   \item{`plot(...)`}{
+#'     Plot the model's coefficient along the regularization path.
+#'     \describe{
+#'       \item{`\dots`}{
+#'         graphical parameters for the plot passed on
+#'         to [lattice::xyplot()].
 #'       }
 #'     }
 #'   }
@@ -517,7 +699,12 @@ Golem <- R6::R6Class(
 #'   setting this to TRUE when `x` is sparse will through an error. (only
 #'   applies to Group SLOPE)
 #' @param tol_rel_gap relative tolerance threshold for duality gap check
+#' @param n_sigma number of sigmas to generate (only relevant for
+#'   SLOPE and Group SLOPE)
+#' @param sigma_min_ratio smallest value for `sigma` as a fraction of
+#    \eqn{\sigma_\mathrm{max}}{\sigma_max}
 #' @param tol_infeas tolerance threshold for infeasibility
+#'
 #' @return An object of class `"Golem"`.
 #' @export
 #'
@@ -546,53 +733,82 @@ golem <- function(family = c("gaussian", "binomial"),
                   intercept = TRUE,
                   standardize_features = TRUE,
                   orthogonalize = TRUE,
-                  sigma = NULL,
+                  sigma = c("sequence", "estimate"),
+                  n_sigma = 100,
+                  sigma_min_ratio = NULL,
                   lambda = NULL,
-                  fdr = 0.2,
                   n_lambda = 100,
                   lambda_min_ratio = NULL,
+                  fdr = 0.2,
                   tol_rel_gap = 1e-6,
                   tol_infeas = 1e-6,
                   max_passes = 1e4,
                   diagnostics = FALSE) {
 
-  family <- match.arg(family)
-  penalty <- match.arg(penalty)
-  solver <- match.arg(solver)
+  out <- Golem$new()
 
-  stopifnot(is.null(lambda_min_ratio) ||
-              (lambda_min_ratio > 0 && lambda_min_ratio < 1),
-            tol_rel_gap > 0,
-            tol_infeas > 0,
-            max_passes > 0,
-            n_lambda >= 1,
-            fdr > 0,
-            fdr < 1,
-            is.null(sigma) || (sigma >= 0 && is.finite(sigma)),
-            is.null(lambda) || is.character(lambda) || is.numeric(lambda),
-            is.finite(max_passes),
-            is.finite(tol_rel_gap),
-            is.finite(tol_infeas),
-            is.finite(n_lambda),
-            is.logical(diagnostics),
-            is.logical(intercept),
-            is.logical(standardize_features),
-            is.logical(orthogonalize))
+  args <- list(family = family,
+               penalty = penalty,
+               solver = solver,
+               intercept = intercept,
+               standardize_features = standardize_features,
+               orthogonalize = orthogonalize,
+               sigma = sigma,
+               n_sigma = n_sigma,
+               sigma_min_ratio = sigma_min_ratio,
+               lambda = lambda,
+               n_lambda = n_lambda,
+               lambda_min_ratio = lambda_min_ratio,
+               fdr = fdr,
+               tol_rel_gap = tol_rel_gap,
+               tol_infeas = tol_infeas,
+               max_passes = max_passes,
+               diagnostics = diagnostics)
 
-  Golem$new(family = family,
-            penalty = penalty,
-            solver = solver,
-            intercept = intercept,
-            standardize_features = standardize_features,
-            orthogonalize = orthogonalize,
-            sigma = sigma,
-            lambda = lambda,
-            fdr = fdr,
-            n_lambda = n_lambda,
-            lambda_min_ratio = lambda_min_ratio,
-            tol_rel_gap = tol_rel_gap,
-            tol_infeas = tol_infeas,
-            max_passes = max_passes,
-            diagnostics = diagnostics)
+  args <- checkArgs(args)
+
+  out$args <- args
+
+  out
 }
 
+checkArgs <- function(args) {
+  args$family <- match.arg(args$family, c("gaussian", "binomial"))
+  args$penalty <- match.arg(args$penalty, c("slope", "group_slope", "lasso"))
+
+  if (is.character(args$sigma))
+    args$sigma <- match.arg(args$sigma, c("sequence", "estimate"))
+
+  with(
+    args,
+    stopifnot(
+      is.null(lambda_min_ratio) ||
+        (lambda_min_ratio > 0 && lambda_min_ratio < 1),
+      tol_rel_gap > 0,
+      tol_infeas > 0,
+      max_passes > 0,
+      n_lambda >= 1,
+      fdr > 0,
+      fdr < 1,
+      is.character(sigma) ||
+        (all(sigma >= 0 & is.finite(sigma))),
+      is.null(sigma_min_ratio) ||
+        (sigma_min_ratio > 0 && sigma_min_ratio < 1),
+      length(n_sigma) == 1,
+      n_sigma >= 1,
+      is.null(lambda) ||
+        is.character(lambda) || is.numeric(lambda),
+      is.finite(max_passes),
+      is.finite(tol_rel_gap),
+      is.finite(tol_infeas),
+      is.finite(n_lambda),
+      n_lambda >= 1,
+      is.logical(diagnostics),
+      is.logical(intercept),
+      is.logical(standardize_features),
+      is.logical(orthogonalize)
+    )
+  )
+
+  args
+}

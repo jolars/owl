@@ -32,7 +32,8 @@ library(golem)
 ### Gaussian model
 
 ```{r, fig.cap = "Objective loss over time for the abalone data set (Gaussian response)."}
-model <- golem(family = "gaussian", diagnostics = TRUE)
+model <- golem(family = "gaussian", penalty = "slope", diagnostics = TRUE,
+               sigma = "estimate")
 model$fit(abalone$x, abalone$y)
 model$diagnostics$plot()
 ```
