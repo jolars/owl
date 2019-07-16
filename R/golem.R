@@ -23,7 +23,9 @@ Golem <- R6::R6Class(
     diagnostics = NULL,
     passes = 0L,
 
-    fit = function(x, y, groups = NULL, warm_start = TRUE, ...) {
+    tuning_result = NULL,
+
+    fit = function(x, y, groups = NULL, warm_start = FALSE, ...) {
 
       stopifnot(is.logical(warm_start))
 
@@ -55,7 +57,6 @@ Golem <- R6::R6Class(
       private$p <- p <- NCOL(x)
       private$m <- m <- NCOL(y)
 
-      # use warm starts if applicable
       if (!warm_start || is.null(private$beta)) {
 
         intercept_init <- double(m)
@@ -65,7 +66,8 @@ Golem <- R6::R6Class(
                  p == NROW(private$beta) &&
                  m == NCOL(private$beta)) {
 
-        # use the coefficients at the end of the regularization path
+        # use the last fit solution
+
         # TODO(jolars): perhaps this could be set more intellegently
         #               based on the penalty strength and penalty?
         last <- dim(private$intercept)[3]
@@ -316,14 +318,111 @@ Golem <- R6::R6Class(
       invisible(self)
     },
 
+    tune = function(x,
+                    y,
+                    groups = NULL,
+                    method = "cv",
+                    number = 10,
+                    repeats = 1,
+                    measure = "deviance",
+                    n_cores = 1,
+                    ...) {
+
+      n <- NROW(x)
+      p <- NCOL(x)
+
+      y <- as.matrix(y)
+
+      stopifnot(NROW(x) > number)
+
+      # get initial lambda sequence
+      self$fit(x, y, groups = groups, ...)
+
+      name <- self$penalty$name
+      lambda <- self$penalty$lambda
+
+      is_slope <- name == "slope" || name == "group_slope"
+
+      fold_id <- as.numeric(cut(sample(n), number))
+
+      if (is_slope) {
+        sigma <- self$penalty$sigma
+        # fdr <- self$penalty$fdr
+
+        params <- expand.grid(sigma = sigma)
+
+        result <- expand.grid(fold = seq_len(number),
+                              sigma = sigma)
+
+        dim <- c(number, length(sigma), 1)
+      } else {
+        params <- expand.grid(lambda = lambda)
+
+        dim <- c(number, length(lambda), 1)
+      }
+
+      result <- array(dim = dim)
+
+      for (i in seq_len(dim[3])) {
+        for (j in seq_len(dim[1])) {
+          train_ind <- j == fold_id
+          test_ind <- !train_ind
+
+          x_train <- x[train_ind, , drop = FALSE]
+          y_train <- y[train_ind, , drop = FALSE]
+
+          if (!is.null(groups)) {
+            g_train <- groups[train_ind]
+            g_test <- groups[test_ind]
+          } else {
+            g_train <- NULL
+            g_test <- NULL
+          }
+
+          x_test <- x[test_ind, , drop = FALSE]
+          y_test <- y[test_ind, , drop = FALSE]
+
+          if (is_slope)
+            self$fit(x_train,
+                     y_train,
+                     groups = g_train,
+                     sigma = sigma,
+                     lambda = lambda)
+          else
+            self$fit(x_train, y_train,
+                     groups = g_train,
+                     lambda = lambda)
+
+          result[j, , i] <-
+            self$score(x_test, y_test, measure)
+        }
+      }
+      self$tuning_result <- result
+    },
+
+    score = function(x, y, measure) {
+      self$family$score(self, x, y, measure)
+    },
+
     coef = function() {
       drop(self$coefficients)
     },
 
-    predict = function(x, type = c("link", "response", "class")) {
+    predict = function(x,
+                       type = c("link", "response", "class"),
+                       which = "all") {
+
+      stopifnot(is.character(which) || is.numeric(which))
+
+      type <- match.arg(type)
+
       beta <- self$coefficients
 
-      # p <- NROW(beta)
+      if (is.numeric(which)) {
+        beta <- beta[, , which, drop = FALSE]
+      }
+
+      p <- NROW(beta)
       n <- NROW(x)
       m <- NCOL(beta)
       n_penalties <- dim(beta)[3]
@@ -338,17 +437,19 @@ Golem <- R6::R6Class(
         x <- methods::cbind2(1, x)
       }
 
+      stopifnot(p == NCOL(x))
+
       lin_pred <- array(dim = c(n, m, n_penalties),
                         dimnames = list(NULL,
                                         dimnames(beta)[[2]],
                                         dimnames(beta)[[3]]))
 
       for (i in seq_len(n_penalties)) {
-        lin_pred[, , i] <- x %*% beta[, , i]
+        lin_pred[, , i] <- as.matrix(x %*% beta[, , i])
       }
 
       switch(
-        match.arg(type),
+        type,
         link = lin_pred,
         response = self$family$link(lin_pred),
         class = self$family$predictClass(lin_pred, self$class_names)

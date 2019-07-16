@@ -37,14 +37,25 @@ Gaussian <- R6::R6Class(
       list(y, y_center, y_scale, n_classes = 1L, class_names = NA_character_)
     },
 
-    lipschitzConstant =
-      function(x,
-               fit_intercept,
-               x_center,
-               x_scale,
-               standardize_features) {
+    lipschitzConstant = function(x,
+                                 fit_intercept,
+                                 x_center,
+                                 x_scale,
+                                 standardize_features) {
       maxSquaredRowNorm(x, x_center/x_scale, standardize_features) +
           fit_intercept
+    },
+
+    score = function(fit, x, y, measure = c("deviance", "mse", "mae")) {
+      measure <- match.arg(measure)
+
+      y <- as.vector(y)
+      y_hat <- fit$predict(x)
+
+      switch(measure,
+             deviance = apply((y_hat - y)^2, 3, mean),
+             mse = apply((y_hat - y)^2, 3, mean),
+             mae = apply(abs(y_hat - y), 3, mean))
     }
   )
 )
@@ -119,6 +130,44 @@ Binomial <- R6::R6Class(
                standardize_features) {
         0.25 * (maxSquaredRowNorm(x, x_center/x_scale, standardize_features) +
           fit_intercept)
-      }
+      },
+
+    score = function(fit,
+                     x,
+                     y,
+                     measure = c("deviance",
+                                 "mse",
+                                 "mae",
+                                 "misclass_error",
+                                 "auc")) {
+      measure <- match.arg(measure)
+
+      prob_min <- 1e-05
+      prob_max <- 1 - prob_min
+
+      y <- as.factor(y)
+      y <- diag(2)[as.numeric(y), ]
+
+      y_hat <- fit$predict(x, type = "response")
+
+      switch(
+        measure,
+        auc = {
+          apply(y_hat, 3, function(y_hat_i) auc(y, y_hat_i))
+        },
+        mse = apply((y_hat + y[, 1] - 1)^2 + (y_hat - y[, 2])^2, 3, mean),
+        mae = apply(abs(y_hat + y[, 1] - 1) + abs(y_hat - y[, 2]), 3, mean),
+        deviance = {
+          y_hat <- pmin(pmax(y_hat, prob_min), prob_max)
+          lp <- y[, 1] * log(1 - y_hat) + y[, 2] * log(y_hat)
+          ly <- log(y)
+          ly[y == 0] <- 0
+          ly <- drop((y * ly) %*% c(1, 1))
+          apply(2 * (ly - lp), 3, mean)
+        },
+        misclass_error =
+          apply(y[, 1] * (y_hat > 0.5) + y[, 2] * (y_hat <= 0.5), 3, mean)
+      )
+    }
   )
 )

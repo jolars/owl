@@ -13,8 +13,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  warning = FALSE,
-  fig.width = 5
+  warning = FALSE
 )
 ```
 
@@ -33,7 +32,8 @@ library(golem)
 ### Gaussian model
 
 ```{r, fig.cap = "Objective loss over time for the abalone data set (Gaussian response)."}
-model <- golem(family = "gaussian", diagnostics = TRUE, n_sigma = 1, sigma = 1)
+model <- golem(family = "gaussian", penalty = "slope", diagnostics = TRUE,
+               sigma = "estimate")
 model$fit(abalone$x, abalone$y)
 model$diagnostics$plot()
 ```
