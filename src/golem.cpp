@@ -28,6 +28,7 @@ golemCpp(const T& x,
   auto family_args = as<Rcpp::List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
   auto diagnostics = as<bool>(solver_args["diagnostics"]);
+
   auto standardize_features = as<bool>(control["standardize_features"]);
   auto is_sparse = as<bool>(control["is_sparse"]);
   auto n_penalties = as<uword>(control["n_penalties"]);

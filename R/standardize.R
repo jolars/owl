@@ -1,5 +1,3 @@
-#' @include penalties.R
-
 standardize <- function(x, standardize_features) {
     p <- NCOL(x)
 

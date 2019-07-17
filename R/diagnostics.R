@@ -1,125 +1,107 @@
-#' Diagnostics
+#' Setup a data.frame of diagnostics
 #'
-#' This class encapsulates diagnostics from model fit with
-#' [golem()].
+#' @param res the result from calling the C++ routine used to fit a model
+#'   in golem
 #'
-#' @docType class
+#' @return A data.frame
 #'
-#' @format NULL
-#' @keywords NULL
+#' @keywords internal
+setupDiagnostics <- function(res) {
+  time <- res$time
+  primals <- res$primals
+  duals <- res$duals
+  infeasibilities <- res$infeasibilities
+
+  nl <- length(time)
+  nn <- lengths(time)
+  time <- unlist(time)
+  primal <- unlist(primals)
+  dual <- unlist(duals)
+  infeasibility <- unlist(infeasibilities)
+
+  data.frame(iteration = seq_along(time),
+             time = time,
+             primal = primal,
+             dual = dual,
+             infeasibility = infeasibility,
+             penalty = rep(seq_len(nl), nn))
+}
+
+#' Plot results from diagnostics collected during model fitting
 #'
-#' @field data contains a data frame with variables
-#'   \describe{
-#'     \item{`iteration`}{iteration}
-#'     \item{`time`}{time}
-#'     \item{`primal`}{primal objective}
-#'     \item{`dual`}{dual objective}
-#'     \item{`infeasibility`}{infeasibility}
-#'     \item{`penalty`}{the index along the regularization path}
-#'   }
+#' This function plots various diagnostics collected during
+#' the model fitting resulting from a call to [golem()] *provided that
+#' `diagnostics = TRUE`*.
 #'
-#' @section Methods:
+#' @param object an object of class `"Golem"`.
+#' @param ind either "last"
+#' @param xvar what to place on the x axis. `iteration` plots each iteration, `time`
+#'   plots the wall-clock time.
+#' @param yvar what to place on the y axis. `objectives` returns the
+#'   primal and dual objectives whereas `infeasibility` returns
+#'   the infeasibility metric.
+#' @param ... other arguments that will be used to modify the call to
+#'   [lattice::xyplot()]
 #'
-#' \describe{
-#'   \item{`plot(ind = "last", what = c("objectives", "infeasibility"))`}{
-#'     Plot objectives and infeasibility side-by-side using
-#'     trellis graphics.
-#'     \describe{
-#'       \item{`ind`}{
-#'         index of the fit for which diagnostics should be plotted
-#'       }
-#'       \item{`x_var`}{
-#'         what to place on the x axis. `iteration` plots each iteration, `time`
-#'         plots the wall-clock time.
-#'       }
-#'       \item{`y_var`}{
-#'         what to place on the y axis. `objectives` returns the
-#'         primal and dual objectives whereas `infeasibility` returns
-#'         the infeasibility metric.
-#'       }
-#'       \item{`\dots`}{
-#'         other arguments that will be used to modify the call to
-#'         [lattice::xyplot()]
-#'       }
-#'     }
-#'   }
-#' }
-#'
+#' @return An object of class `"trellis"`, which, unless stored in a variable,
+#'   will be plotted when its default `print()` method is called.
 #' @export
-Diagnostics <- R6::R6Class(
-  "Diagnostics",
-  list (
-    data = NULL,
+#'
+#' @examples
+#' x <- golem(abalone$x, abalone$y, sigma = 2, diagnostics = TRUE)
+#' plotDiagnostics(x)
+plotDiagnostics <- function(object,
+                            ind = max(object$diagnostics$penalty),
+                            xvar = c("time", "iteration"),
+                            yvar = c("objectives", "infeasibility"),
+                            ...) {
 
-    initialize = function(time, primals, duals, infeasibilities) {
-      nl <- length(time)
-      nn <- lengths(time)
-      time <- unlist(time)
-      primal <- unlist(primals)
-      dual <- unlist(duals)
-      infeasibility <- unlist(infeasibilities)
+  stopifnot(inherits(object, "Golem"),
+            is.numeric(ind),
+            length(ind) == 1)
 
-      self$data <- data.frame(iteration = seq_along(time),
-                              time = time,
-                              primal = primal,
-                              dual = dual,
-                              infeasibility = infeasibility,
-                              penalty = rep(seq_len(nl), nn))
-    },
+  xvar <- match.arg(xvar)
+  yvar <- match.arg(yvar)
 
-    plot = function(ind = "last",
-                    x_var = c("time", "iteration"),
-                    y_var = c("objectives", "infeasibility"),
-                    ...) {
-      d <- self$data
+  if (is.null(object$diagnostics))
+    stop("no diagnostics found in", enquote(substitute(object)),
+         "; did you call golem() with diagnostics = TRUE?")
 
-      n_penalties <- length(unique(d$penalty))
+  d <- object$diagnostics
 
-      x_var <- match.arg(x_var)
-      y_var <- match.arg(y_var)
+  d <- subset(d, subset = d$penalty == ind)
 
-      if (ind == "last") {
-        ind <- unique(d$penalty)[n_penalties]
-      } else {
-        stopifnot(ind <= n_penalties,
-                  ind >= 1)
-      }
+  # setup a list of arguments to be provided to lattice::xyplot()
+  args <- list(data = d, type = "l")
 
-      d <- subset(d, subset = d$penalty == ind)
+  if (nrow(d) > 1)
+    args$grid <- TRUE
 
-      args <- list(data = d,
-                   type = "l")
+  if (yvar == "objectives") {
+    args$x <- "primal + dual"
+    args$ylab <- "Objective"
+    args$auto.key <- list(space = "inside",
+                          corner = c(0.95, 0.95),
+                          lines = TRUE,
+                          points = FALSE)
 
-      if (nrow(d) > 1)
-        args$grid <- TRUE
+  } else if (yvar == "infeasibility") {
+    args$x <- "infeasibility"
+    args$ylab <- "Infeasibility"
+  }
 
-      if (y_var == "objectives") {
-        args$x <- "primal + dual"
-        args$ylab <- "Objective"
-        args$auto.key <- list(space = "inside",
-                              corner = c(0.95, 0.95),
-                              lines = TRUE,
-                              points = FALSE)
+  if (xvar == "time") {
+    args$x <- paste(args$x, "~ time")
+    args$xlab <- "Time (seconds)"
+  } else if (xvar == "iteration") {
+    args$x <- paste(args$x, "~ iteration")
+    args$xlab <- "Iteration"
+  }
 
-      } else if (y_var == "infeasibility") {
-        args$x <- "infeasibility"
-        args$ylab <- "Infeasibility"
-      }
+  args$x <- stats::as.formula(args$x)
 
-      if (x_var == "time") {
-        args$x <- paste(args$x, "~ time")
-        args$xlab <- "Time (seconds)"
-      } else if (x_var == "iteration") {
-        args$x <- paste(args$x, "~ iteration")
-        args$xlab <- "Iteration"
-      }
+  args <- utils::modifyList(args,
+                            list(...))
 
-      args$x <- as.formula(args$x)
-
-      args <- utils::modifyList(args,
-                                list(...))
-
-      do.call(lattice::xyplot, args)
-    }
-  )
-)
+  do.call(lattice::xyplot, args)
+}

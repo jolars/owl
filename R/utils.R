@@ -17,6 +17,15 @@ firstUpper <- function(x) {
   x
 }
 
+camelCase <- function(x) {
+  s <- strsplit(x, "[^[:alnum:]]")
+
+  sapply(s, function(y) {
+    first <- toupper(substring(y, 1, 1))
+    paste(first, substring(y, 2), sep = "", collapse = "")
+  })
+}
+
 logSeq <- function(from, to, length.out) {
   exp(seq(log(from), log(to), length.out = length.out))
 }

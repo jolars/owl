@@ -16,6 +16,10 @@ Coefficients from the model after having dropped extraneous
 dimensions by calling drop.
 }
 \description{
-This function is equivalent to calling \code{$coef()} on a model fit by
-\code{\link[=golem]{golem()}}.
+This function is equivalent to simply calling \code{drop(object$coefficients)}
+on a model fit by \code{\link[=golem]{golem()}}.
+}
+\examples{
+fit <- golem(mtcars$mpg, mtcars$vs, n_sigma = 1)
+coef(fit)
 }

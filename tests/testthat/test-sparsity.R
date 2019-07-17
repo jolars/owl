@@ -3,8 +3,6 @@ test_that("sparse and dense implementations give equivalent results", {
   n <- 1000
   p <- 2
 
-  g <- golem(sigma = 1)
-
   for (family in c("gaussian", "binomial")) {
     for (standardize in c(TRUE, FALSE)) {
       d <- golem:::randomProblem(n, p, 0.5, density = 0.5, response = family)
@@ -12,10 +10,14 @@ test_that("sparse and dense implementations give equivalent results", {
       y <- d$y
       beta <- d$beta
 
-      g$fit(x, y, family = family, standardize_features = standardize)
-      sparse_coefs <- g$coef()
-      g$fit(as.matrix(x), y)
-      dense_coefs <- g$coef()
+      g <- golem(x, y, family = family, standardize_features = standardize)
+
+      sparse_coefs <- coef(g)
+
+      g <- golem(as.matrix(x), y, family = family,
+                 standardize_features = standardize)
+
+      dense_coefs <- coef(g)
 
       expect_equal(sparse_coefs, dense_coefs, tol = 1e-4)
     }
@@ -28,16 +30,19 @@ test_that("sparse and dense implementations give equivalent results", {
   y <- d$y
   beta <- d$beta
 
-  g <- golem(sigma = 1, penalty = "group_slope",
-             standardize_features = FALSE)
-
   for (orthogonalize in c(TRUE, FALSE)) {
-    sparse_coefs <- g$fit(x, y,
-                          groups = d$groups,
-                          orthogonalize = orthogonalize)$coef()
-    dense_coefs <- g$fit(as.matrix(x), y,
-                         groups = d$groups,
-                         orthogonalize = orthogonalize)$coef()
+    sparse_coefs <- coef(golem(x, y,
+                               sigma = 1,
+                               penalty = "group_slope",
+                               groups = d$groups,
+                               standardize_features = FALSE,
+                               orthogonalize = orthogonalize))
+    dense_coefs <- coef(golem(as.matrix(x), y,
+                              sigma = 1,
+                              penalty = "group_slope",
+                              groups = d$groups,
+                              standardize_features = FALSE,
+                              orthogonalize = orthogonalize))
     expect_equal(sparse_coefs, dense_coefs, tol = 1e-7)
   }
 })
