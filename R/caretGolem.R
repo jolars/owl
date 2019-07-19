@@ -6,7 +6,7 @@
 #'
 #' @return Please see [caret::train()]
 #' @keywords internal
-slopeCaret <- function() {
+caretGolem <- function() {
   list(
     label = "golem",
     library = c("golem", "Matrix"),
