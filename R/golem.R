@@ -110,7 +110,13 @@
 #' @param diagnostics should diagnostics be saved for the model fit (timings,
 #'   primal and dual objectives, and infeasibility)
 #'
-#' @return An object of class `"Golem"`.
+#' @return An object of class `"Golem"` with the following slots:
+#' \item{coefficients}{a three-dimensional array of the coefficients from the
+#'                     model fit, including the intercept if it was fit.
+#'                     There is one row for each coefficient, one column
+#'                     for each target (dependent variable), and
+#'                     one slice for each penalty.}
+#' \item{nonzeros}{a numeric}
 #' @export
 #'
 #' @seealso [plot.Golem()], [plotDiagnostics()], [score()], [predict.Golem()],
@@ -224,28 +230,33 @@ golem <- function(x,
     stop("orthogonalization is currently not implemented for sparse data ",
          "when standardization is required")
 
-  # setup family
+  # setup response
   family <- switch(family,
                    gaussian = Gaussian(),
                    binomial = Binomial())
 
-  y_center <- y_scale <- double(m)
-  n_classes <- integer(0)
-  class_names <- character(0)
+  res <- preProcessResponse(family, y)
+  y <- res$y
+  y_center <- res$y_center
+  y_scale <- res$y_scale
+  # n_classes <- res$n_classes
+  class_names <- res$class_names
 
-  c(y, y_center, y_scale, n_classes, class_names) %<-%
-    preprocessResponse(family, y)
-
-  x_center <- x_scale <- double(p)
-  c(x, x_center, x_scale) %<-% standardize(x, standardize_features)
+  # setup feature matrix
+  res <- standardize(x, standardize_features)
+  x <- res$x
+  x_center <- res$x_center
+  x_scale <- res$x_scale
 
   if (group_penalty) {
-    c(x, groups) %<-% groupify(x,
-                               x_center,
-                               x_scale,
-                               groups,
-                               standardize_features,
-                               orthogonalize)
+    res <- groupify(x,
+                    x_center,
+                    x_scale,
+                    groups,
+                    standardize_features,
+                    orthogonalize)
+    x <- res$x
+    groups <- res$groups
   }
 
   if (group_penalty) {
@@ -346,9 +357,9 @@ golem <- function(x,
   if (is_slope && sigma == "estimate") {
     if (inherits(family, "Gaussian")) {
       control$penalty$sigma <- penalty$sigma <- stats::sd(y)
-      res <- golemFit(x, y, control)
+      fit <- golemFit(x, y, control)
 
-      S_new <- which(res$beta != 0)
+      S_new <- which(fit$beta != 0)
       S <- c()
 
       while(!isTRUE(all.equal(S, S_new)) && (length(S_new) > 0)) {
@@ -371,22 +382,22 @@ golem <- function(x,
         }
 
         control$penalty$sigma <- penalty$sigma <- sigma
-        control$intercept_init <- res$intercept
-        control$beta_init <- as.matrix(res$beta)
+        control$intercept_init <- fit$intercept
+        control$beta_init <- as.matrix(fit$beta)
 
-        res <- golemFit(x, y, control)
-        S_new <- which(res$beta != 0)
+        fit <- golemFit(x, y, control)
+        S_new <- which(fit$beta != 0)
       }
     } else if (inherits(family, "Binomial")) {
       control$penalty$sigma <- penalty$sigma <- 0.5
-      res <- golemFit(x, y, control)
+      fit <- golemFit(x, y, control)
     }
   } else {
-    res <- golemFit(x, y, control)
+    fit <- golemFit(x, y, control)
   }
 
-  intercept <- res$intercept
-  beta <- res$beta
+  intercept <- fit$intercept
+  beta <- fit$beta
 
   # reverse scaling when using group penalty type
   if (group_penalty) {
@@ -394,23 +405,28 @@ golem <- function(x,
     x_center <- x_center*weights
   }
 
-  nonzeros <- integer(0)
-
   if (group_penalty && orthogonalize) {
     beta <- unorthogonalize(beta, groups)
   }
 
-  c(intercept, beta, nonzeros) %<-% postProcess(penalty,
-                                                intercept,
-                                                beta,
-                                                x,
-                                                y,
-                                                fit_intercept,
-                                                x_center,
-                                                x_scale,
-                                                y_center,
-                                                y_scale,
-                                                groups)
+  nonzeros <- array(NA, dim = dim(beta))
+
+  # post-processing to get back non-standardized coefficients
+  res <- postProcess(penalty,
+                     intercept,
+                     beta,
+                     x,
+                     y,
+                     fit_intercept,
+                     x_center,
+                     x_scale,
+                     y_center,
+                     y_scale,
+                     groups)
+
+  intercept <- res$intercepts
+  beta <- res$betas
+  nonzeros <- res$nonzeros
 
   n_penalties <- dim(beta)[3]
 
@@ -431,7 +447,7 @@ golem <- function(x,
                                    paste0("p", seq_len(n_penalties)))
   }
 
-  diagnostics <- if (diagnostics) setupDiagnostics(res) else NULL
+  diagnostics <- if (diagnostics) setupDiagnostics(fit) else NULL
 
   structure(list(coefficients = coefficients,
                  nonzeros = nonzeros,
@@ -439,10 +455,9 @@ golem <- function(x,
                  penalty = penalty,
                  solver = solver,
                  class_names = class_names,
-                 passes = res$passes,
+                 passes = fit$passes,
                  diagnostics = diagnostics),
             class = c(paste0("Golem", camelCase(family$name)),
                       paste0("Golem", camelCase(penalty$name)),
                       "Golem"))
 }
-

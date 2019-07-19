@@ -18,7 +18,6 @@ lipschitzConstant.Binomial <- function(object,
                                        fit_intercept,
                                        x_center,
                                        x_scale,
-
                                        standardize_features) {
     0.25 * (maxSquaredRowNorm(x, x_center/x_scale, standardize_features) +
               fit_intercept)

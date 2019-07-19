@@ -68,7 +68,13 @@ Group SLOPE)}
 primal and dual objectives, and infeasibility)}
 }
 \value{
-An object of class \code{"Golem"}.
+An object of class \code{"Golem"} with the following slots:
+\item{coefficients}{a three-dimensional array of the coefficients from the
+model fit, including the intercept if it was fit.
+There is one row for each coefficient, one column
+for each target (dependent variable), and
+one slice for each penalty.}
+\item{nonzeros}{a numeric}
 }
 \description{
 This functions fits a generalized linear model (GLM) using efficient

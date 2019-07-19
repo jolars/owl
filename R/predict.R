@@ -71,6 +71,7 @@ predict.Golem <- function(object, x, type, ...) {
 }
 
 #' @rdname predict.Golem
+#' @export
 predict.GolemGaussian <- function(object,
                                   x,
                                   type = c("link", "response"),
@@ -81,6 +82,7 @@ predict.GolemGaussian <- function(object,
 }
 
 #' @rdname predict.Golem
+#' @export
 predict.GolemBinomial <- function(object,
                                   x,
                                   type = c("link", "response", "class"),

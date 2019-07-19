@@ -49,8 +49,7 @@ Imports:
     Matrix,
     methods,
     Rcpp,
-    grpSLOPE,
-    zeallot
+    grpSLOPE
 LinkingTo:
     Rcpp (>= 1.0.0),
     RcppArmadillo (>= 0.9.200.7.0)

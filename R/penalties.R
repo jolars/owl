@@ -1,78 +1,3 @@
-postProcess <- function(object, ...) {
-  UseMethod("postProcess", object)
-}
-
-postProcess.Penalty <- function(object,
-                                intercepts,
-                                betas,
-                                x,
-                                y,
-                                fit_intercept,
-                                x_center,
-                                x_scale,
-                                y_center,
-                                y_scale,
-                                groups) {
-
-  c(intercepts, betas) %<-% unstandardize(intercepts,
-                                          betas,
-                                          x,
-                                          y,
-                                          fit_intercept,
-                                          x_center,
-                                          x_scale,
-                                          y_center,
-                                          y_scale)
-  selected <- which(betas > 0)
-  list(intercepts = intercepts, betas = betas, selected = selected)
-}
-
-
-postProcess.GroupSlope <- function(object,
-                                   intercepts,
-                                   betas,
-                                   x,
-                                   y,
-                                   fit_intercept,
-                                   x_center,
-                                   x_scale,
-                                   y_center,
-                                   y_scale,
-                                   groups) {
-
-  # compute group norms ||X_I beta_I||
-  group_id <- groups$group_id
-  ortho_group_id <- groups$ortho_group_id
-  n_groups <- length(group_id)
-  orthogonalize <- groups$orthogonalize
-
-  group_norms <- double(n_groups)
-
-  for (i in seq_len(n_groups)) {
-    if (orthogonalize) {
-      group_norms[i] <- norm(as.matrix(betas[ortho_group_id[[i]]]), "f")
-    } else {
-      xbetai <- x[, group_id[[i]]] %*% as.matrix(betas[group_id[[i]]])
-      group_norms[i] <- norm(as.matrix(xbetai), "f")
-    }
-  }
-
-  names(group_norms) <- names(group_id)
-
-  res <- unstandardize(intercepts,
-                       betas,
-                       x,
-                       y,
-                       fit_intercept,
-                       x_center,
-                       x_scale,
-                       y_center,
-                       y_scale)
-
-  res$selected <- which(group_norms > 0)
-  res
-}
-
 Slope <- function(x,
                   y,
                   y_scale,
@@ -146,8 +71,10 @@ Slope <- function(x,
   sigma  <- sigma
 
   structure(list(name = "slope",
-                 lambda = lambda,
-                 sigma = sigma),
+                 tuning_parameters = c("sigma", "fdr"),
+                 sigma = sigma,
+                 fdr = fdr,
+                 lambda = lambda),
             class = c("Slope", "Penalty"))
 }
 
@@ -162,7 +89,6 @@ GroupSlope <- function(x,
                        fdr = 0.2,
                        family) {
 
-  name <- "group_slope"
   group_id <- groups$group_id
   ortho_group_id <- groups$ortho_group_id
   orthogonalize <- groups$orthogonalize
@@ -249,8 +175,10 @@ GroupSlope <- function(x,
   sigma <- sigma
 
   structure(list(name = "group_slope",
-                 lambda = lambda,
-                 sigma = sigma),
+                 tuning_parameters = c("sigma", "fdr"),
+                 sigma = sigma,
+                 fdr = fdr,
+                 lambda = lambda),
             class = c("GroupSlope", "Penalty"))
 }
 
@@ -284,6 +212,7 @@ Lasso <- function(x,
   lambda <- matrix(lambda, 1, length(lambda))
 
   structure(list(name = "lasso",
+                 tuning_parameters = c("lambda"),
                  lambda = lambda,
                  lambda_scale = lambda_scale),
             class = c("Lasso", "Penalty"))

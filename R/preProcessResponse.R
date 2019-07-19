@@ -1,8 +1,8 @@
-preprocessResponse <- function(object, ...) {
-  UseMethod("preprocessResponse", object)
+preProcessResponse <- function(object, ...) {
+  UseMethod("preProcessResponse", object)
 }
 
-preprocessResponse.Gaussian <- function(object, y) {
+preProcessResponse.Gaussian <- function(object, y) {
   y <- as.numeric(y)
 
   if (NCOL(y) > 1)
@@ -13,10 +13,14 @@ preprocessResponse.Gaussian <- function(object, y) {
 
   y <- as.matrix(y - y_center)
 
-  list(y, y_center, y_scale, n_classes = 1L, class_names = NA_character_)
+  list(y = y,
+       y_center = y_center,
+       y_scale = y_scale,
+       n_classes = 1L,
+       class_names = NA_character_)
 }
 
-preprocessResponse.Binomial <- function(object, y) {
+preProcessResponse.Binomial <- function(object, y) {
   if (NCOL(y) > 1)
     stop("response for binomial regression must be one-dimensional.")
 
@@ -37,7 +41,7 @@ preprocessResponse.Binomial <- function(object, y) {
   # Transform response to {-1, 1}, which is used internally
   y <- as.matrix(ifelse(as.numeric(as.factor(y)) == 1, -1, 1))
 
-  list(y,
+  list(y = y,
        y_center = 0,
        y_scale = 1,
        n_classes = 1L,

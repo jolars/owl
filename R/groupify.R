@@ -1,35 +1,3 @@
-orthogonalizeGroups <- function(x,
-                                group_id,
-                                x_center,
-                                x_scale,
-                                standardize_features) {
-  getGroupQR <- function(ids) {
-    submat <- x[, ids, drop = FALSE]
-
-    if (length(ids) == 1) {
-      Q <- submat
-      R <- 1
-      P <- 1
-    } else {
-
-      if (inherits(submat, "sparseMatrix")) {
-        submat_qr <- Matrix::qr(submat)
-        Q <- Matrix::qr.Q(submat_qr)
-        R <- Matrix::qrR(submat_qr)
-        P <- submat_qr@q + 1
-      } else {
-        submat_qr <- qr(as.matrix(submat), LAPACK = TRUE)
-        Q <- qr.Q(submat_qr)
-        R <- qr.R(submat_qr)
-        P <- submat_qr$pivot
-      }
-    }
-    list(Q = Q, R = R, P = P)
-  }
-
-  lapply(group_id, getGroupQR)
-}
-
 groupify <- function(x,
                      x_center,
                      x_scale,
@@ -101,59 +69,39 @@ groupify <- function(x,
   groups$group_id <- group_id
   groups$orthogonalize <- orthogonalize
 
-  list(x, groups)
+  list(x = x,
+       groups = groups)
 }
 
+orthogonalizeGroups <- function(x,
+                                group_id,
+                                x_center,
+                                x_scale,
+                                standardize_features) {
+  getGroupQR <- function(ids) {
+    submat <- x[, ids, drop = FALSE]
 
-unorthogonalize <- function(betas,
-                            groups) {
+    if (length(ids) == 1) {
+      Q <- submat
+      R <- 1
+      P <- 1
+    } else {
 
-  group_id <- groups$group_id
-  n_groups <- length(group_id)
-  ortho_group_id <- groups$ortho_group_id
-
-  group_lengths <- lengths(group_id)
-  ortho_group_lengths <- lengths(ortho_group_id)
-
-  ortho <- groups$ortho
-
-  if (all(group_lengths == ortho_group_lengths)) {
-
-    beta_tilde <- betas
-
-    for (i in seq_len(n_groups)) {
-      # c corresponds to the (reordered) group
-      # structure in orthogonalized version of X
-      ci <- betas[ortho_group_id[[i]]]
-      li <- ortho_group_lengths[i]
-
-      if (inherits(ortho[[i]]$R, "sparseMatrix")) {
-        bi <- tryCatch({
-          Matrix::solve(ortho[[i]]$R, ci)
-        }, error = function(err) {
-          warning(paste("golem caught an error:", err))
-          rep(NA, li)
-        })
+      if (inherits(submat, "sparseMatrix")) {
+        submat_qr <- Matrix::qr(submat)
+        Q <- Matrix::qr.Q(submat_qr)
+        R <- Matrix::qrR(submat_qr)
+        P <- submat_qr@q + 1
       } else {
-        bi <- tryCatch({
-          backsolve(ortho[[i]]$R, ci)
-        }, error = function(err) {
-          warning(paste("golem caught an error:", err))
-          rep(NA, li)
-        })
+        submat_qr <- qr(as.matrix(submat), LAPACK = TRUE)
+        Q <- qr.Q(submat_qr)
+        R <- qr.R(submat_qr)
+        P <- submat_qr$pivot
       }
-
-      or <- double(li)
-
-      for (j in seq_len(li))
-        or[j] <- which(ortho[[i]]$P == j)
-
-      # beta corresponds to the group structure in the original matrix
-      beta_tilde[group_id[[i]]] <- bi[or]
     }
-  } else {
-    beta_tilde <- NULL
+    list(Q = Q, R = R, P = P)
   }
 
-  beta_tilde
+  lapply(group_id, getGroupQR)
 }
+
