@@ -6,9 +6,11 @@ test_that("lasso induces sparse models", {
   library(glmnet)
   glmnet.control(fdev = 0)
   glm_fit <- glmnet::glmnet(x, y, standardize = FALSE, nlambda = 10)
-  fit <- golem(penalty = "lasso",
+  fit <- golem(x,
+               y,
+               penalty = "lasso",
                standardize_features = FALSE,
-               n_lambda = 10)$fit(x, y)
+               n_lambda = 10)
 
   expect_equivalent(glm_fit$lambda, fit$penalty$lambda, tol = 1e-4)
 })
@@ -19,13 +21,12 @@ test_that("lasso and slope fits are equivalent if all lambda are equal", {
   x <- xy$x
   y <- xy$y
 
-  model <- golem(penalty = "lasso", lambda = 0.2)
-  model$fit(x, y)
-  lasso_coef <- model$coef()
+  model <- golem(x, y, penalty = "lasso", lambda = 0.2)
+  lasso_coef <- coef(model)
 
-  model$fit(x, y, penalty = "slope", warm_start = FALSE,
-            lambda = rep(0.2, NCOL(x))*NROW(x), sigma = 1)
-  slope_coef <- model$coef()
+  model <- golem(x, y, penalty = "slope",
+                 lambda = rep(0.2, NCOL(x))*NROW(x), sigma = 1)
+  slope_coef <- coef(model)
 
   expect_equal(lasso_coef, slope_coef)
 })

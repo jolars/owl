@@ -4,15 +4,27 @@
 \alias{golem}
 \title{Regularized Generalized Linear Models}
 \usage{
-golem(family = c("gaussian", "binomial"), penalty = c("slope",
-  "group_slope", "lasso"), solver = "fista", intercept = TRUE,
-  standardize_features = TRUE, orthogonalize = TRUE,
-  sigma = c("sequence", "estimate"), n_sigma = 100,
-  sigma_min_ratio = NULL, lambda = NULL, n_lambda = 100,
-  lambda_min_ratio = NULL, fdr = 0.2, tol_rel_gap = 1e-06,
-  tol_infeas = 1e-06, max_passes = 10000, diagnostics = FALSE)
+golem(x, y, groups = NULL, family = c("gaussian", "binomial"),
+  penalty = c("slope", "group_slope", "lasso"), solver = "fista",
+  intercept = TRUE, standardize_features = TRUE,
+  orthogonalize = TRUE, sigma = c("sequence", "estimate"),
+  n_sigma = 100, sigma_min_ratio = NULL, lambda = NULL,
+  n_lambda = 100, lambda_min_ratio = NULL, fdr = 0.2,
+  tol_rel_gap = 1e-06, tol_infeas = 1e-06, max_passes = 10000,
+  diagnostics = FALSE)
 }
 \arguments{
+\item{x}{the feature matrix, which can be either a dense
+matrix of the standard \emph{matrix} class, or a sparse matrix
+inheriting from \link[Matrix:sparseMatrix]{Matrix::sparseMatrix} Data frames will
+be converted to matrices internally.}
+
+\item{y}{the response. For Gaussian models this must be numeric; for
+binomial models, it can be a factor.}
+
+\item{groups}{a vector of integers giving the group membership of each
+feature (only applies to Group SLOPE)}
+
 \item{family}{response type. See \strong{Families} for details.}
 
 \item{penalty}{the regularization penalty to use. See \strong{Penalties} for
@@ -30,10 +42,10 @@ applies to Group SLOPE)}
 
 \item{sigma}{noise estimate (only applies to SLOPE and Group SLOPE)}
 
-\item{n_sigma}{number of sigmas to generate (only relevant for
-SLOPE and Group SLOPE)}
+\item{n_sigma}{length of regularization path (only relevant for group slope)}
 
-\item{sigma_min_ratio}{smallest value for \code{sigma} as a fraction of}
+\item{sigma_min_ratio}{smallest value for \code{sigma} as a fraction of
+\code{sigma_max}}
 
 \item{lambda}{either a character vector indicating the method used
 to construct the lambda path or}
@@ -41,7 +53,7 @@ to construct the lambda path or}
 \item{n_lambda}{length of regularization path (only relevant for lasso)}
 
 \item{lambda_min_ratio}{smallest value for \code{lambda} as a fraction of
-\eqn{\lambda_\mathrm{max}}{\lambda_max} (only applies to lasso)}
+\code{lambda_max}}
 
 \item{fdr}{target false discovery rate (only applies to SLOPE and
 Group SLOPE)}
@@ -56,7 +68,13 @@ Group SLOPE)}
 primal and dual objectives, and infeasibility)}
 }
 \value{
-An object of class \code{"Golem"}.
+An object of class \code{"Golem"} with the following slots:
+\item{coefficients}{a three-dimensional array of the coefficients from the
+model fit, including the intercept if it was fit.
+There is one row for each coefficient, one column
+for each target (dependent variable), and
+one slice for each penalty.}
+\item{nonzeros}{a numeric}
 }
 \description{
 This functions fits a generalized linear model (GLM) using efficient
@@ -66,71 +84,6 @@ optimization routines suitable to big data problems.
 The objective for each model is simply the loss function for
 each family plus a penalty term.
 }
-\section{Methods}{
-
-
-\describe{
-\item{\code{fit(x, y, groups = NULL, warm_start = TRUE, ...)}}{
-This method fits models specified by \code{\link[=golem]{golem()}}.
-\describe{
-\item{\code{x}}{
-the feature matrix, which can be either a dense
-matrix of the standard \emph{matrix} class, or a sparse matrix
-inheriting from \link[Matrix:sparseMatrix]{Matrix::sparseMatrix} Data frames will
-be converted to matrices internally.
-}
-\item{\code{y}}{
-the response. For Gaussian models, this must be numeric; for
-binomial models, it can be a factor.
-}
-\item{\code{groups}}{
-a vector of integers giving the group membership of each
-feature (only applies to Group SLOPE)
-}
-\item{\code{warm_start}}{
-whether to use the coefficient estimates from the previous
-fit when refitting the model using new data. Provided that
-the same penalty (with approximately the same parameters)
-is used, setting this to true might lead to
-substantial performance boosts.
-}
-\item{\code{\dots}}{
-arguments that will be used to modify the original model
-specification from the call to \code{\link[=golem]{golem()}}. Note that arguments
-pushed through this interface will modify the model, which
-might have unintended consequences.
-}
-}
-}
-\item{\code{coef()}}{
-Return the coefficients from the model fit (after dropping extraneous
-dimensions). If you prefer to always return a three-dimensional array,
-call \code{model$coefficients} instead.
-}
-\item{\code{predict(x, type = c("link", "response", "class"))}}{
-Return predictions from models fit by \code{\link[=golem]{golem()}} based on
-new data.
-\describe{
-\item{\code{x}}{new data to make predictions for.}
-\item{\code{type}}{
-type of predictions to make. \code{"link"} gives the linear
-predictors, \code{"response"} gives the result of applying the link
-function, and \code{"class"} gives class predictions.
-}
-}
-}
-\item{\code{plot(...)}}{
-Plot the model's coefficient along the regularization path.
-\describe{
-\item{\code{\dots}}{
-graphical parameters for the plot passed on
-to \code{\link[lattice:xyplot]{lattice::xyplot()}}.
-}
-}
-}
-}
-}
-
 \section{Families}{
 
 
@@ -211,19 +164,14 @@ of the classical gradient algorithm.
 
 # Gaussian response, slope penalty (default) --------------------------------
 
-# Specify the model
-gaussian_model <- golem(family = "gaussian")
-
-# Fit the model
-gaussian_model$fit(abalone$x, abalone$y)
-
-# Get coefficients from the model fit
-gaussian_model$coef()
+fit <- golem(abalone$x, abalone$y)
 
 # Binomial response, lasso penalty ------------------------------------------
 
-binomial_model <- golem(family = "binomial", penalty = "lasso")
+fit <- golem(heart$x, heart$y, family = "binomial", penalty = "lasso")
 
-binomial_model$fit(heart$x, heart$y)
-
+}
+\seealso{
+\code{\link[=plot.Golem]{plot.Golem()}}, \code{\link[=plotDiagnostics]{plotDiagnostics()}}, \code{\link[=score]{score()}}, \code{\link[=predict.Golem]{predict.Golem()}},
+\code{\link[=trainGolem]{trainGolem()}}
 }

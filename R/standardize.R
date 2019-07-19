@@ -1,5 +1,3 @@
-#' @include penalties.R
-
 standardize <- function(x, standardize_features) {
     p <- NCOL(x)
 
@@ -22,7 +20,9 @@ standardize <- function(x, standardize_features) {
       x_scale  <- rep.int(1, p)
     }
 
-    list(x, x_center, x_scale)
+    list(x = x,
+         x_center = x_center,
+         x_scale = x_scale)
 }
 
 unstandardize <- function(intercepts,
@@ -52,5 +52,6 @@ unstandardize <- function(intercepts,
         intercepts[, k, ]*y_scale[k] + y_center[k] - x_bar_beta_sum
   }
 
-  list(intercepts = intercepts, betas = betas)
+  list(intercepts = intercepts,
+       betas = betas)
 }

@@ -32,18 +32,25 @@ library(golem)
 ### Gaussian model
 
 ```{r, fig.cap = "Objective loss over time for the abalone data set (Gaussian response)."}
-model <- golem(family = "gaussian", penalty = "slope", diagnostics = TRUE,
-               sigma = "estimate")
-model$fit(abalone$x, abalone$y)
-model$diagnostics$plot()
+fit <- golem(abalone$x, 
+             abalone$y,
+             family = "gaussian",
+             penalty = "slope",
+             diagnostics = TRUE,
+             sigma = "estimate")
+plotDiagnostics(fit)
 ```
 
 ### Binomial model
 
 ```{r, fig.cap = "Objective loss over time for the heart data set (binomial response)."}
-model <- golem(family = "binomial", diagnostics = TRUE)
-model$fit(heart$x, heart$y)
-model$diagnostics$plot()
+fit <- golem(heart$x,
+             heart$y,
+             family = "gaussian",
+             penalty = "slope",
+             sigma = "estimate",
+             diagnostics = TRUE)
+plotDiagnostics(fit)
 ```
 
 

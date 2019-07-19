@@ -11,6 +11,4 @@
 #' @useDynLib golem, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @import Matrix
-#' @import zeallot
-#' @import R6
 NULL
