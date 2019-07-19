@@ -1,12 +1,18 @@
 #' Model objects for model tuning with caret
 #'
 #' This function can be used in a call to [caret::train()] to enable
-#' model tuning using caret. This function is currently not exported
-#' pending investigation.
+#' model tuning using caret. Note that this function does not properly work
+#' with sparse feature matrices and standardization due to the way
+#' resampling is implemented in caret. So for these cases, please
+#' check out [trainGolem()] instead.
 #'
-#' @return Please see [caret::train()]
-#' @keywords internal
-caretGolem <- function() {
+#' @return A model description list to be used in the `method` argument
+#' in [caret::train()].
+#'
+#' @seealso [caret::train()], [trainGolem()], [golem()]
+#'
+#' @export
+caretSlopeGolem <- function() {
   list(
     label = "golem",
     library = c("golem", "Matrix"),
@@ -31,36 +37,21 @@ caretGolem <- function() {
       else
         fam <- "gaussian"
 
-      fit <- golem(x,
-                   y,
-                   family = fam)
+      fit <- golem::golem(x,
+                          y,
+                          family = fam,
+                          penalty = "slope",
+                          n_sigma = len[1],
+                          standardize_features = FALSE)
 
       if (search == "grid") {
-        res <- Slope(x,
-                     as.numeric(as.factor(y)) - 1,
-                     1,
-                     "gaussian",
-                     "sequence",
-                     0.001,
-                     len[1],
-                     fdr,
-                     Binomial())
-        out <- expand.grid(sigma = res$sigma,
-                           fdr = fdr)
+        out <- expand.grid(sigma = fit$penalty$sigma,
+                           fdr = fit$penalty$fdr)
       } else {
         fdr <- stats::runif(0.01, 0.4, len[2])
-        res <- Slope(x,
-                     as.numeric(as.factor(y)) - 1,
-                     1,
-                     "gaussian",
-                     "sequence",
-                     0.001,
-                     len[1],
-                     fdr,
-                     Binomial())
 
-        sigma <- exp(stats::runif(log(min(res$sigma)),
-                                  log(max(res$sigma)),
+        sigma <- exp(stats::runif(log(min(fit$sigma)),
+                                  log(max(fit$sigma)),
                                   len[1]))
 
         out <- data.frame(sigma = sigma,
@@ -88,23 +79,79 @@ caretGolem <- function() {
     },
 
     fit = function(x, y, wts, param, lev, last, weights, classProbs, ...) {
-      golem::golem(as.matrix(x),
-                   y,
-                   sigma = param$sigma,
-                   fdr = param$fdr,
-                   standardize_features = FALSE,
-                   ...)
+
+      dots <- list(...)
+
+      numLev <- if(is.character(y) | is.factor(y)) length(levels(y)) else NA
+
+      if (all(names(dots) != "family")) {
+        if (!is.na(numLev)) {
+          fam <- ifelse(numLev > 2, "multinomial", "binomial")
+        } else fam <- "gaussian"
+        dots$family <- fam
+      }
+
+      dots$x <- x
+      dots$y <- y
+      dots$sigma <- param$sigma
+      dots$fdr <- param$fdr
+      dots$standardize_features = FALSE
+
+      do.call(golem::golem, dots)
     },
 
     predict = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
       library(golem)
       stats::predict(modelFit, x = newdata, type = "class")
+
+      # if (!is.matrix(newdata))
+      #   newdata <- Matrix::as.matrix(newdata)
+      #
+      # if (length(modelFit$obsLevels) < 2) {
+      #   out <- stats::predict(modelFit,
+      #                         newdata,
+      #                         s = modelFit$lambdaOpt)
+      # } else {
+      #   out <- stats::predict(modelFit,
+      #                         newdata,
+      #                         s = modelFit$lambdaOpt,
+      #                         type = "class")
+      # }
+      #
+      # if (is.matrix(out)) out <- out[, 1]
+      #
+      # if (!is.null(submodels)) {
+      #   if (length(modelFit$obsLevels) < 2) {
+      #     tmp <- as.list(as.data.frame(predict(modelFit,
+      #                                          newdata,
+      #                                          penalty = submodels$lambda)))
+      #   } else {
+      #     tmp <- predict(modelFit,
+      #                    newdata,
+      #                    s = submodels$lambda,
+      #                    type = "class")
+      #     tmp <- if (is.matrix(tmp))
+      #       as.data.frame(tmp, stringsAsFactors = FALSE)
+      #     else
+      #       as.character(tmp)
+      #     tmp <- as.list(tmp)
+      #   }
+      #   out <- c(list(out), tmp)
+      # }
+      # out
+
     },
 
     prob = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
       library(golem)
       stats::predict(modelFit, x = newdata, type = "response")
-    }
+    },
+
+    sort = function(x) x[order(-x$sigma, x$fdr),],
+
+    tags = c("Generalized Linear Model", "Implicit Feature Selection",
+             "L1 Regularization", "Linear Classifier",
+             "Linear Regression"),
   )
 }
 
