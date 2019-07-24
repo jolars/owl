@@ -165,7 +165,7 @@ GroupSlope <- function(x,
   }
 
   if (sigma_type == "sequence") {
-    lambda_max <- family$lambdaMax(x, y, y_scale)*NROW(x)
+    lambda_max <- lambdaMax(family, x, y, y_scale)*NROW(x)
 
     sigma <- lambda_max/min(lambda)
     sigma <- logSeq(sigma, sigma*sigma_min_ratio, n_sigma)

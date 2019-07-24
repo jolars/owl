@@ -4,12 +4,30 @@
 \alias{coef.Golem}
 \title{Obtain Coefficients from Model fit by Golem}
 \usage{
-\method{coef}{Golem}(object, ...)
+\method{coef}{Golem}(object, lambda = NULL, sigma = NULL,
+  exact = FALSE, simplify = TRUE, ...)
 }
 \arguments{
 \item{object}{an object of class \code{'Golem'}.}
 
-\item{...}{ignored}
+\item{lambda}{penalty parameter for Lasso-type models; if \code{NULL}, the
+values used in the original fit will be used}
+
+\item{sigma}{penalty parameter for SLOPE models; if \code{NULL}, the
+values used in the original fit will be used}
+
+\item{exact}{if \code{TRUE} and the given parameter values differ from those in
+the original fit, the model will be refit by calling \code{\link[stats:update]{stats::update()}} on
+the object with the new parameters. If \code{FALSE}, the predicted values
+will be based on interpolated coefficients from the original
+penalty path.}
+
+\item{simplify}{if \code{TRUE}, \code{\link[base:drop]{base::drop()}} will be called before returning
+the coefficients to drop extraneous dimensions}
+
+\item{...}{arguments that are passed on to \code{\link[stats:update]{stats::update()}} (and therefore
+also to \code{\link[golem:golem]{golem::golem()}}) if \code{exact = TRUE} and the given penalty
+is not in \code{object}}
 }
 \value{
 Coefficients from the model after having dropped extraneous

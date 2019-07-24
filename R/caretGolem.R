@@ -151,7 +151,7 @@ caretSlopeGolem <- function() {
 
     tags = c("Generalized Linear Model", "Implicit Feature Selection",
              "L1 Regularization", "Linear Classifier",
-             "Linear Regression"),
+             "Linear Regression")
   )
 }
 

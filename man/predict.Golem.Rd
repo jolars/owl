@@ -6,13 +6,15 @@
 \alias{predict.GolemBinomial}
 \title{Generate predictions from golem models}
 \usage{
-\method{predict}{Golem}(object, x, type, ...)
+\method{predict}{Golem}(object, x, lambda = NULL, sigma = NULL,
+  type = "link", exact = FALSE, simplify = TRUE, ...)
 
-\method{predict}{GolemGaussian}(object, x, type = c("link", "response"),
-  ...)
+\method{predict}{GolemGaussian}(object, x, lambda = NULL, sigma = NULL,
+  type = c("link", "response"), exact = FALSE, simplify = TRUE, ...)
 
-\method{predict}{GolemBinomial}(object, x, type = c("link", "response",
-  "class"), ...)
+\method{predict}{GolemBinomial}(object, x, lambda = NULL, sigma = NULL,
+  type = c("link", "response", "class"), exact = FALSE,
+  simplify = TRUE, ...)
 }
 \arguments{
 \item{object}{an object of class \code{"Golem"}, typically the result of
@@ -20,9 +22,24 @@ a call to \code{\link[=golem]{golem()}}}
 
 \item{x}{new data}
 
+\item{lambda}{penalty parameter for Lasso-type models; if \code{NULL}, the
+values used in the original fit will be used}
+
+\item{sigma}{penalty parameter for SLOPE models; if \code{NULL}, the
+values used in the original fit will be used}
+
 \item{type}{type of prediction; \code{"link"} returns the linear predictors,
 \code{"response"} returns the result of applying the link function,
 and \code{"class"} returns class predictions.}
+
+\item{exact}{if \code{TRUE} and the given parameter values differ from those in
+the original fit, the model will be refit by calling \code{\link[stats:update]{stats::update()}} on
+the object with the new parameters. If \code{FALSE}, the predicted values
+will be based on interpolated coefficients from the original
+penalty path.}
+
+\item{simplify}{if \code{TRUE}, \code{\link[base:drop]{base::drop()}} will be called before returning
+the coefficients to drop extraneous dimensions}
 
 \item{...}{ignored and only here for method consistency}
 }
@@ -30,8 +47,7 @@ and \code{"class"} returns class predictions.}
 Predictions from the model with scale determined by \code{type}.
 }
 \description{
-Return predictions from models fit by \code{\link[=golem]{golem()}} based on
-new data.
+Return predictionsfrom models fit by \code{\link[=golem]{golem()}}.
 }
 \examples{
 fit <- with(mtcars, golem(cbind(mpg, hp), vs, family = "binomial"))

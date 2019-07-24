@@ -6,7 +6,7 @@
 \usage{
 trainGolem(x, y, groups = NULL, fdr = 0.2, method = "cv",
   number = 10, repeats = 1, measure = c("deviance", "mse", "mae",
-  "misclass_error", "auc"), n_cores = 1, ...)
+  "accuracy", "auc"), n_cores = 1, ...)
 }
 \arguments{
 \item{x}{the feature matrix, which can be either a dense

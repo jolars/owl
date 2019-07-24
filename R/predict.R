@@ -1,52 +1,6 @@
-#' Return linear predictors
-#'
-#' @param object an ojbect of class `"Golem"`
-#' @param x a feature matrix
-#'
-#' @return Linear predictors
-#'
-#' @keywords internal
-linearPredictors <- function(object, x) {
-
-  beta <- object$coefficients
-
-  if (is.numeric(which)) {
-    beta <- beta[, , which, drop = FALSE]
-  }
-
-  p <- NROW(beta)
-  n <- NROW(x)
-  m <- NCOL(beta)
-  n_penalties <- dim(beta)[3]
-
-  if (inherits(x, "sparseMatrix"))
-    x <- methods::as(x, "dgCMatrix")
-
-  if (inherits(x, "data.frame"))
-    x <- as.matrix(x)
-
-  if (names(beta[, , 1])[1] == "(Intercept)") {
-    x <- methods::cbind2(1, x)
-  }
-
-  stopifnot(p == NCOL(x))
-
-  lin_pred <- array(dim = c(n, m, n_penalties),
-                    dimnames = list(NULL,
-                                    dimnames(beta)[[2]],
-                                    dimnames(beta)[[3]]))
-
-  for (i in seq_len(n_penalties)) {
-    lin_pred[, , i] <- as.matrix(x %*% beta[, , i])
-  }
-
-  lin_pred
-}
-
 #' Generate predictions from golem models
 #'
-#' Return predictions from models fit by [golem()] based on
-#' new data.
+#' Return predictionsfrom models fit by [golem()].
 #'
 #' @param object an object of class `"Golem"`, typically the result of
 #'   a call to [golem()]
@@ -55,6 +9,17 @@ linearPredictors <- function(object, x) {
 #'   `"response"` returns the result of applying the link function,
 #'    and `"class"` returns class predictions.
 #' @param ... ignored and only here for method consistency
+#' @param lambda penalty parameter for Lasso-type models; if `NULL`, the
+#'   values used in the original fit will be used
+#' @param sigma penalty parameter for SLOPE models; if `NULL`, the
+#'   values used in the original fit will be used
+#' @param simplify if `TRUE`, [base::drop()] will be called before returning
+#'   the coefficients to drop extraneous dimensions
+#' @param exact if `TRUE` and the given parameter values differ from those in
+#'   the original fit, the model will be refit by calling [stats::update()] on
+#'   the object with the new parameters. If `FALSE`, the predicted values
+#'   will be based on interpolated coefficients from the original
+#'   penalty path.
 #'
 #' @seealso [stats::predict()], [stats::predict.glm()]
 #'
@@ -66,34 +31,83 @@ linearPredictors <- function(object, x) {
 #' predict(fit, with(mtcars, cbind(mpg, hp)), type = "class")
 #'
 #' @export
-predict.Golem <- function(object, x, type, ...) {
-  NULL
+predict.Golem <- function(object,
+                          x,
+                          lambda = NULL,
+                          sigma = NULL,
+                          type = "link",
+                          exact = FALSE,
+                          simplify = TRUE,
+                          ...) {
+  # This method (the base method) only generates linear predictors
+
+  if (inherits(x, "sparseMatrix"))
+    x <- methods::as(x, "dgCMatrix")
+
+  if (inherits(x, "data.frame"))
+    x <- as.matrix(x)
+
+  beta <- stats::coef(object, lambda = lambda, sigma = sigma, simplify = FALSE)
+
+  if (names(beta[, , 1])[1] == "(Intercept)")
+    x <- methods::cbind2(1, x)
+
+  n <- NROW(x)
+  p <- NROW(beta)
+  m <- NCOL(beta)
+  n_penalties <- dim(beta)[3]
+
+  stopifnot(p == NCOL(x))
+
+  lin_pred <- array(dim = c(n, m, n_penalties),
+                    dimnames = list(rownames(x),
+                                    dimnames(beta)[[2]],
+                                    dimnames(beta)[[3]]))
+
+  for (i in seq_len(n_penalties))
+    lin_pred[, , i] <- as.matrix(x %*% beta[, , i])
+
+  lin_pred
 }
 
 #' @rdname predict.Golem
 #' @export
 predict.GolemGaussian <- function(object,
                                   x,
+                                  lambda = NULL,
+                                  sigma = NULL,
                                   type = c("link", "response"),
+                                  exact = FALSE,
+                                  simplify = TRUE,
                                   ...) {
   type <- match.arg(type)
 
-  linearPredictors(object, x)
+  out <- NextMethod(object, type = type) # always linear predictors
+
+  if (simplify)
+    out <- drop(out)
+
+  out
 }
 
 #' @rdname predict.Golem
 #' @export
 predict.GolemBinomial <- function(object,
                                   x,
+                                  lambda = NULL,
+                                  sigma = NULL,
                                   type = c("link", "response", "class"),
+                                  exact = FALSE,
+                                  simplify = TRUE,
                                   ...) {
 
   type <- match.arg(type)
 
-  lin_pred <- linearPredictors(object, x)
+  lin_pred <- NextMethod(object, type = type)
 
-  switch(
+  out <- switch(
     type,
+    link = lin_pred,
     response = 1 / (1 + exp(-lin_pred)),
     class = {
       cnum <- ifelse(lin_pred > 0, 2, 1)
@@ -105,4 +119,14 @@ predict.GolemBinomial <- function(object,
       clet
     }
   )
+
+  if (simplify)
+    out <- drop(out)
+
+  out
 }
+
+
+
+
+
