@@ -29,9 +29,12 @@ test_that("erroneous input throws errors in plot.trainGolem", {
   fit <- trainGolem(x, y)
 
   expect_error(plot(fit, measure = "auc"))
-  expect_s3_class(plot(fit), "trellis")
+  p <- plot(fit)
+  expect_s3_class(p, "trellis")
+  expect_silent(dont_plot(p))
 
   fit <- trainGolem(x, y, fdr = c(0.1, 0.2))
 
-  expect_s3_class(plot(fit), "trellis")
+  p <- plot(fit)
+  expect_s3_class(p, "trellis")
 })
