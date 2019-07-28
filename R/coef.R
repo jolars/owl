@@ -40,7 +40,7 @@ coef.Golem <- function(object,
     n_penalties <- length(penalty)
   } else if (all(value %in% penalty)) {
     n_penalties <- length(value)
-    beta <- beta[, , value %in% penalty]
+    beta <- beta[, , penalty %in% value, drop = FALSE]
   } else if (exact) {
     object <- stats::update(object, lambda = lambda, sigma = sigma, ...)
     beta <- object$coefficients
