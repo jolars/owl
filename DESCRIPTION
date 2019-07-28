@@ -46,14 +46,16 @@ LazyData: true
 Depends:
     R (>= 3.4.0)
 Imports:
+    grpSLOPE,
     Matrix,
     methods,
-    Rcpp,
-    grpSLOPE
+    Rcpp
 LinkingTo:
     Rcpp (>= 1.0.0),
     RcppArmadillo (>= 0.9.200.7.0)
 Suggests:
+    caret,
+    covr,
     glmnet,
     isotone,
     knitr,
@@ -62,8 +64,7 @@ Suggests:
     rmarkdown,
     SLOPE,
     spelling,
-    testthat (>= 2.1.0),
-    covr
+    testthat (>= 2.1.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Language: en-US
