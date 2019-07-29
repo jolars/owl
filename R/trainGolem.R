@@ -52,7 +52,7 @@ trainGolem <- function(x,
                        measure = c("deviance",
                                    "mse",
                                    "mae",
-                                   "misclass_error",
+                                   "accuracy",
                                    "auc"),
                        n_cores = 1,
                        ...) {
@@ -62,8 +62,6 @@ trainGolem <- function(x,
 
   measure <- match.arg(measure, several.ok = TRUE)
   method <- match.arg(method)
-
-
 
   n <- NROW(x)
 
@@ -79,7 +77,7 @@ trainGolem <- function(x,
   # match measure against accepted measure for the given family
   ok <- switch(fit$family$name,
                gaussian = c("deviance", "mse", "mae"),
-               binomial = c("deviance", "mse", "mae", "misclass_error", "auc"))
+               binomial = c("deviance", "mse", "mae", "accuracy", "auc"))
   measure <- measure[measure %in% ok]
 
   is_slope <- fit$penalty$name %in% c("slope", "group_slope")
@@ -109,7 +107,7 @@ trainGolem <- function(x,
     lambda <- fit$penalty$lambda
     result <- array(
       NA,
-      dim = c(number*repeats, length(lambda), length(fdr)),
+      dim = c(number*repeats, length(lambda), 1),
       dimnames = list(foldnames,
                       paste("lambda", signif(lambda, 2), sep = "_"),
                       NULL)
@@ -137,17 +135,9 @@ trainGolem <- function(x,
       x_test <- x[test_ind, , drop = FALSE]
       y_test <- y[test_ind, , drop = FALSE]
 
-      if (!is.null(groups)) {
-        g_train <- groups[train_ind]
-        g_test <- groups[test_ind]
-      } else {
-        g_train <- NULL
-        g_test <- NULL
-      }
-
       args <- utils::modifyList(list(x = x_train,
                                      y = y_train,
-                                     groups = g_train), list(...))
+                                     groups = groups), list(...))
 
       for (k in seq_len(d[3])) {
 
@@ -190,7 +180,7 @@ trainGolem <- function(x,
   for (i in seq_along(measure)) {
     s <- summary[[i]]
 
-    if (measure[i] == "auc")
+    if (measure[i] %in% c("auc", "accuracy"))
       best_ind <- which.max(s$mean)
     else
       best_ind <- which.min(s$mean)
@@ -220,7 +210,7 @@ trainGolem <- function(x,
       },
       mse = "Mean Squared Error",
       mae = "Mean Absolute Error",
-      class = "Misclassification Error",
+      accuracy = "Accuracy",
       auc = "AUC"
     )
   }, FUN.VALUE = character(1))

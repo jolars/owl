@@ -12,7 +12,7 @@ score(object, x, y, measure)
   "mse", "mae"))
 
 \method{score}{GolemBinomial}(object, x, y, measure = c("deviance",
-  "mse", "mae", "misclass_error", "auc"))
+  "mse", "mae", "accuracy", "auc"))
 }
 \arguments{
 \item{object}{an object of class \code{"Golem"}}
@@ -24,7 +24,8 @@ score(object, x, y, measure)
 \item{measure}{type of target measure. The default, \code{"deviance"},
 returns mean squared error for Gaussian models and deviance for
 Binomial models. \code{"mse"} returns mean squared error. \code{"mae"} returns
-mean absolute error, and \code{"auc"} returns Area Under the Curve.}
+mean absolute error, \code{"accuracy"} returns classification rate accuracy,
+and \code{"auc"} returns area under the ROC curve.}
 }
 \value{
 The measure along the regularization path depending on the

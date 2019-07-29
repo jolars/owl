@@ -92,6 +92,9 @@ randomProblem <- function(n = 1000,
                 (sign(y) + 1)/2
               })
 
+  dimnames(x) <- list(seq_len(nrow(x)),
+                      paste0("V", seq_len(ncol(x))))
+
   list(x = x,
        y = as.double(y),
        beta = beta,

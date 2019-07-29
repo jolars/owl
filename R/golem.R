@@ -153,6 +153,8 @@ golem <- function(x,
                   max_passes = 1e4,
                   diagnostics = FALSE) {
 
+  ocall <- match.call()
+
   family <- match.arg(family)
   penalty <- match.arg(penalty)
   solver <- match.arg(solver)
@@ -409,8 +411,6 @@ golem <- function(x,
     beta <- unorthogonalize(beta, groups)
   }
 
-  nonzeros <- array(NA, dim = dim(beta))
-
   # post-processing to get back non-standardized coefficients
   res <- postProcess(penalty,
                      intercept,
@@ -456,7 +456,8 @@ golem <- function(x,
                  solver = solver,
                  class_names = class_names,
                  passes = fit$passes,
-                 diagnostics = diagnostics),
+                 diagnostics = diagnostics,
+                 call = ocall),
             class = c(paste0("Golem", camelCase(family$name)),
                       paste0("Golem", camelCase(penalty$name)),
                       "Golem"))

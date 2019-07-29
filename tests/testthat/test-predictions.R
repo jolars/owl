@@ -2,17 +2,25 @@ test_that("predictions work for all models", {
   set.seed(1)
 
   for (family in c("gaussian", "binomial")) {
-    xy <- golem:::randomProblem(100, 10, response = family)
-    x <- xy$x
-    y <- xy$y
+    for (penalty in c("lasso", "slope", "group_slope")) {
+      xy <- golem:::randomProblem(100, 10, response = family, n_groups = 2)
+      x <- xy$x
+      y <- xy$y
 
-    fit <- golem(x, y, family = family)
+      fit <- golem(x,
+                   y,
+                   groups = xy$groups,
+                   family = family,
+                   penalty = penalty,
+                   n_lambda = 10, n_sigma = 10)
 
-    for (type in c("link", "response", "class")) {
-      if (type == "class" && family == "gaussian")
-        next
+      for (type in c("link", "response", "class")) {
+        if (type == "class" && family == "gaussian")
+          next
 
-      expect_silent(predict(fit, x, type = type))
+        expect_silent(predict(fit, x, type = type))
+      }
     }
   }
 })
+

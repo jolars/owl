@@ -9,7 +9,8 @@
 #' @param measure type of target measure. The default, `"deviance"`,
 #'   returns mean squared error for Gaussian models and deviance for
 #'   Binomial models. `"mse"` returns mean squared error. `"mae"` returns
-#'   mean absolute error, and `"auc"` returns Area Under the Curve.
+#'   mean absolute error, `"accuracy"` returns classification rate accuracy,
+#'   and `"auc"` returns area under the ROC curve.
 #'
 #' @return The measure along the regularization path depending on the
 #'   value in `measure`.
@@ -34,7 +35,7 @@ score.GolemGaussian <- function(object,
   measure <- match.arg(measure)
 
   y <- as.vector(y)
-  y_hat <- stats::predict(object, x)
+  y_hat <- stats::predict(object, x, simplify = FALSE)
 
   switch(measure,
          deviance = apply((y_hat - y)^2, 3, mean),
@@ -50,7 +51,7 @@ score.GolemBinomial <- function(object,
                                 measure = c("deviance",
                                             "mse",
                                             "mae",
-                                            "misclass_error",
+                                            "accuracy",
                                             "auc")) {
   measure <- match.arg(measure)
 
@@ -60,7 +61,7 @@ score.GolemBinomial <- function(object,
   y <- as.factor(y)
   y <- diag(2)[as.numeric(y), ]
 
-  y_hat <- stats::predict(object, x, type = "response")
+  y_hat <- stats::predict(object, x, type = "response", simplify = FALSE)
 
   switch(
     measure,
@@ -77,7 +78,7 @@ score.GolemBinomial <- function(object,
       ly <- drop((y * ly) %*% c(1, 1))
       apply(2 * (ly - lp), 3, mean)
     },
-    misclass_error =
+    accuracy = 1 -
       apply(y[, 1] * (y_hat > 0.5) + y[, 2] * (y_hat <= 0.5), 3, mean)
   )
 }

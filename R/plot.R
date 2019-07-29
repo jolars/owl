@@ -139,10 +139,15 @@ plot.TrainedGolem <-
   object <- x
 
   ind <- match(measure, object$measure$measure)
+
+  if (is.na(ind))
+    stop("measure ", measure, " was not used or not available when",
+         "fitting the model")
+
   measure_label <- object$measure$label[ind]
 
   summary <- object$summary[[measure]]
-  optimum <- object$optima[ind, ]
+  optimum <- object$optima[ind, , drop = FALSE]
   model <- object$model
 
   is_slope <- model$penalty$name %in% c("slope", "group_slope")
@@ -174,7 +179,7 @@ plot.TrainedGolem <-
 
   } else {
     x <- quote(mean ~ lambda)
-    best_ind <- match(summary$lambda, optimum$lambda)
+    best_ind <- match(optimum$lambda, summary$lambda)
     xlab <- expression(log[e](lambda))
     strip <- lattice::strip.default
     best_outer_ind <- 1
