@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Obtain Coefficients from Model fit by Golem — coef.Golem • golem</title>
+<title>Interpolate penalty values — interpolatePenalty • golem</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -37,10 +37,9 @@
 
 
 
-<meta property="og:title" content="Obtain Coefficients from Model fit by Golem — coef.Golem" />
+<meta property="og:title" content="Interpolate penalty values — interpolatePenalty" />
 
-<meta property="og:description" content="This function is equivalent to simply calling drop(object$coefficients)
-on a model fit by golem()." />
+<meta property="og:description" content="Interpolate penalty values" />
 
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
@@ -127,70 +126,37 @@ on a model fit by golem()." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Obtain Coefficients from Model fit by Golem</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/coef.R'><code>R/coef.R</code></a></small>
-    <div class="hidden name"><code>coef.Golem.Rd</code></div>
+    <h1>Interpolate penalty values</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/interpolatePenalty.R'><code>R/interpolatePenalty.R</code></a></small>
+    <div class="hidden name"><code>interpolatePenalty.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>This function is equivalent to simply calling <code><a href='https://www.rdocumentation.org/packages/base/topics/drop'>drop(object$coefficients)</a></code>
-on a model fit by <code><a href='golem.html'>golem()</a></code>.</p>
+    <p>Interpolate penalty values</p>
     
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for Golem</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>(<span class='no'>object</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>exact</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>interpolatePenalty</span>(<span class='no'>penalty</span>, <span class='no'>x</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>object</th>
-      <td><p>an object of class <code>'Golem'</code>.</p></td>
+      <th>penalty</th>
+      <td><p>current penalty sequence</p></td>
     </tr>
     <tr>
-      <th>lambda</th>
-      <td><p>penalty parameter for Lasso-type models; if <code>NULL</code>, the
-values used in the original fit will be used</p></td>
-    </tr>
-    <tr>
-      <th>sigma</th>
-      <td><p>penalty parameter for SLOPE models; if <code>NULL</code>, the
-values used in the original fit will be used</p></td>
-    </tr>
-    <tr>
-      <th>exact</th>
-      <td><p>if <code>TRUE</code> and the given parameter values differ from those in
-the original fit, the model will be refit by calling <code><a href='https://www.rdocumentation.org/packages/stats/topics/update'>stats::update()</a></code> on
-the object with the new parameters. If <code>FALSE</code>, the predicted values
-will be based on interpolated coefficients from the original
-penalty path.</p></td>
-    </tr>
-    <tr>
-      <th>simplify</th>
-      <td><p>if <code>TRUE</code>, <code><a href='https://www.rdocumentation.org/packages/base/topics/drop'>base::drop()</a></code> will be called before returning
-the coefficients to drop extraneous dimensions</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>arguments that are passed on to <code><a href='https://www.rdocumentation.org/packages/stats/topics/update'>stats::update()</a></code> (and therefore
-also to <code><a href='golem.html'>golem::golem()</a></code>) if <code>exact = TRUE</code> and the given penalty
-is not in <code>object</code></p></td>
+      <th>x</th>
+      <td><p>new sequence</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Coefficients from the model after having dropped extraneous
-dimensions by calling drop.</p>
+    <p>Interpolated values of lambda</p>
     
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='golem.html'>golem</a></span>(<span class='no'>mtcars</span>$<span class='no'>mpg</span>, <span class='no'>mtcars</span>$<span class='no'>vs</span>, <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>1</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>(<span class='no'>fit</span>)</div><div class='output co'>#&gt; (Intercept)          V1 
-#&gt;      0.4375      0.0000 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -198,10 +164,10 @@ dimensions by calling drop.</p>
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+          </ul>
 
+    <h2>Author</h2>
+    <p>Jerome Friedman, Trevor Hastie, Rob Tibshirani, and Noah Simon</p>
   </div>
 </div>
 

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Obtain Coefficients from Model fit by Golem — coef.Golem • golem</title>
+<title>Model objects for model tuning with caret — caretSlopeGolem • golem</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -37,10 +37,13 @@
 
 
 
-<meta property="og:title" content="Obtain Coefficients from Model fit by Golem — coef.Golem" />
+<meta property="og:title" content="Model objects for model tuning with caret — caretSlopeGolem" />
 
-<meta property="og:description" content="This function is equivalent to simply calling drop(object$coefficients)
-on a model fit by golem()." />
+<meta property="og:description" content="This function can be used in a call to caret::train() to enable
+model tuning using caret. Note that this function does not properly work
+with sparse feature matrices and standardization due to the way
+resampling is implemented in caret. So for these cases, please
+check out trainGolem() instead." />
 
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
@@ -127,80 +130,42 @@ on a model fit by golem()." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Obtain Coefficients from Model fit by Golem</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/coef.R'><code>R/coef.R</code></a></small>
-    <div class="hidden name"><code>coef.Golem.Rd</code></div>
+    <h1>Model objects for model tuning with caret</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/caretGolem.R'><code>R/caretGolem.R</code></a></small>
+    <div class="hidden name"><code>caretSlopeGolem.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>This function is equivalent to simply calling <code><a href='https://www.rdocumentation.org/packages/base/topics/drop'>drop(object$coefficients)</a></code>
-on a model fit by <code><a href='golem.html'>golem()</a></code>.</p>
+    <p>This function can be used in a call to <code><a href='https://www.rdocumentation.org/packages/caret/topics/train'>caret::train()</a></code> to enable
+model tuning using caret. Note that this function does not properly work
+with sparse feature matrices and standardization due to the way
+resampling is implemented in caret. So for these cases, please
+check out <code><a href='trainGolem.html'>trainGolem()</a></code> instead.</p>
     
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for Golem</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>(<span class='no'>object</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>exact</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>object</th>
-      <td><p>an object of class <code>'Golem'</code>.</p></td>
-    </tr>
-    <tr>
-      <th>lambda</th>
-      <td><p>penalty parameter for Lasso-type models; if <code>NULL</code>, the
-values used in the original fit will be used</p></td>
-    </tr>
-    <tr>
-      <th>sigma</th>
-      <td><p>penalty parameter for SLOPE models; if <code>NULL</code>, the
-values used in the original fit will be used</p></td>
-    </tr>
-    <tr>
-      <th>exact</th>
-      <td><p>if <code>TRUE</code> and the given parameter values differ from those in
-the original fit, the model will be refit by calling <code><a href='https://www.rdocumentation.org/packages/stats/topics/update'>stats::update()</a></code> on
-the object with the new parameters. If <code>FALSE</code>, the predicted values
-will be based on interpolated coefficients from the original
-penalty path.</p></td>
-    </tr>
-    <tr>
-      <th>simplify</th>
-      <td><p>if <code>TRUE</code>, <code><a href='https://www.rdocumentation.org/packages/base/topics/drop'>base::drop()</a></code> will be called before returning
-the coefficients to drop extraneous dimensions</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>arguments that are passed on to <code><a href='https://www.rdocumentation.org/packages/stats/topics/update'>stats::update()</a></code> (and therefore
-also to <code><a href='golem.html'>golem::golem()</a></code>) if <code>exact = TRUE</code> and the given penalty
-is not in <code>object</code></p></td>
-    </tr>
-    </table>
-    
+    <pre class="usage"><span class='fu'>caretSlopeGolem</span>()</pre>
+        
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Coefficients from the model after having dropped extraneous
-dimensions by calling drop.</p>
+    <p>A model description list to be used in the <code>method</code> argument
+in <code><a href='https://www.rdocumentation.org/packages/caret/topics/train'>caret::train()</a></code>.</p>
+    
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='https://www.rdocumentation.org/packages/caret/topics/train'>caret::train()</a></code>, <code><a href='trainGolem.html'>trainGolem()</a></code>, <code><a href='golem.html'>golem()</a></code></p></div>
     
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='golem.html'>golem</a></span>(<span class='no'>mtcars</span>$<span class='no'>mpg</span>, <span class='no'>mtcars</span>$<span class='no'>vs</span>, <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>1</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>(<span class='no'>fit</span>)</div><div class='output co'>#&gt; (Intercept)          V1 
-#&gt;      0.4375      0.0000 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+
+      <li><a href="#see-also">See also</a></li>
+          </ul>
 
   </div>
 </div>

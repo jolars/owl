@@ -147,7 +147,7 @@ model fit with <code><a href='golem.html'>golem()</a></code>.</p>
 
 <span class='co'># S3 method for GolemBinomial</span>
 <span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"deviance"</span>,
-  <span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"misclass_error"</span>, <span class='st'>"auc"</span>))</pre>
+  <span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"accuracy"</span>, <span class='st'>"auc"</span>))</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -169,7 +169,8 @@ model fit with <code><a href='golem.html'>golem()</a></code>.</p>
       <td><p>type of target measure. The default, <code>"deviance"</code>,
 returns mean squared error for Gaussian models and deviance for
 Binomial models. <code>"mse"</code> returns mean squared error. <code>"mae"</code> returns
-mean absolute error, and <code>"auc"</code> returns Area Under the Curve.</p></td>
+mean absolute error, <code>"accuracy"</code> returns classification rate accuracy,
+and <code>"auc"</code> returns area under the ROC curve.</p></td>
     </tr>
     </table>
     
