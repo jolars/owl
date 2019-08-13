@@ -1,5 +1,5 @@
 test_that("intepolating coefficients works properly", {
-  xy <- golem:::randomProblem(100, 10)
+  xy <- prague:::randomProblem(100, 10)
 
   # check for slope
   fit <- golem(xy$x, xy$y)
@@ -18,7 +18,7 @@ test_that("intepolating coefficients works properly", {
 })
 
 test_that("simplify argument in coef() works as expected", {
-  xy <- golem:::randomProblem(100, 10)
+  xy <- prague:::randomProblem(100, 10)
 
   # check for slope
   fit <- golem(xy$x, xy$y, penalty = "lasso")
@@ -32,7 +32,7 @@ test_that("simplify argument in coef() works as expected", {
 })
 
 test_that("refitting works if exact = TRUE", {
-  xy <- golem:::randomProblem(100, 10)
+  xy <- prague:::randomProblem(100, 10)
 
   # check for slope
   fit <- golem(xy$x, xy$y)

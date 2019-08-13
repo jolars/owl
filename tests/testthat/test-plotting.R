@@ -1,6 +1,6 @@
 test_that("plotting works", {
   set.seed(1)
-  xy <- golem:::randomProblem(100, 2)
+  xy <- prague:::randomProblem(100, 2)
 
   # one parameter
   fit <- golem(xy$x, xy$y, sigma = 0.2)

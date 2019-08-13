@@ -2,38 +2,38 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 golemSparse <- function(x, y, control) {
-    .Call(`_golem_golemSparse`, x, y, control)
+    .Call(`_prague_golemSparse`, x, y, control)
 }
 
 golemDense <- function(x, y, control) {
-    .Call(`_golem_golemDense`, x, y, control)
+    .Call(`_prague_golemDense`, x, y, control)
 }
 
 prox_slope_cpp <- function(y, args) {
-    .Call(`_golem_prox_slope_cpp`, y, args)
+    .Call(`_prague_prox_slope_cpp`, y, args)
 }
 
 standardizedSparseColNorms <- function(x, x_center) {
-    .Call(`_golem_standardizedSparseColNorms`, x, x_center)
+    .Call(`_prague_standardizedSparseColNorms`, x, x_center)
 }
 
 colNormsSparse <- function(x, norm_type = 2L) {
-    .Call(`_golem_colNormsSparse`, x, norm_type)
+    .Call(`_prague_colNormsSparse`, x, norm_type)
 }
 
 colNormsDense <- function(x, norm_type = 2L) {
-    .Call(`_golem_colNormsDense`, x, norm_type)
+    .Call(`_prague_colNormsDense`, x, norm_type)
 }
 
 rowNormsSparse <- function(x, norm_type = 2L) {
-    .Call(`_golem_rowNormsSparse`, x, norm_type)
+    .Call(`_prague_rowNormsSparse`, x, norm_type)
 }
 
 rowNormsDense <- function(x, norm_type = 2L) {
-    .Call(`_golem_rowNormsDense`, x, norm_type)
+    .Call(`_prague_rowNormsDense`, x, norm_type)
 }
 
 maxSquaredRowNorm <- function(x, x_scaled_center, standardize_features) {
-    .Call(`_golem_maxSquaredRowNorm`, x, x_scaled_center, standardize_features)
+    .Call(`_prague_maxSquaredRowNorm`, x, x_scaled_center, standardize_features)
 }
 

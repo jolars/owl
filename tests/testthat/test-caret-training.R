@@ -2,9 +2,9 @@ test_that("model training with caret works", {
   set.seed(432)
 
   library(caret)
-  library(golem)
+  library(prague)
 
-  xy <- golem:::randomProblem(1000, 10, q = 0.5)
+  xy <- prague:::randomProblem(1000, 10, q = 0.5)
 
   ctrl <- trainControl(method = "cv", number = 3)
 

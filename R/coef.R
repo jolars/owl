@@ -5,7 +5,7 @@
 #'
 #' @param object an object of class `'Golem'`.
 #' @param ... arguments that are passed on to [stats::update()] (and therefore
-#'   also to [golem::golem()]) if `exact = TRUE` and the given penalty
+#'   also to [golem()]) if `exact = TRUE` and the given penalty
 #'   is not in `object`
 #' @inheritParams predict.Golem
 #'

@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // golemSparse
 Rcpp::List golemSparse(const arma::sp_mat& x, const arma::mat& y, const Rcpp::List control);
-RcppExport SEXP _golem_golemSparse(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
+RcppExport SEXP _prague_golemSparse(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +21,7 @@ END_RCPP
 }
 // golemDense
 Rcpp::List golemDense(const arma::mat& x, const arma::mat& y, const Rcpp::List control);
-RcppExport SEXP _golem_golemDense(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
+RcppExport SEXP _prague_golemDense(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -34,7 +34,7 @@ END_RCPP
 }
 // prox_slope_cpp
 arma::vec prox_slope_cpp(const arma::vec& y, const Rcpp::List& args);
-RcppExport SEXP _golem_prox_slope_cpp(SEXP ySEXP, SEXP argsSEXP) {
+RcppExport SEXP _prague_prox_slope_cpp(SEXP ySEXP, SEXP argsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,7 +46,7 @@ END_RCPP
 }
 // standardizedSparseColNorms
 arma::vec standardizedSparseColNorms(const arma::sp_mat& x, const arma::vec& x_center);
-RcppExport SEXP _golem_standardizedSparseColNorms(SEXP xSEXP, SEXP x_centerSEXP) {
+RcppExport SEXP _prague_standardizedSparseColNorms(SEXP xSEXP, SEXP x_centerSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -58,7 +58,7 @@ END_RCPP
 }
 // colNormsSparse
 arma::vec colNormsSparse(const arma::sp_mat& x, const arma::uword norm_type);
-RcppExport SEXP _golem_colNormsSparse(SEXP xSEXP, SEXP norm_typeSEXP) {
+RcppExport SEXP _prague_colNormsSparse(SEXP xSEXP, SEXP norm_typeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -70,7 +70,7 @@ END_RCPP
 }
 // colNormsDense
 arma::vec colNormsDense(const arma::mat& x, const arma::uword norm_type);
-RcppExport SEXP _golem_colNormsDense(SEXP xSEXP, SEXP norm_typeSEXP) {
+RcppExport SEXP _prague_colNormsDense(SEXP xSEXP, SEXP norm_typeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -82,7 +82,7 @@ END_RCPP
 }
 // rowNormsSparse
 arma::vec rowNormsSparse(const arma::sp_mat& x, const arma::uword norm_type);
-RcppExport SEXP _golem_rowNormsSparse(SEXP xSEXP, SEXP norm_typeSEXP) {
+RcppExport SEXP _prague_rowNormsSparse(SEXP xSEXP, SEXP norm_typeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -94,7 +94,7 @@ END_RCPP
 }
 // rowNormsDense
 arma::vec rowNormsDense(const arma::mat& x, const arma::uword norm_type);
-RcppExport SEXP _golem_rowNormsDense(SEXP xSEXP, SEXP norm_typeSEXP) {
+RcppExport SEXP _prague_rowNormsDense(SEXP xSEXP, SEXP norm_typeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -106,7 +106,7 @@ END_RCPP
 }
 // maxSquaredRowNorm
 double maxSquaredRowNorm(SEXP x, const arma::rowvec& x_scaled_center, const bool standardize_features);
-RcppExport SEXP _golem_maxSquaredRowNorm(SEXP xSEXP, SEXP x_scaled_centerSEXP, SEXP standardize_featuresSEXP) {
+RcppExport SEXP _prague_maxSquaredRowNorm(SEXP xSEXP, SEXP x_scaled_centerSEXP, SEXP standardize_featuresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -119,19 +119,19 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_golem_golemSparse", (DL_FUNC) &_golem_golemSparse, 3},
-    {"_golem_golemDense", (DL_FUNC) &_golem_golemDense, 3},
-    {"_golem_prox_slope_cpp", (DL_FUNC) &_golem_prox_slope_cpp, 2},
-    {"_golem_standardizedSparseColNorms", (DL_FUNC) &_golem_standardizedSparseColNorms, 2},
-    {"_golem_colNormsSparse", (DL_FUNC) &_golem_colNormsSparse, 2},
-    {"_golem_colNormsDense", (DL_FUNC) &_golem_colNormsDense, 2},
-    {"_golem_rowNormsSparse", (DL_FUNC) &_golem_rowNormsSparse, 2},
-    {"_golem_rowNormsDense", (DL_FUNC) &_golem_rowNormsDense, 2},
-    {"_golem_maxSquaredRowNorm", (DL_FUNC) &_golem_maxSquaredRowNorm, 3},
+    {"_prague_golemSparse", (DL_FUNC) &_prague_golemSparse, 3},
+    {"_prague_golemDense", (DL_FUNC) &_prague_golemDense, 3},
+    {"_prague_prox_slope_cpp", (DL_FUNC) &_prague_prox_slope_cpp, 2},
+    {"_prague_standardizedSparseColNorms", (DL_FUNC) &_prague_standardizedSparseColNorms, 2},
+    {"_prague_colNormsSparse", (DL_FUNC) &_prague_colNormsSparse, 2},
+    {"_prague_colNormsDense", (DL_FUNC) &_prague_colNormsDense, 2},
+    {"_prague_rowNormsSparse", (DL_FUNC) &_prague_rowNormsSparse, 2},
+    {"_prague_rowNormsDense", (DL_FUNC) &_prague_rowNormsDense, 2},
+    {"_prague_maxSquaredRowNorm", (DL_FUNC) &_prague_maxSquaredRowNorm, 3},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_golem(DllInfo *dll) {
+RcppExport void R_init_prague(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

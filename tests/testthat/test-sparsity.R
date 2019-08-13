@@ -5,7 +5,7 @@ test_that("sparse and dense implementations give equivalent results", {
 
   for (family in c("gaussian", "binomial")) {
     for (standardize in c(TRUE, FALSE)) {
-      d <- golem:::randomProblem(n, p, 0.5, density = 0.5, response = family)
+      d <- prague:::randomProblem(n, p, 0.5, density = 0.5, response = family)
       x <- d$x
       y <- d$y
       beta <- d$beta
@@ -24,7 +24,7 @@ test_that("sparse and dense implementations give equivalent results", {
   }
 
   p <- 10
-  d <- golem:::randomProblem(n, p, 0.5, density = 0.5, response = "gaussian",
+  d <- prague:::randomProblem(n, p, 0.5, density = 0.5, response = "gaussian",
                              n_groups = 5)
   x <- d$x
   y <- d$y

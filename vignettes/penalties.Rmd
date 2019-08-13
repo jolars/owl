@@ -27,7 +27,7 @@ Benjamini--Hochberg procedure for multiple comparisons.
 Let's set up a simple experiment to see how SLOPE controls the FDR.
 
 ```{r, fig.cap = "Control of false discovery rate using SLOPE."}
-library(golem)
+library(prague)
 library(lattice)
 
 # proportion of real signals

@@ -17,7 +17,7 @@ test_that("lasso induces sparse models", {
 
 test_that("lasso and slope fits are equivalent if all lambda are equal", {
   set.seed(1)
-  xy <- golem:::randomProblem(100, 10)
+  xy <- prague:::randomProblem(100, 10)
   x <- xy$x
   y <- xy$y
 

@@ -30,7 +30,7 @@
 #' }
 #'
 #' @section Penalties:
-#' Models fit by [golem::golem()] can be regularized via several
+#' Models fit by [golem()] can be regularized via several
 #' penalties.
 #'
 #' **Lasso**
@@ -69,7 +69,7 @@
 #' }
 #'
 #' @section Solvers:
-#' There is currently a single solver available for [golem::golem].
+#' There is currently a single solver available for [golem()].
 #'
 #' **FISTA**
 #'

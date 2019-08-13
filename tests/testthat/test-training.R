@@ -2,7 +2,7 @@ test_that("model training works with trainGolem", {
   set.seed(48)
 
   for (family in c("gaussian", "binomial")) {
-    xy <- golem:::randomProblem(1e2, 4, n_groups = 2, response = family)
+    xy <- prague:::randomProblem(1e2, 4, n_groups = 2, response = family)
 
     for (penalty in c("slope", "group_slope", "lasso")) {
 
@@ -22,7 +22,7 @@ test_that("model training works with trainGolem", {
 })
 
 test_that("erroneous input throws errors in plot.trainGolem", {
-  xy <- golem:::randomProblem(1e3, 2)
+  xy <- prague:::randomProblem(1e3, 2)
   x <- xy$x
   y <- xy$y
 

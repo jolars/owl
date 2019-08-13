@@ -26,7 +26,7 @@ penalty path.}
 the coefficients to drop extraneous dimensions}
 
 \item{...}{arguments that are passed on to \code{\link[stats:update]{stats::update()}} (and therefore
-also to \code{\link[golem:golem]{golem::golem()}}) if \code{exact = TRUE} and the given penalty
+also to \code{\link[=golem]{golem()}}) if \code{exact = TRUE} and the given penalty
 is not in \code{object}}
 }
 \value{

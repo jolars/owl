@@ -1,4 +1,4 @@
 library(testthat)
-library(golem)
+library(prague)
 
-test_check("golem")
+test_check("prague")

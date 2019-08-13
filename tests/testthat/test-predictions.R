@@ -3,7 +3,7 @@ test_that("predictions work for all models", {
 
   for (family in c("gaussian", "binomial")) {
     for (penalty in c("lasso", "slope", "group_slope")) {
-      xy <- golem:::randomProblem(100, 10, response = family, n_groups = 2)
+      xy <- prague:::randomProblem(100, 10, response = family, n_groups = 2)
       x <- xy$x
       y <- xy$y
 

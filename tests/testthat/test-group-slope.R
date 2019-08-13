@@ -38,7 +38,7 @@ test_that("uneven group input is handled correctly", {
 
 test_that("binomial group slope models work", {
   set.seed(1)
-  library(golem)
+  library(prague)
 
   X <- scale(matrix(rnorm(3000), ncol = 3))
   x1 <- X[, 1]
@@ -90,7 +90,7 @@ test_that("group_slope lambda sequences are computed properly", {
 test_that("sigma estimation for Group SLOPE", {
   set.seed(1)
 
-  problem <- golem:::randomProblem(100, 5, sigma = 1)
+  problem <- prague:::randomProblem(100, 5, sigma = 1)
 
   x <- problem$x
   y <- problem$y

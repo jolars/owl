@@ -34,12 +34,12 @@ caretSlopeGolem <- function() {
       else
         fam <- "gaussian"
 
-      fit <- golem::golem(x,
-                          y,
-                          family = fam,
-                          penalty = "slope",
-                          n_sigma = len + 2,
-                          standardize_features = FALSE)
+      fit <- prague::golem(x,
+                           y,
+                           family = fam,
+                           penalty = "slope",
+                           n_sigma = len + 2,
+                           standardize_features = FALSE)
 
       sigma <- fit$penalty$sigma
       sigma <- sigma[-c(1, length(sigma))]
@@ -103,7 +103,7 @@ caretSlopeGolem <- function() {
       dots$fdr <- param$fdr
       dots$standardize_features = FALSE
 
-      out <- do.call(golem::golem, dots)
+      out <- do.call(prague::golem, dots)
 
       if (!is.na(param$sigma[1]))
         out$sigmaOpt <- param$sigma[1]
@@ -112,7 +112,7 @@ caretSlopeGolem <- function() {
     },
 
     predict = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
-      library(golem)
+      library(prague)
 
       if (!is.matrix(newdata))
         newdata <- Matrix::as.matrix(newdata)

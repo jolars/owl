@@ -111,7 +111,7 @@ The binomial model (logistic regression) has the following objective.
 
 \section{Penalties}{
 
-Models fit by \code{\link[golem:golem]{golem::golem()}} can be regularized via several
+Models fit by \code{\link[=golem]{golem()}} can be regularized via several
 penalties.
 
 \strong{Lasso}
@@ -152,7 +152,7 @@ penalty
 
 \section{Solvers}{
 
-There is currently a single solver available for \link[golem:golem]{golem::golem}.
+There is currently a single solver available for \code{\link[=golem]{golem()}}.
 
 \strong{FISTA}
 
