@@ -48,7 +48,7 @@ applies to Group SLOPE)}
 \code{sigma_max}}
 
 \item{lambda}{either a character vector indicating the method used
-to construct the lambda path or}
+to construct the lambda path or the a vector or matrix}
 
 \item{n_lambda}{length of regularization path (only relevant for lasso)}
 

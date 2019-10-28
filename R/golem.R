@@ -98,7 +98,7 @@
 #' @param sigma_min_ratio smallest value for `sigma` as a fraction of
 #'  `sigma_max`
 #' @param lambda either a character vector indicating the method used
-#'   to construct the lambda path or
+#'   to construct the lambda path or the a vector or matrix
 #' @param n_lambda length of regularization path (only relevant for lasso)
 #' @param lambda_min_ratio smallest value for `lambda` as a fraction of
 #'   `lambda_max`
