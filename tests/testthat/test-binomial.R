@@ -45,3 +45,28 @@ test_that("unregularized group slope logistic regression matches output from glm
                     coef(gol_fit),
                     tol = 0.01)
 })
+
+test_that("regularized slope logistic regression picks out correct features", {
+  set.seed(2)
+  p <- 10
+  n <- 200
+  k <- 3
+
+  x <- matrix(rnorm(p*n), n, p)
+  # x <- scale(x)
+  beta <- double(p)
+  nz <- sample(p, k)
+
+  beta[nz] <- 10
+  z <- x %*% beta + 1
+  prob <- 1 / (1 + exp(- z))
+
+  y <- rbinom(n, 1, prob)
+
+  golem_fit <- golem(x, y,
+                     family = "binomial",
+                     penalty = "slope",
+                     sigma = 0.5)
+
+  expect_setequal(nz, which(golem_fit$nonzeros))
+})
