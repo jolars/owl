@@ -14,33 +14,17 @@ public:
          : fit_intercept(fit_intercept), standardize(standardize) {}
 
   virtual
-  void
-  eval(const arma::mat& x,
-       const arma::mat& y,
-       const arma::vec& intercept,
-       const arma::mat& beta,
-       const arma::vec& x_scaled_center) = 0;
-
-  virtual
-  void
-  eval(const arma::sp_mat& x,
-       const arma::mat& y,
-       const arma::vec& intercept,
-       const arma::mat& beta,
-       const arma::vec& x_scaled_center) = 0;
+  double
+  primal(const arma::mat& y, const arma::mat& lin_pred) = 0;
 
   virtual
   double
-  primal() = 0;
-
-  virtual
-  double
-  dual(const arma::mat&y) = 0;
+  dual(const arma::mat& y, const arma::mat& lin_pred) = 0;
 
   // this is not really the true gradient, and needs to multiplied by X'
   virtual
   arma::mat
-  gradient(const arma::mat& y) = 0;
+  pseudoGradient(const arma::mat& y, const arma::mat& lin_pred) = 0;
 
   virtual
   double
@@ -48,66 +32,28 @@ public:
 };
 
 class Gaussian : public Family {
-private:
-  arma::vec residuals;
-  arma::mat lin_pred;
-  double loss = 0.0;
-
 public:
   Gaussian(const bool fit_intercept, const bool standardize)
            : Family(fit_intercept, standardize) {}
 
-  void
-  eval(const arma::mat& x,
-       const arma::mat& y,
-       const arma::vec& intercept,
-       const arma::mat& beta,
-       const arma::vec& x_scaled_center)
+  double
+  primal(const arma::mat& y, const arma::mat& lin_pred)
   {
-    lin_pred = x * beta;
-
-    if (fit_intercept)
-      lin_pred += intercept(0);
-
-    residuals = lin_pred - y;
-    loss = 0.5*std::pow(arma::norm(residuals), 2);
-  }
-
-  void
-  eval(const arma::sp_mat& x,
-       const arma::mat& y,
-       const arma::vec& intercept,
-       const arma::mat& beta,
-       const arma::vec& x_scaled_center)
-  {
-    if (standardize)
-      lin_pred = x * beta - arma::dot(x_scaled_center, beta);
-    else
-      lin_pred = x * beta;
-
-    if (fit_intercept)
-      lin_pred += intercept(0);
-
-    residuals = lin_pred - y;
-    loss = 0.5*std::pow(arma::norm(residuals), 2);
+    return 0.5*std::pow(arma::norm(y - lin_pred), 2);
   }
 
   double
-  primal()
+  dual(const arma::mat& y, const arma::mat& lin_pred)
   {
-    return loss;
-  }
-
-  double
-  dual(const arma::mat& y)
-  {
-    return -loss - arma::dot(residuals, y);
+    using namespace arma;
+    using namespace std;
+    return 0.5*pow(norm(y, 2), 2) - 0.5*pow(norm(lin_pred, 2), 2);
   }
 
   arma::mat
-  gradient(const arma::mat& y)
+  pseudoGradient(const arma::mat& y, const arma::mat& lin_pred)
   {
-    return lin_pred - y;
+    return -(y - lin_pred);
   }
 
   double
@@ -118,65 +64,29 @@ public:
 };
 
 class Binomial : public Family {
-private:
-  arma::mat lin_pred;
-  arma::mat exp_y_lin_pred;
-
 public:
   Binomial(const bool fit_intercept, const bool standardize)
            : Family(fit_intercept, standardize) {}
 
-  void
-  eval(const arma::mat& x,
-       const arma::mat& y,
-       const arma::vec& intercept,
-       const arma::mat& beta,
-       const arma::vec& x_scaled_center)
-  {
-    lin_pred = x * beta;
-
-    if (fit_intercept)
-      lin_pred += intercept(0);
-
-    exp_y_lin_pred = arma::exp(y % lin_pred);
-  }
-
-  void
-  eval(const arma::sp_mat& x,
-       const arma::mat& y,
-       const arma::vec& intercept,
-       const arma::mat& beta,
-       const arma::vec& x_scaled_center)
-  {
-    if (standardize)
-      lin_pred = x*beta - arma::dot(x_scaled_center, beta);
-    else
-      lin_pred = x*beta;
-
-    if (fit_intercept)
-      lin_pred += intercept(0);
-
-    exp_y_lin_pred = arma::exp(y % lin_pred);
-  }
-
   double
-  primal()
-  {
-    return arma::accu(arma::log(1.0 + 1.0/exp_y_lin_pred));
-  }
-
-  double
-  dual(const arma::mat& y)
+  primal(const arma::mat& y, const arma::mat& lin_pred)
   {
     using namespace arma;
-    const arma::vec r = 1.0/(1.0 + exp_y_lin_pred);
-    return arma::as_scalar((r-1.0).t()*log(1.0-r) - r.t()*log(r));
+    return accu(log(1.0 + exp(-y % lin_pred)));
+  }
+
+  double
+  dual(const arma::mat& y, const arma::mat& lin_pred)
+  {
+    using namespace arma;
+    const arma::vec r = 1.0/(1.0 + arma::exp(y % lin_pred));
+    return arma::as_scalar((r - 1.0).t()*log(1.0 - r) - r.t()*log(r));
   }
 
   arma::mat
-  gradient(const arma::mat& y)
+  pseudoGradient(const arma::mat& y, const arma::mat& lin_pred)
   {
-    return -y / (exp_y_lin_pred + 1.0);
+    return -y / (1.0 + arma::exp(y % lin_pred));
   }
 
   double

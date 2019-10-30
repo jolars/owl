@@ -125,14 +125,20 @@ public:
       timer.tic();
     }
 
-    family->eval(x, y, intercept, beta, x_scaled_center);
+    if (standardize && is_sparse)
+      lin_pred = x*beta - arma::dot(x_scaled_center, beta);
+    else
+      lin_pred = x*beta;
+
+    if (fit_intercept)
+      lin_pred += intercept(0);
 
     // main loop
     while (!accepted && passes < max_passes) {
       ++passes;
       // gradient
-      double f = family->primal();
-      pseudo_g = family->gradient(y);
+      double f = family->primal(y, lin_pred);
+      pseudo_g = family->pseudoGradient(y, lin_pred);
       g = x.t() * pseudo_g;
 
       // adjust gradient if sparse and standardizing
@@ -145,7 +151,7 @@ public:
         g_intercept = mean(pseudo_g);
 
       double primal = f + penalty->primal(beta, k);
-      double dual = family->dual(y);
+      double dual = family->dual(y, lin_pred);
       double infeasibility = penalty->infeasibility(g, k);
 
       accepted = (std::abs(primal - dual)/std::max(1.0, primal) < tol_rel_gap)
@@ -175,12 +181,19 @@ public:
         beta_tilde = penalty->eval(beta - (1.0/L)*g, 1.0/L, k);
 
         mat d = beta_tilde - beta;
+
         if (fit_intercept)
           intercept_tilde = intercept - (1.0/L)*g_intercept;
 
-        family->eval(x, y, intercept_tilde, beta_tilde, x_scaled_center);
+        if (standardize && is_sparse)
+          lin_pred = x*beta_tilde - arma::dot(x_scaled_center, beta_tilde);
+        else
+          lin_pred = x*beta_tilde;
 
-        f = family->primal();
+        if (fit_intercept)
+          lin_pred += intercept_tilde(0);
+
+        f = family->primal(y, lin_pred);
         mat q = f_old + d.t()*g + 0.5*L*d.t()*d;
 
         if (any(q.diag() >= f*(1 - 1e-12)))
@@ -197,7 +210,13 @@ public:
         intercept = intercept_tilde
                     + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
 
-      family->eval(x, y, intercept, beta, x_scaled_center);
+      if (standardize && is_sparse)
+        lin_pred = x*beta - arma::dot(x_scaled_center, beta);
+      else
+        lin_pred = x*beta;
+
+      if (fit_intercept)
+        lin_pred += intercept(0);
     }
 
     Results res{intercept,
