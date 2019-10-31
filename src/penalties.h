@@ -154,9 +154,8 @@ public:
   {
     using namespace arma;
 
-    return sign(beta) % clamp(abs(beta) - step_size*lambda(k),
-                0.0,
-                datum::inf);
+    return sign(beta)
+           % clamp(abs(beta) - step_size*lambda(k), 0.0, datum::inf);
   };
 
   double
