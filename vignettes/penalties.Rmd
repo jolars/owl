@@ -1,11 +1,11 @@
 ---
-title: "Regularization penalties in golem"
+title: "Regularization penalties in prague"
 author: "Johan Larsson"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-bibliography: golem.bib
+bibliography: prague.bib
 vignette: >
-  %\VignetteIndexEntry{Regularization penalties in golem}
+  %\VignetteIndexEntry{Regularization penalties in prague}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
