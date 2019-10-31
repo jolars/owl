@@ -39,7 +39,7 @@ for (i in seq_along(q)) {
   n <- 1000
   p <- n/2
   sigma <- 1
-  problem <- golem:::randomProblem(n, p, q = q[i], sigma = sigma)
+  problem <- prague:::randomProblem(n, p, q = q[i], sigma = sigma)
   
   x <- problem$x
   y <- problem$y
