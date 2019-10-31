@@ -15,7 +15,7 @@
 caretSlopeGolem <- function() {
   list(
     label = "golem",
-    library = c("golem", "Matrix"),
+    library = c("prague", "Matrix"),
     type = c("Regression", "Classification"),
 
     parameters = data.frame(parameter = c("sigma", "fdr"),
