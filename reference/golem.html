@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Regularized Generalized Linear Models — golem • golem</title>
+<title>Regularized Generalized Linear Models — golem • prague</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -15,21 +15,25 @@
 <link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png" />
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png" />
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png" />
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -37,13 +41,13 @@
 
 
 
-<meta property="og:title" content="Regularized Generalized Linear Models — golem" />
 
+<meta property="og:title" content="Regularized Generalized Linear Models — golem" />
 <meta property="og:description" content="This functions fits a generalized linear model (GLM) using efficient
 optimization routines suitable to big data problems." />
-
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -55,6 +59,7 @@ optimization routines suitable to big data problems." />
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
+
 
 
   </head>
@@ -72,7 +77,7 @@ optimization routines suitable to big data problems." />
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">golem</a>
+        <a class="navbar-link" href="../index.html">prague</a>
         <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
       </span>
     </div>
@@ -81,7 +86,7 @@ optimization routines suitable to big data problems." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -99,7 +104,7 @@ optimization routines suitable to big data problems." />
       <a href="../articles/benchmarks.html">Benchmarks</a>
     </li>
     <li>
-      <a href="../articles/penalties.html">Regularization penalties in golem</a>
+      <a href="../articles/penalties.html">Regularization penalties in prague</a>
     </li>
   </ul>
 </li>
@@ -107,11 +112,10 @@ optimization routines suitable to big data problems." />
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jolars/golem">
-    <span class="fa fa-github fa-lg"></span>
+  <a href="https://github.com/jolars/prague">
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -122,32 +126,31 @@ optimization routines suitable to big data problems." />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Regularized Generalized Linear Models</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/golem/blob/master/R/golem.R'><code>R/golem.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/prague/blob/master/R/golem.R'><code>R/golem.R</code></a></small>
     <div class="hidden name"><code>golem.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    
     <p>This functions fits a generalized linear model (GLM) using efficient
 optimization routines suitable to big data problems.</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>golem</span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>),
-  <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"slope"</span>, <span class='st'>"group_slope"</span>, <span class='st'>"lasso"</span>), <span class='kw'>solver</span> <span class='kw'>=</span> <span class='st'>"fista"</span>,
+    <pre class="usage"><span class='fu'>golem</span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>),
+  <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"slope"</span>, <span class='st'>"group_slope"</span>, <span class='st'>"lasso"</span>), <span class='kw'>solver</span> <span class='kw'>=</span> <span class='st'>"fista"</span>,
   <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"sequence"</span>, <span class='st'>"estimate"</span>),
+  <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"sequence"</span>, <span class='st'>"estimate"</span>),
   <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>sigma_min_ratio</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>n_lambda</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
   <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
   <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -155,7 +158,7 @@ optimization routines suitable to big data problems.</p>
       <th>x</th>
       <td><p>the feature matrix, which can be either a dense
 matrix of the standard <em>matrix</em> class, or a sparse matrix
-inheriting from <a href='https://www.rdocumentation.org/packages/Matrix/topics/sparseMatrix'>Matrix::sparseMatrix</a> Data frames will
+inheriting from <a href='https://rdrr.io/pkg/Matrix/man/sparseMatrix.html'>Matrix::sparseMatrix</a> Data frames will
 be converted to matrices internally.</p></td>
     </tr>
     <tr>
@@ -211,7 +214,7 @@ applies to Group SLOPE)</p></td>
     <tr>
       <th>lambda</th>
       <td><p>either a character vector indicating the method used
-to construct the lambda path or</p></td>
+to construct the lambda path or the a vector or matrix</p></td>
     </tr>
     <tr>
       <th>n_lambda</th>
@@ -245,7 +248,7 @@ Group SLOPE)</p></td>
 primal and dual objectives, and infeasibility)</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>An object of class <code>"Golem"</code> with the following slots:</p>
@@ -256,16 +259,16 @@ for each target (dependent variable), and
 one slice for each penalty.</p></dd>
 <dt>nonzeros</dt><dd><p>a numeric</p></dd>
 
-    
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The objective for each model is simply the loss function for
 each family plus a penalty term.</p>
-    
     <h2 class="hasAnchor" id="families"><a class="anchor" href="#families"></a>Families</h2>
 
     
-    <p><strong>Gaussian</strong></p>
+
+
+<p><strong>Gaussian</strong></p>
 <p>The Gaussian model (Ordinary Least Squares) minimizes the following
 objective.</p>
 <p>$$
@@ -276,11 +279,11 @@ $$</p>
 <p>$$
   \sum_{i=1}^n \log\left[1+ \exp\left(- y_i\boldsymbol{x}_i'\boldsymbol{\beta} \right) \right]
 $$</p>
-    
     <h2 class="hasAnchor" id="penalties"><a class="anchor" href="#penalties"></a>Penalties</h2>
 
     
-    <p>Models fit by <code>golem::golem()</code> can be regularized via several
+
+<p>Models fit by <code>golem()</code> can be regularized via several
 penalties.</p>
 <p><strong>Lasso</strong></p>
 <p>The Lasso penalizes coefficients using the L1 norm. The penalty
@@ -302,20 +305,18 @@ penalty</p>
 <p>$$
   J_\lambda(\beta) = \sum_{j=1}^p \lambda_j |W||\beta||_{I,X}|_{(j)}
 $$</p>
-    
     <h2 class="hasAnchor" id="solvers"><a class="anchor" href="#solvers"></a>Solvers</h2>
 
     
-    <p>There is currently a single solver available for golem::golem.</p>
+
+<p>There is currently a single solver available for <code>golem()</code>.</p>
 <p><strong>FISTA</strong></p>
 <p>FISTA (Fast Iterative Shrinking-Tresholding Algorithm) is an extension
 of the classical gradient algorithm.</p>
-    
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='plot.Golem.html'>plot.Golem()</a></code>, <code><a href='plotDiagnostics.html'>plotDiagnostics()</a></code>, <code><a href='score.html'>score()</a></code>, <code><a href='predict.Golem.html'>predict.Golem()</a></code>,
 <code><a href='trainGolem.html'>trainGolem()</a></code></p></div>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -331,24 +332,18 @@ of the classical gradient algorithm.</p>
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
       <li><a href="#value">Value</a></li>
-
       <li><a href="#details">Details</a></li>
-
       <li><a href="#families">Families</a></li>
-
       <li><a href="#penalties">Penalties</a></li>
-
       <li><a href="#solvers">Solvers</a></li>
-
       <li><a href="#see-also">See also</a></li>
-      
       <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -356,13 +351,16 @@ of the classical gradient algorithm.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 
