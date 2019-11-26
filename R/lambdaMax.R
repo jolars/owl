@@ -14,7 +14,7 @@ lambdaMax <- function(object, x, y, y_scale) {
 
 #' @rdname lambdaMax
 lambdaMax.Gaussian <- function(object, x, y, y_scale) {
-  y_scale * max(abs(crossprod(x, y))) / NROW(x)
+  y_scale * abs(crossprod(x, y))
 }
 
 #' @rdname lambdaMax
@@ -28,5 +28,5 @@ lambdaMax.Binomial <- function(object, x, y, y_scale) {
 
   y <- (y - y_bar) / y_sd
 
-  y_sd * max(abs(crossprod(x, y))) / NROW(x)
+  y_sd * abs(crossprod(x, y))
 }

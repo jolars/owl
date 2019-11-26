@@ -217,6 +217,9 @@ public:
 
       if (fit_intercept)
         lin_pred += intercept(0);
+
+      if (passes % 100 == 0)
+        Rcpp::checkUserInterrupt();
     }
 
     Results res{intercept,
