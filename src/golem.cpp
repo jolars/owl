@@ -81,6 +81,8 @@ golemCpp(const T& x,
       infeasibilities.push_back(res.infeasibilities);
       timings.push_back(res.time);
     }
+
+    Rcpp::checkUserInterrupt();
   }
 
   return Rcpp::List::create(
