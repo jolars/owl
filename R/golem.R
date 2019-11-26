@@ -95,8 +95,6 @@
 #'   applies to Group SLOPE)
 #' @param sigma noise estimate (only applies to SLOPE and Group SLOPE)
 #' @param n_sigma length of regularization path (only relevant for group slope)
-#' @param sigma_min_ratio smallest value for `sigma` as a fraction of
-#'  `sigma_max`
 #' @param lambda either a character vector indicating the method used
 #'   to construct the lambda path or the a vector or matrix
 #' @param n_lambda length of regularization path (only relevant for lasso)
@@ -143,7 +141,6 @@ golem <- function(x,
                   orthogonalize = TRUE,
                   sigma = c("sequence", "estimate"),
                   n_sigma = 100,
-                  sigma_min_ratio = NULL,
                   lambda = NULL,
                   n_lambda = 100,
                   lambda_min_ratio = NULL,
@@ -173,8 +170,6 @@ golem <- function(x,
     fdr < 1,
     is.character(sigma) ||
       (all(sigma >= 0 & is.finite(sigma))),
-    is.null(sigma_min_ratio) ||
-      (sigma_min_ratio > 0 && sigma_min_ratio < 1),
     length(n_sigma) == 1,
     n_sigma >= 1,
     is.null(lambda) ||
@@ -281,7 +276,7 @@ golem <- function(x,
                   y_scale = y_scale,
                   lambda = lambda,
                   sigma = sigma,
-                  sigma_min_ratio = sigma_min_ratio,
+                  lambda_min_ratio = lambda_min_ratio,
                   n_sigma = n_sigma,
                   fdr = fdr,
                   family = family),
@@ -292,7 +287,7 @@ golem <- function(x,
                              groups = groups,
                              lambda = lambda,
                              sigma = sigma,
-                             sigma_min_ratio = sigma_min_ratio,
+                             lambda_min_ratio = lambda_min_ratio,
                              n_sigma = n_sigma,
                              fdr = fdr,
                              family = family),

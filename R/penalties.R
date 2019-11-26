@@ -3,7 +3,7 @@ Slope <- function(x,
                   y_scale,
                   lambda = c("gaussian", "bhq"),
                   sigma = c("sequence", "estimate"),
-                  sigma_min_ratio = NULL,
+                  lambda_min_ratio = NULL,
                   n_sigma = 100,
                   fdr = 0.2,
                   family) {
@@ -11,8 +11,8 @@ Slope <- function(x,
   n <- NROW(x)
   p <- NCOL(x)
 
-  if (is.null(sigma_min_ratio))
-    sigma_min_ratio <- if (n < p) 0.01 else 0.0001
+  if (is.null(lambda_min_ratio))
+    lambda_min_ratio <- if (n < p) 0.01 else 0.0001
 
   if (is.null(lambda))
     lambda <- "gaussian"
@@ -61,10 +61,22 @@ Slope <- function(x,
   }
 
   if (sigma_type == "sequence") {
-    lambda_max <- lambdaMax(family, x, y, y_scale)*NROW(x)
+    # lambda_max <- lambdaMax(family, x, y, y_scale)*NROW(x)
+    #
+    # sigma <- lambda_max/min(lambda)
+    # sigma <- logSeq(sigma, sigma*lambda_min_ratio, n_sigma)
 
-    sigma <- lambda_max/min(lambda)
-    sigma <- logSeq(sigma, sigma*sigma_min_ratio, n_sigma)
+    lambda_max <- lambdaMax(family, x, y, y_scale)
+    ord <- order(lambda_max, decreasing = TRUE)
+    min_diff_ind <- which.max(lambda_max[ord]/lambda)
+
+    lambda <- lambda*lambda_max[ord][min_diff_ind]/lambda[min_diff_ind]
+
+    sigma <- exp(seq(log(1),
+                     log(lambda_min_ratio),
+                     length.out = n_sigma))
+
+
   }
 
   lambda <- matrix(lambda, p, 1)
@@ -84,7 +96,7 @@ GroupSlope <- function(x,
                        groups,
                        lambda = c("corrected", "mean", "max"),
                        sigma = c("sequence", "estimate"),
-                       sigma_min_ratio = NULL,
+                       lambda_min_ratio = NULL,
                        n_sigma = 100,
                        fdr = 0.2,
                        family) {
@@ -102,8 +114,8 @@ GroupSlope <- function(x,
   if (is.null(lambda))
     lambda <- "corrected"
 
-  if (is.null(sigma_min_ratio))
-    sigma_min_ratio <- if (n < p) 0.01 else 0.0001
+  if (is.null(lambda_min_ratio))
+    lambda_min_ratio <- if (n < p) 0.01 else 0.0001
 
   group_sizes <- if (orthogonalize)
     lengths(ortho_group_id)
@@ -165,10 +177,10 @@ GroupSlope <- function(x,
   }
 
   if (sigma_type == "sequence") {
-    lambda_max <- lambdaMax(family, x, y, y_scale)*NROW(x)
+    lambda_max <- max(lambdaMax(family, x, y, y_scale))
 
     sigma <- lambda_max/min(lambda)
-    sigma <- logSeq(sigma, sigma*sigma_min_ratio, n_sigma)
+    sigma <- logSeq(sigma, sigma*lambda_min_ratio, n_sigma)
   }
 
   lambda <- matrix(lambda, n_groups, 1)
@@ -195,7 +207,7 @@ Lasso <- function(x,
 
   # lambda (regularization strength)
   if (is.null(lambda)) {
-    lambda_max <- lambdaMax(family, x, y, y_scale)
+    lambda_max <- max(lambdaMax(family, x, y, y_scale))/NROW(x)
 
     lambda <- logSeq(lambda_max,
                      lambda_max*lambda_min_ratio,
