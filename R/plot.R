@@ -13,7 +13,7 @@
 #' @export
 #'
 #' @examples
-#' fit <- golem(heart$x, heart$y, penalty = "lasso")
+#' fit <- golem(heart$x, heart$y, penalty = "slope")
 #' plot(fit)
 plot.Golem = function(x, ...) {
   object <- x
@@ -26,17 +26,10 @@ plot.Golem = function(x, ...) {
   p <- NROW(coefs) # number of features
   m <- NCOL(coefs) # number of responses
 
-  is_slope <- inherits(object$penalty, c("Slope", "GroupSlope"))
-
   args <- list()
 
-  if (is_slope) {
-    x <- object$penalty$sigma
-    xlab <- expression(sigma)
-  } else {
-    x <- object$penalty$lambda
-    xlab <- expression(lambda)
-  }
+  x <- object$sigma
+  xlab <- expression(sigma)
 
   n_x <- length(x)
   d <- as.data.frame(as.table(coefs))
@@ -150,40 +143,29 @@ plot.TrainedGolem <-
   optimum <- object$optima[ind, , drop = FALSE]
   model <- object$model
 
-  is_slope <- model$penalty$name %in% c("slope", "group_slope")
+  sigma <- unique(summary$sigma)
+  fdr <- unique(summary$fdr)
 
-  if (is_slope) {
-    sigma <- unique(summary$sigma)
-    fdr <- unique(summary$fdr)
+  summary$fdr <- as.factor(summary$fdr)
 
-    summary$fdr <- as.factor(summary$fdr)
+  # get indices of best fit
+  best_ind <- match(optimum$sigma, summary$sigma)
 
-    # get indices of best fit
-    best_ind <- match(optimum$sigma, summary$sigma)
-
-    if (length(fdr) > 1) {
-      x <- quote(mean ~ sigma | fdr)
-      strip <- lattice::strip.custom(
-        var.name = "FDR",
-        sep = expression(" = "),
-        strip.names = TRUE
-      )
-      best_outer_ind <- match(optimum$fdr, unique(summary$fdr))
-    } else {
-      x <- quote(mean ~ sigma)
-      strip <- lattice::strip.default
-      best_outer_ind <- 1
-    }
-
-    xlab <- expression(log[e](sigma))
-
+  if (length(fdr) > 1) {
+    x <- quote(mean ~ sigma | fdr)
+    strip <- lattice::strip.custom(
+      var.name = "FDR",
+      sep = expression(" = "),
+      strip.names = TRUE
+    )
+    best_outer_ind <- match(optimum$fdr, unique(summary$fdr))
   } else {
-    x <- quote(mean ~ lambda)
-    best_ind <- match(optimum$lambda, summary$lambda)
-    xlab <- expression(log[e](lambda))
+    x <- quote(mean ~ sigma)
     strip <- lattice::strip.default
     best_outer_ind <- 1
   }
+
+  xlab <- expression(log[e](sigma))
 
   args <- list(
     x = x,

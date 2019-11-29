@@ -83,7 +83,7 @@ test_that("group_slope lambda sequences are computed properly", {
                                                wt = sqrt(table(groups)),
                                                n.obs = n,
                                                method = lambda)
-    expect_equivalent(g$penalty$lambda, grps_lambda)
+    expect_equivalent(g$lambda, grps_lambda)
   }
 })
 
@@ -101,5 +101,5 @@ test_that("sigma estimation for Group SLOPE", {
              penalty = "group_slope", fdr = 0.2, sigma = "estimate")
 
   expect_equal(slope_fit$sigma[length(slope_fit$sigma)],
-               g$penalty$sigma)
+               g$sigma)
 })

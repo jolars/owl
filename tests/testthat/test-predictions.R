@@ -2,7 +2,7 @@ test_that("predictions work for all models", {
   set.seed(1)
 
   for (family in c("gaussian", "binomial")) {
-    for (penalty in c("lasso", "slope", "group_slope")) {
+    for (penalty in c("slope", "group_slope")) {
       xy <- prague:::randomProblem(100, 10, response = family, n_groups = 2)
       x <- xy$x
       y <- xy$y
@@ -12,7 +12,7 @@ test_that("predictions work for all models", {
                    groups = xy$groups,
                    family = family,
                    penalty = penalty,
-                   n_lambda = 10, n_sigma = 10)
+                   n_sigma = 10)
 
       for (type in c("link", "response", "class")) {
         if (type == "class" && family == "gaussian")

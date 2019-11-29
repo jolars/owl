@@ -9,82 +9,81 @@
 class Penalty {
 public:
   virtual
-  arma::mat
-  eval(const arma::mat& y,
-       const double L,
-       const arma::uword k) = 0;
+  arma::vec
+  eval(const arma::vec& beta,
+       const arma::vec& lambda,
+       const double shrinkage) = 0;
 
   virtual
   double
-  primal(const arma::mat& beta, const arma::uword k) = 0;
+  primal(const arma::vec& beta, const arma::vec& lambda) = 0;
 
   virtual
   double
-  infeasibility(const arma::mat& grad, const arma::uword k) = 0;
+  infeasibility(const arma::vec& gradient, const arma::vec& lambda) = 0;
 
   virtual
-  double
-  lambdaInfeas(const arma::uword k) = 0;
+  arma::uvec
+  activeSet(const std::unique_ptr<Family>& family,
+            const arma::vec& y,
+            const arma::vec& gradient_prev,
+            const arma::vec& pseudo_gradient_prev,
+            const arma::vec& norms,
+            const arma::vec& lambda,
+            const arma::vec& lambda_prev,
+            const std::string screening_rule) = 0;
 };
 
 class SLOPE : public Penalty {
 public:
-  const arma::vec sigma;
-  const arma::vec lambda;
-
-  SLOPE(const arma::vec& sigma, const arma::vec& lambda)
-        : sigma(sigma), lambda(lambda) {}
-
-  arma::mat
-  eval(const arma::mat& beta,
-       const double step_size,
-       const arma::uword k)
+  arma::vec
+  eval(const arma::vec& beta,
+       const arma::vec& lambda,
+       const double shrinkage)
   {
-    return slopeProx(beta, step_size, lambda, sigma(k));
+    return slopeProx(beta, lambda, shrinkage);
   };
 
   double
-  primal(const arma::mat& beta, const arma::uword k)
+  primal(const arma::vec& beta, const arma::vec& lambda)
   {
     using namespace arma;
-    return dot(sigma(k)*lambda, sort(abs(beta), "descending"));
+    return dot(lambda, sort(abs(beta), "descending"));
   }
 
   double
-  infeasibility(const arma::mat& grad, const arma::uword k)
+  infeasibility(const arma::vec& gradient, const arma::vec& lambda)
   {
     using namespace arma;
 
-    vec grad_sorted = sort(abs(grad), "descending");
-    return std::max(cumsum(grad_sorted - sigma(k)*lambda).max(), 0.0);
+    vec gradient_sorted = sort(abs(gradient), "descending");
+    return std::max(cumsum(gradient_sorted - lambda).max(), 0.0);
   }
 
-  double
-  lambdaInfeas(const arma::uword k)
-  {
-    return lambda(0)*sigma(k);
-  }
+  arma::uvec
+  activeSet(const std::unique_ptr<Family>& family,
+            const arma::vec& y,
+            const arma::vec& gradient_prev,
+            const arma::vec& pseudo_gradient_prev,
+            const arma::vec& norms,
+            const arma::vec& lambda,
+            const arma::vec& lambda_prev,
+            const std::string screening_rule);
 };
 
 class GroupSLOPE : public Penalty {
 public:
-  const arma::vec sigma;
-  const arma::vec lambda;
   const arma::field<arma::uvec> group_id;
   const arma::uword n_groups;
 
-  GroupSLOPE(const arma::vec& sigma,
-             const arma::vec& lambda,
-             const arma::field<arma::uvec>& group_id)
-             : sigma(sigma),
-               lambda(lambda),
-               group_id(group_id),
+  GroupSLOPE(const arma::field<arma::uvec>& group_id)
+             : group_id(group_id),
                n_groups(group_id.n_elem) {}
 
-  arma::mat
-  eval(const arma::mat& beta,
-       const double step_size,
-       const arma::uword k)
+  arma::vec
+  eval(const arma::vec& beta,
+       const arma::vec& lambda,
+       const double shrinkage)
   {
     using namespace arma;
 
@@ -93,8 +92,7 @@ public:
     for (uword i = 0; i < n_groups; ++i)
       group_norms(i) = norm(beta(group_id(i)), "fro");
 
-    auto prox_norms =
-      slopeProx(group_norms, step_size, lambda, sigma(k));
+    auto prox_norms = slopeProx(group_norms, lambda, shrinkage);
 
     vec prox_solution(size(beta));
 
@@ -107,7 +105,7 @@ public:
   };
 
   double
-  primal(const arma::mat& beta, const arma::uword k)
+  primal(const arma::vec& beta, const arma::vec& lambda)
   {
     using namespace arma;
 
@@ -116,67 +114,32 @@ public:
     for (uword i = 0; i < n_groups; ++i)
       beta_norms(i) = norm(beta(group_id(i)), "fro");
 
-    return dot(sigma(k)*lambda, sort(beta_norms, "descending"));
+    return dot(lambda, sort(beta_norms, "descending"));
   }
 
   double
-  infeasibility(const arma::mat& grad, const arma::uword k)
+  infeasibility(const arma::vec& gradient, const arma::vec& lambda)
   {
     using namespace arma;
 
-    vec grad_norms(n_groups);
+    vec gradient_norms(n_groups);
 
     for (uword i = 0; i < n_groups; ++i)
-      grad_norms(i) = norm(grad(group_id(i)), "fro");
+      gradient_norms(i) = norm(gradient(group_id(i)), "fro");
 
-    const vec grad_norms_sorted = sort(grad_norms, "descending");
-    return std::max(cumsum(grad_norms_sorted - sigma(k)*lambda).max(), 0.0);
+    const vec gradient_norms_sorted = sort(gradient_norms, "descending");
+    return std::max(cumsum(gradient_norms_sorted - lambda).max(), 0.0);
   }
 
-  double
-  lambdaInfeas(const arma::uword k)
-  {
-    return lambda(0)*sigma(k);
-  }
-};
-
-class Lasso : public Penalty {
-public:
-  const arma::vec lambda;
-
-  Lasso(const arma::vec& lambda)
-        : lambda(lambda) {}
-
-  arma::mat
-  eval(const arma::mat& beta,
-       const double step_size,
-       const arma::uword k)
-  {
-    using namespace arma;
-
-    return sign(beta)
-           % clamp(abs(beta) - step_size*lambda(k), 0.0, datum::inf);
-  };
-
-  double
-  primal(const arma::mat& beta, const arma::uword k)
-  {
-    return lambda(k)*arma::norm(beta, 1);
-  }
-
-  double
-  infeasibility(const arma::mat& grad, const arma::uword k)
-  {
-    using namespace arma;
-    return std::max(
-      cumsum(sort(abs(grad), "descending") - lambda(k)).max(), 0.0);
-  }
-
-  double
-  lambdaInfeas(const arma::uword k)
-  {
-    return lambda(k);
-  }
+  arma::uvec
+  activeSet(const std::unique_ptr<Family>& family,
+            const arma::vec& y,
+            const arma::vec& gradient_prev,
+            const arma::vec& pseudo_gradient_prev,
+            const arma::vec& norms,
+            const arma::vec& lambda,
+            const arma::vec& lambda_prev,
+            const std::string screening_rule);
 };
 
 // helper to choose penalty
@@ -188,14 +151,8 @@ setupPenalty(const Rcpp::List& args, const Rcpp::List& groups)
   using Rcpp::as;
 
   auto name = as<std::string>(args["name"]);
-  auto lambda = as<vec>(args["lambda"]);
 
-  if (name == "slope") {
-
-    auto sigma = as<vec>(args["sigma"]);
-    return std::unique_ptr<SLOPE>(new SLOPE{sigma, lambda});
-
-  } else if (name == "group_slope") {
+  if (name == "group_slope") {
 
     auto sigma = as<vec>(args["sigma"]);
     bool orthogonalize = as<bool>(groups["orthogonalize"]);
@@ -206,13 +163,8 @@ setupPenalty(const Rcpp::List& args, const Rcpp::List& groups)
 
     group_id.for_each([](uvec& x) {x -= 1;}); // fix indexing for c++
 
-    return std::unique_ptr<GroupSLOPE>(new GroupSLOPE{sigma, lambda, group_id});
+    return std::unique_ptr<GroupSLOPE>(new GroupSLOPE{group_id});
   }
 
-  // else lasso
-  double lambda_scale = as<double>(args["lambda_scale"]);
-
-  lambda /= lambda_scale;
-
-  return std::unique_ptr<Lasso>(new Lasso{lambda});
+  return std::unique_ptr<SLOPE>(new SLOPE);
 }

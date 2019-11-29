@@ -15,16 +15,16 @@ public:
 
   virtual
   double
-  primal(const arma::mat& y, const arma::mat& lin_pred) = 0;
+  primal(const arma::vec& y, const arma::vec& lin_pred) = 0;
 
   virtual
   double
-  dual(const arma::mat& y, const arma::mat& lin_pred) = 0;
+  dual(const arma::vec& y, const arma::vec& lin_pred) = 0;
 
   // this is not really the true gradient, and needs to multiplied by X'
   virtual
-  arma::mat
-  pseudoGradient(const arma::mat& y, const arma::mat& lin_pred) = 0;
+  arma::vec
+  pseudoGradient(const arma::vec& y, const arma::vec& lin_pred) = 0;
 
   virtual
   double
@@ -37,21 +37,21 @@ public:
            : Family(fit_intercept, standardize) {}
 
   double
-  primal(const arma::mat& y, const arma::mat& lin_pred)
+  primal(const arma::vec& y, const arma::vec& lin_pred)
   {
     return 0.5*std::pow(arma::norm(y - lin_pred), 2);
   }
 
   double
-  dual(const arma::mat& y, const arma::mat& lin_pred)
+  dual(const arma::vec& y, const arma::vec& lin_pred)
   {
     using namespace arma;
     using namespace std;
     return 0.5*pow(norm(y, 2), 2) - 0.5*pow(norm(lin_pred, 2), 2);
   }
 
-  arma::mat
-  pseudoGradient(const arma::mat& y, const arma::mat& lin_pred)
+  arma::vec
+  pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
   {
     return -(y - lin_pred);
   }
@@ -69,22 +69,22 @@ public:
            : Family(fit_intercept, standardize) {}
 
   double
-  primal(const arma::mat& y, const arma::mat& lin_pred)
+  primal(const arma::vec& y, const arma::vec& lin_pred)
   {
     using namespace arma;
     return accu(log(1.0 + exp(-y % lin_pred)));
   }
 
   double
-  dual(const arma::mat& y, const arma::mat& lin_pred)
+  dual(const arma::vec& y, const arma::vec& lin_pred)
   {
     using namespace arma;
     const arma::vec r = 1.0/(1.0 + arma::exp(y % lin_pred));
     return arma::as_scalar((r - 1.0).t()*log(1.0 - r) - r.t()*log(r));
   }
 
-  arma::mat
-  pseudoGradient(const arma::mat& y, const arma::mat& lin_pred)
+  arma::vec
+  pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
   {
     return -y / (1.0 + arma::exp(y % lin_pred));
   }

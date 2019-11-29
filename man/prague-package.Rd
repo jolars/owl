@@ -6,7 +6,7 @@
 \alias{prague-package}
 \title{prague: Generalized Linear Models for Big Data}
 \description{
-\if{html}{\figure{logo.png}{options: align='right'}}
+\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
 
 Fast implementations of penalized Generalized Linear Models (GLM)
     suited to big data.
@@ -20,7 +20,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Johan Larsson \email{mail@larssonjohan.com} (0000-0002-4029-5945)
+\strong{Maintainer}: Johan Larsson \email{mail@larssonjohan.com} (\href{https://orcid.org/0000-0002-4029-5945}{ORCID})
 
 Other contributors:
 \itemize{

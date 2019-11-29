@@ -4,9 +4,15 @@
 \alias{plot.TrainedGolem}
 \title{Plot Results from Cross-Validation}
 \usage{
-\method{plot}{TrainedGolem}(x, measure = x$measure$measure[1],
-  plot_min = TRUE, ci_alpha = 0.2, ci_border = FALSE,
-  ci_col = lattice::trellis.par.get("superpose.line")$col, ...)
+\method{plot}{TrainedGolem}(
+  x,
+  measure = x$measure$measure[1],
+  plot_min = TRUE,
+  ci_alpha = 0.2,
+  ci_border = FALSE,
+  ci_col = lattice::trellis.par.get("superpose.line")$col,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{'TrainedGolem'}, typically from a call

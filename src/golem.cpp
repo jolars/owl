@@ -3,11 +3,12 @@
 #include "solvers.h"
 #include "penalties.h"
 #include "families.h"
+#include "screening_rules.h"
 
 template <typename T>
 Rcpp::List
 golemCpp(const T& x,
-         const arma::mat& y,
+         const arma::vec& y,
          const Rcpp::List control)
 {
   using namespace arma;
@@ -16,8 +17,8 @@ golemCpp(const T& x,
   using Rcpp::wrap;
 
   // auto n = x.n_rows;
-  auto m = y.n_cols;
   auto p = x.n_cols;
+  auto n = x.n_rows;
 
   // parameter packs for penalty and solver
   auto penalty_args = as<Rcpp::List>(control["penalty"]);
@@ -28,13 +29,20 @@ golemCpp(const T& x,
   auto family_args = as<Rcpp::List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
   auto diagnostics = as<bool>(solver_args["diagnostics"]);
+  auto screening_rule = as<std::string>(control["screening_rule"]);
+  auto sigma_type = as<std::string>(control["sigma_type"]);
 
   auto standardize_features = as<bool>(control["standardize_features"]);
   auto is_sparse = as<bool>(control["is_sparse"]);
-  auto n_penalties = as<uword>(control["n_penalties"]);
+  auto n_sigma = as<uword>(control["n_sigma"]);
+
+  auto lambda = as<vec>(control["lambda"]);
+  auto sigma  = as<vec>(control["sigma"]);
 
   // get scaled vector of feature matrix centers for use in sparse fitting
-  vec x_scaled_center = as<vec>(control["x_scaled_center"]);
+  vec x_center        = as<vec>(control["x_center"]);
+  vec x_scale         = as<vec>(control["x_scale"]);
+  vec x_scaled_center = x_center/x_scale;
 
   // setup family and response
   auto family = setupFamily(as<std::string>(family_args["name"]),
@@ -43,18 +51,28 @@ golemCpp(const T& x,
 
   auto penalty = setupPenalty(penalty_args, groups);
 
-  cube betas(p, m, n_penalties);
-  cube intercepts(1, m, n_penalties);
+  cube betas(p, 1, n_sigma);
+  cube intercepts(1, 1, n_sigma);
 
   // initialize estimates
-  auto intercept_init = as<rowvec>(control["intercept_init"]);
-  auto beta_init      = as<mat>(control["beta_init"]);
+  auto intercept_init = as<double>(control["intercept_init"]);
+  auto beta_init      = as<vec>(control["beta_init"]);
 
-  uvec passes(n_penalties);
+  uvec passes(n_sigma);
   std::vector<std::vector<double>> primals;
   std::vector<std::vector<double>> duals;
   std::vector<std::vector<double>> timings;
   std::vector<std::vector<double>> infeasibilities;
+
+  double intercept_prev = 0.0;
+  vec beta_prev(p, fill::zeros);
+
+  vec linear_predictor_prev(n);
+  vec gradient_prev(p);
+  vec pseudo_gradient_prev(n);
+
+  umat active_sets(p, n_sigma);
+  uvec active_set(p);
 
   FISTA solver(intercept_init,
                beta_init,
@@ -63,13 +81,57 @@ golemCpp(const T& x,
                is_sparse,
                solver_args);
 
-  for (uword k = 0; k < n_penalties; ++k) {
-    Results res = solver.fit(x, y,
+  vec x_colnorms(p);
+
+  if (screening_rule == "safe") {
+    if (standardize_features && is_sparse) {
+      for (uword j = 0; j < p; ++j)
+        x_colnorms(j) = norm(x.col(j) - x_center(j), 2);
+
+    } else {
+      for (uword j = 0; j < p; ++j)
+        x_colnorms(j) = norm(x.col(j), 2);
+    }
+  }
+
+  for (uword k = 0; k < n_sigma; ++k) {
+    if (sigma_type == "sequence" && k == 0) {
+      // no predictors active at first step (except intercept) if
+      // using penalty sequence
+      active_set.zeros();
+
+    } else if (screening_rule == "none") {
+
+      active_set.ones();
+
+    } else {
+
+      linear_predictor_prev = x*beta_prev + intercept_prev;
+      pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
+      gradient_prev = x.t() * pseudo_gradient_prev;
+
+      active_set = penalty->activeSet(family,
+                                      y,
+                                      gradient_prev,
+                                      pseudo_gradient_prev,
+                                      x_colnorms,
+                                      lambda*sigma(k),
+                                      lambda*sigma(k-1),
+                                      screening_rule);
+    }
+
+    active_sets.col(k) = active_set;
+
+    Results res = solver.fit(x,
+                             y,
                              family,
                              penalty,
                              fit_intercept,
                              lipschitz_constant,
-                             k);
+                             lambda*sigma(k));
+
+    beta_prev = res.beta;
+    intercept_prev = res.intercept;
 
     betas.slice(k) = res.beta;
     intercepts.slice(k) = res.intercept;
@@ -88,6 +150,7 @@ golemCpp(const T& x,
   return Rcpp::List::create(
     Named("intercept")       = wrap(intercepts),
     Named("beta")            = wrap(betas),
+    Named("active_sets")     = wrap(active_sets),
     Named("passes")          = passes,
     Named("primals")         = wrap(primals),
     Named("duals")           = wrap(duals),
@@ -100,7 +163,7 @@ golemCpp(const T& x,
 // [[Rcpp::export]]
 Rcpp::List
 golemSparse(const arma::sp_mat& x,
-            const arma::mat& y,
+            const arma::vec& y,
             const Rcpp::List control)
 {
   return golemCpp(x, y, control);
@@ -109,7 +172,7 @@ golemSparse(const arma::sp_mat& x,
 // [[Rcpp::export]]
 Rcpp::List
 golemDense(const arma::mat& x,
-           const arma::mat& y,
+           const arma::vec& y,
            const Rcpp::List control)
 {
   return golemCpp(x, y, control);

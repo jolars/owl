@@ -29,10 +29,10 @@ coef.Golem <- function(object,
   n_penalties <- dim(beta)[3]
 
   if (object$penalty$name %in% c("slope", "group_slope")) {
-    penalty <- object$penalty$sigma
+    penalty <- object$sigma
     value <- sigma
   } else {
-    penalty <- object$penalty$lambda
+    penalty <- object$lambda
     value <- lambda
   }
 

@@ -6,15 +6,38 @@
 \alias{predict.GolemBinomial}
 \title{Generate predictions from golem models}
 \usage{
-\method{predict}{Golem}(object, x, lambda = NULL, sigma = NULL,
-  type = "link", exact = FALSE, simplify = TRUE, ...)
+\method{predict}{Golem}(
+  object,
+  x,
+  lambda = NULL,
+  sigma = NULL,
+  type = "link",
+  exact = FALSE,
+  simplify = TRUE,
+  ...
+)
 
-\method{predict}{GolemGaussian}(object, x, lambda = NULL, sigma = NULL,
-  type = c("link", "response"), exact = FALSE, simplify = TRUE, ...)
+\method{predict}{GolemGaussian}(
+  object,
+  x,
+  lambda = NULL,
+  sigma = NULL,
+  type = c("link", "response"),
+  exact = FALSE,
+  simplify = TRUE,
+  ...
+)
 
-\method{predict}{GolemBinomial}(object, x, lambda = NULL, sigma = NULL,
-  type = c("link", "response", "class"), exact = FALSE,
-  simplify = TRUE, ...)
+\method{predict}{GolemBinomial}(
+  object,
+  x,
+  lambda = NULL,
+  sigma = NULL,
+  type = c("link", "response", "class"),
+  exact = FALSE,
+  simplify = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{an object of class \code{"Golem"}, typically the result of
@@ -47,7 +70,7 @@ the coefficients to drop extraneous dimensions}
 Predictions from the model with scale determined by \code{type}.
 }
 \description{
-Return predictionsfrom models fit by \code{\link[=golem]{golem()}}.
+Return predictions from models fit by \code{\link[=golem]{golem()}}.
 }
 \examples{
 fit <- with(mtcars, golem(cbind(mpg, hp), vs, family = "binomial"))

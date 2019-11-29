@@ -4,7 +4,7 @@ test_that("model training works with trainGolem", {
   for (family in c("gaussian", "binomial")) {
     xy <- prague:::randomProblem(1e2, 4, n_groups = 2, response = family)
 
-    for (penalty in c("slope", "group_slope", "lasso")) {
+    for (penalty in c("slope", "group_slope")) {
 
       fit <- trainGolem(xy$x,
                         xy$y,
@@ -14,8 +14,7 @@ test_that("model training works with trainGolem", {
                         number = 2,
                         fdr = c(0.1, 0.2),
                         repeats = 2,
-                        n_sigma = 3,
-                        n_lambda = 3)
+                        n_sigma = 3)
       expect_s3_class(fit, "TrainedGolem")
     }
   }

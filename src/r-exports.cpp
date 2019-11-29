@@ -8,9 +8,9 @@ prox_slope_cpp(const arma::vec& y, const Rcpp::List& args)
   auto sigma = Rcpp::as<arma::vec>(args["sigma"]);
   auto lambda = Rcpp::as<arma::vec>(args["lambda"]);
 
-  SLOPE penalty{sigma, lambda};
+  SLOPE penalty;
 
-  return penalty.eval(y, 1.0, 0);
+  return penalty.eval(y, lambda*sigma(0), 1.0);
 }
 
 

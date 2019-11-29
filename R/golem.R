@@ -33,16 +33,6 @@
 #' Models fit by [golem()] can be regularized via several
 #' penalties.
 #'
-#' **Lasso**
-#'
-#' The Lasso penalizes coefficients using the L1 norm. The penalty
-#' term in the lagrangian form of the loss function is
-#'
-#' \deqn{
-#'   \lambda \sum_{j=1}^p |\beta_j|
-#' }{
-#'   \lambda \sum |\beta|
-#' }
 #'
 #' **SLOPE**
 #'
@@ -94,10 +84,9 @@
 #'   setting this to TRUE when `x` is sparse will through an error. (only
 #'   applies to Group SLOPE)
 #' @param sigma noise estimate (only applies to SLOPE and Group SLOPE)
-#' @param n_sigma length of regularization path (only relevant for group slope)
+#' @param n_sigma length of regularization path
 #' @param lambda either a character vector indicating the method used
 #'   to construct the lambda path or the a vector or matrix
-#' @param n_lambda length of regularization path (only relevant for lasso)
 #' @param lambda_min_ratio smallest value for `lambda` as a fraction of
 #'   `lambda_max`
 #' @param fdr target false discovery rate (only applies to SLOPE and
@@ -107,6 +96,7 @@
 #' @param max_passes maximum number of passes for optimizer
 #' @param diagnostics should diagnostics be saved for the model fit (timings,
 #'   primal and dual objectives, and infeasibility)
+#' @param screening_rule type of screening rule to use
 #'
 #' @return An object of class `"Golem"` with the following slots:
 #' \item{coefficients}{a three-dimensional array of the coefficients from the
@@ -126,25 +116,21 @@
 #'
 #' fit <- golem(abalone$x, abalone$y)
 #'
-#' # Binomial response, lasso penalty ------------------------------------------
-#'
-#' fit <- golem(heart$x, heart$y, family = "binomial", penalty = "lasso")
-#'
 golem <- function(x,
                   y,
                   groups = NULL,
                   family = c("gaussian", "binomial"),
-                  penalty = c("slope", "group_slope", "lasso"),
+                  penalty = c("slope", "group_slope"),
                   solver = "fista",
                   intercept = TRUE,
                   standardize_features = TRUE,
                   orthogonalize = TRUE,
                   sigma = c("sequence", "estimate"),
-                  n_sigma = 100,
                   lambda = NULL,
-                  n_lambda = 100,
-                  lambda_min_ratio = NULL,
+                  lambda_min_ratio = if (NROW(x) < NCOL(x)) 1e-2 else 1e-4,
+                  n_sigma = 100,
                   fdr = 0.2,
+                  screening_rule = c("none", "strong", "safe"),
                   tol_rel_gap = 1e-6,
                   tol_infeas = 1e-6,
                   max_passes = 1e4,
@@ -155,9 +141,15 @@ golem <- function(x,
   family <- match.arg(family)
   penalty <- match.arg(penalty)
   solver <- match.arg(solver)
+  screening_rule <- match.arg(screening_rule)
 
-  if (is.character(sigma))
+  if (is.character(sigma)) {
     sigma <- match.arg(sigma)
+    sigma_type <- sigma
+  } else {
+    sigma <- as.double(sigma)
+    sigma_type <- "user"
+  }
 
   stopifnot(
     is.null(lambda_min_ratio) ||
@@ -165,7 +157,6 @@ golem <- function(x,
     tol_rel_gap > 0,
     tol_infeas > 0,
     max_passes > 0,
-    n_lambda >= 1,
     fdr > 0,
     fdr < 1,
     is.character(sigma) ||
@@ -177,8 +168,6 @@ golem <- function(x,
     is.finite(max_passes),
     is.finite(tol_rel_gap),
     is.finite(tol_infeas),
-    is.finite(n_lambda),
-    n_lambda >= 1,
     is.logical(diagnostics),
     is.logical(intercept),
     is.logical(standardize_features),
@@ -236,7 +225,6 @@ golem <- function(x,
   y <- res$y
   y_center <- res$y_center
   y_scale <- res$y_scale
-  # n_classes <- res$n_classes
   class_names <- res$class_names
 
   # setup feature matrix
@@ -290,23 +278,12 @@ golem <- function(x,
                              lambda_min_ratio = lambda_min_ratio,
                              n_sigma = n_sigma,
                              fdr = fdr,
-                             family = family),
-
-    lasso = Lasso(x = x,
-                  y = y,
-                  y_scale = y_scale,
-                  family = family,
-                  lambda = lambda,
-                  lambda_min_ratio = lambda_min_ratio,
-                  n_lambda = n_lambda)
+                             family = family)
   )
 
-  is_slope <- penalty$name %in% c("slope", "group_slope")
-
-  n_penalties <- if (is_slope)
-    length(penalty$sigma)
-  else
-    NCOL(penalty$lambda)
+  sigma <- penalty$sigma
+  lambda <- penalty$lambda
+  n_sigma <- length(penalty$sigma)
 
   # setup solver settings
   solver <- Fista(tol_rel_gap = tol_rel_gap,
@@ -342,18 +319,23 @@ golem <- function(x,
                   is_sparse = is_sparse,
                   weights = weights,
                   standardize_features = standardize_features,
-                  x_scaled_center = x_center/x_scale,
+                  x_center = x_center,
+                  x_scale = x_scale,
                   lipschitz_constant = lipschitz_constant,
-                  n_penalties = n_penalties)
+                  n_sigma = n_sigma,
+                  sigma_type = sigma_type,
+                  screening_rule = screening_rule,
+                  sigma = sigma,
+                  lambda = lambda)
 
   golemFit <- if (is_sparse) golemSparse else golemDense
 
   if (is_sparse)
     x <- methods::as(x, "dgCMatrix")
 
-  if (is_slope && sigma == "estimate") {
+  if (sigma_type == "estimate") {
     if (inherits(family, "Gaussian")) {
-      control$penalty$sigma <- penalty$sigma <- stats::sd(y)
+      control$sigma <- sigma <- stats::sd(y)
       fit <- golemFit(x, y, control)
 
       S_new <- which(fit$beta != 0)
@@ -378,7 +360,7 @@ golem <- function(x,
           sigma <- sqrt(sum(OLS$residuals^2) / (n - length(S)))
         }
 
-        control$penalty$sigma <- penalty$sigma <- sigma
+        control$sigma <- penalty$sigma <- sigma
         control$intercept_init <- fit$intercept
         control$beta_init <- as.matrix(fit$beta)
 
@@ -386,12 +368,15 @@ golem <- function(x,
         S_new <- which(fit$beta != 0)
       }
     } else if (inherits(family, "Binomial")) {
-      control$penalty$sigma <- penalty$sigma <- 0.5
+      control$sigma <- penalty$sigma <- sigma <- 0.5
       fit <- golemFit(x, y, control)
     }
   } else {
     fit <- golemFit(x, y, control)
   }
+
+  active_sets <- fit$active_sets
+  mode(active_sets) <- "logical"
 
   intercept <- fit$intercept
   beta <- fit$beta
@@ -423,23 +408,23 @@ golem <- function(x,
   beta <- res$betas
   nonzeros <- res$nonzeros
 
-  n_penalties <- dim(beta)[3]
+  n_sigma <- dim(beta)[3]
 
   if (fit_intercept) {
-    coefficients <- array(NA, dim = c(p + 1, m, n_penalties))
+    coefficients <- array(NA, dim = c(p + 1, m, n_sigma))
 
-    for (i in seq_len(n_penalties)) {
+    for (i in seq_len(n_sigma)) {
       coefficients[1, , i] <- intercept[, , i]
       coefficients[-1, , i] <- beta[, , i]
     }
     dimnames(coefficients) <- list(c("(Intercept)", variable_names),
                                    response_names,
-                                   paste0("p", seq_len(n_penalties)))
+                                   paste0("p", seq_len(n_sigma)))
   } else {
     coefficients <- beta
     dimnames(coefficients) <- list(variable_names,
                                    response_names,
-                                   paste0("p", seq_len(n_penalties)))
+                                   paste0("p", seq_len(n_sigma)))
   }
 
   diagnostics <- if (diagnostics) setupDiagnostics(fit) else NULL
@@ -448,9 +433,12 @@ golem <- function(x,
                  nonzeros = nonzeros,
                  family = family,
                  penalty = penalty,
+                 lambda = lambda,
+                 sigma = sigma,
                  solver = solver,
                  class_names = class_names,
                  passes = fit$passes,
+                 active_sets = active_sets,
                  diagnostics = diagnostics,
                  call = ocall),
             class = c(paste0("Golem", camelCase(family$name)),

@@ -1,6 +1,6 @@
 #' Generate predictions from golem models
 #'
-#' Return predictionsfrom models fit by [golem()].
+#' Return predictions from models fit by [golem()].
 #'
 #' @param object an object of class `"Golem"`, typically the result of
 #'   a call to [golem()]

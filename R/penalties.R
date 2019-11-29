@@ -20,7 +20,7 @@ Slope <- function(x,
   # noise estimate
   if (is.character(sigma)) {
     sigma_type <- match.arg(sigma)
-    sigma <- NA_real_
+    sigma <- NA
   } else {
     stopifnot(length(sigma) > 0, sigma >= 0, is.finite(sigma))
     sigma_type <- "user"
@@ -200,7 +200,7 @@ Lasso <- function(x,
                   family,
                   lambda = NULL,
                   lambda_min_ratio = NULL,
-                  n_lambda = 100) {
+                  n_sigma = 100) {
 
   if (is.null(lambda_min_ratio))
     lambda_min_ratio <- ifelse(NROW(x) < NCOL(x), 0.01, 0.0001)
@@ -211,7 +211,7 @@ Lasso <- function(x,
 
     lambda <- logSeq(lambda_max,
                      lambda_max*lambda_min_ratio,
-                     n_lambda)
+                     n_sigma)
     lambda_scale <- max(y_scale)
 
   } else {

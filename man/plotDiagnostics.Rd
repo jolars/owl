@@ -4,9 +4,13 @@
 \alias{plotDiagnostics}
 \title{Plot results from diagnostics collected during model fitting}
 \usage{
-plotDiagnostics(object, ind = max(object$diagnostics$penalty),
-  xvar = c("time", "iteration"), yvar = c("objectives",
-  "infeasibility"), ...)
+plotDiagnostics(
+  object,
+  ind = max(object$diagnostics$penalty),
+  xvar = c("time", "iteration"),
+  yvar = c("objectives", "infeasibility"),
+  ...
+)
 }
 \arguments{
 \item{object}{an object of class \code{"Golem"}.}

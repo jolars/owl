@@ -30,7 +30,7 @@ test_that("SLOPE and golem agree when computing lambda sequences", {
   for (lambda in c("bhq", "gaussian")) {
     slope_lambda <- SLOPE::SLOPE(x, y, sigma = 1, lambda = lambda)$lambda
     golem_lambda <- golem(x, y, sigma = 1, lambda = lambda,
-                          penalty = "slope")$penalty$lambda
+                          penalty = "slope")$lambda
     expect_equivalent(golem_lambda, slope_lambda)
   }
 })
@@ -49,7 +49,7 @@ test_that("sigma estimation for SLOPE", {
                      sigma = "estimate")
 
   expect_equal(slope_fit$sigma[length(slope_fit$sigma)],
-               golem_fit$penalty$sigma)
+               golem_fit$sigma)
 })
 
 test_that("fitting SLOPE path works", {

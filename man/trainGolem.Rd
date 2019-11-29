@@ -4,9 +4,18 @@
 \alias{trainGolem}
 \title{Train a golem model}
 \usage{
-trainGolem(x, y, groups = NULL, fdr = 0.2, method = "cv",
-  number = 10, repeats = 1, measure = c("deviance", "mse", "mae",
-  "accuracy", "auc"), n_cores = 1, ...)
+trainGolem(
+  x,
+  y,
+  groups = NULL,
+  fdr = 0.2,
+  method = "cv",
+  number = 10,
+  repeats = 1,
+  measure = c("deviance", "mse", "mae", "accuracy", "auc"),
+  n_cores = 1,
+  ...
+)
 }
 \arguments{
 \item{x}{the feature matrix, which can be either a dense
@@ -40,7 +49,7 @@ all the possible measures for the given model will be used.}
 }
 \value{
 An object of class \code{"TrainedGolem"}, with the following slots:
-\item{summary}{a summary of the resutls with means, standard errors,
+\item{summary}{a summary of the results with means, standard errors,
 and 0.95 confidence levels}
 \item{data}{the raw data from the model training}
 \item{optima}{a \code{data.frame} of the best (mean) values for the different metrics and their corresponding parameter values}
@@ -54,7 +63,7 @@ through the resampling method chosen by the \code{method} argument.
 }
 \details{
 Note that by default this method matches all of the available metrics
-for the given model family against those provided in the argumet
+for the given model family against those provided in the argument
 \code{measure}. Collecting these measures is not particularly demanding
 computationally so it is almost always best to leave this argument
 as it is and then choose which argument to focus on in the call

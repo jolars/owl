@@ -7,26 +7,26 @@
 using namespace Rcpp;
 
 // golemSparse
-Rcpp::List golemSparse(const arma::sp_mat& x, const arma::mat& y, const Rcpp::List control);
+Rcpp::List golemSparse(const arma::sp_mat& x, const arma::vec& y, const Rcpp::List control);
 RcppExport SEXP _prague_golemSparse(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::sp_mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Rcpp::List >::type control(controlSEXP);
     rcpp_result_gen = Rcpp::wrap(golemSparse(x, y, control));
     return rcpp_result_gen;
 END_RCPP
 }
 // golemDense
-Rcpp::List golemDense(const arma::mat& x, const arma::mat& y, const Rcpp::List control);
+Rcpp::List golemDense(const arma::mat& x, const arma::vec& y, const Rcpp::List control);
 RcppExport SEXP _prague_golemDense(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Rcpp::List >::type control(controlSEXP);
     rcpp_result_gen = Rcpp::wrap(golemDense(x, y, control));
     return rcpp_result_gen;

@@ -41,7 +41,7 @@ caretSlopeGolem <- function() {
                            n_sigma = len + 2,
                            standardize_features = FALSE)
 
-      sigma <- fit$penalty$sigma
+      sigma <- fit$sigma
       sigma <- sigma[-c(1, length(sigma))]
       sigma <- sigma[1:min(length(sigma), len)]
 

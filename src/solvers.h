@@ -7,8 +7,9 @@
 #include "utils.h"
 
 struct Results {
-  Results(arma::rowvec intercept,
-          arma::mat beta,
+  Results(double intercept,
+          arma::vec beta,
+          arma::vec gradient,
           arma::uword passes,
           std::vector<double> primals,
           std::vector<double> duals,
@@ -16,14 +17,16 @@ struct Results {
           std::vector<double> time)
           : intercept(intercept),
             beta(beta),
+            gradient(gradient),
             passes(passes),
             primals(primals),
             duals(duals),
             infeasibilities(infeasibilities),
             time(time) {}
 
-  arma::rowvec intercept;
-  arma::mat beta;
+  double intercept;
+  arma::vec beta;
+  arma::vec gradient;
   arma::uword passes;
   std::vector<double> primals;
   std::vector<double> duals;
@@ -34,8 +37,8 @@ struct Results {
 class Solver {
 protected:
   bool diagnostics;
-  arma::rowvec intercept;
-  arma::mat beta;
+  double intercept;
+  arma::vec beta;
 };
 
 class FISTA : public Solver {
@@ -49,8 +52,8 @@ private:
   double tol_infeas = 1e-6;
 
 public:
-  FISTA(const arma::rowvec& intercept_init,
-        const arma::mat& beta_init,
+  FISTA(const double intercept_init,
+        const arma::vec& beta_init,
         const bool standardize,
         const arma::vec x_scaled_center,
         const bool is_sparse,
@@ -73,30 +76,29 @@ public:
   template <typename T>
   Results
   fit(const T& x,
-      const arma::mat& y,
+      const arma::vec& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
       const bool fit_intercept,
       double L,
-      const arma::uword k)
+      const arma::vec& lambda)
   {
     using namespace arma;
 
-    uword n = x.n_rows;
+    uword n = y.n_elem;
     uword p = x.n_cols;
-    uword m = y.n_cols;
 
-    rowvec intercept_tilde(intercept);
-    rowvec intercept_tilde_old(intercept_tilde);
+    double intercept_tilde = intercept;
+    double intercept_tilde_old = intercept_tilde;
 
-    mat beta_tilde(beta);
-    mat beta_tilde_old(beta_tilde);
+    vec beta_tilde(beta);
+    vec beta_tilde_old(beta_tilde);
 
-    mat lin_pred(n, m);
+    vec lin_pred(n);
 
-    mat g(p, m, fill::zeros);
-    mat pseudo_g(g);
-    rowvec g_intercept(m, fill::zeros);
+    vec gradient(p, fill::zeros);
+    vec pseudo_gradient(gradient);
+    double gradient_intercept = 0.0;
 
     double t = 1;
 
@@ -105,7 +107,7 @@ public:
 
     double mod_tol_infeas{tol_infeas};
 
-    mod_tol_infeas *= penalty->lambdaInfeas(k);
+    mod_tol_infeas *= lambda(0);
 
     if (mod_tol_infeas < std::sqrt(datum::eps))
       mod_tol_infeas = std::sqrt(datum::eps);
@@ -131,28 +133,28 @@ public:
       lin_pred = x*beta;
 
     if (fit_intercept)
-      lin_pred += intercept(0);
+      lin_pred += intercept;
 
     // main loop
     while (!accepted && passes < max_passes) {
       ++passes;
       // gradient
       double f = family->primal(y, lin_pred);
-      pseudo_g = family->pseudoGradient(y, lin_pred);
-      g = x.t() * pseudo_g;
+      pseudo_gradient = family->pseudoGradient(y, lin_pred);
+      gradient = x.t()*pseudo_gradient;
 
       // adjust gradient if sparse and standardizing
       if (is_sparse && standardize) {
         for (uword j = 0; j < p; ++j)
-          g(j) -= accu(x_scaled_center(j)*pseudo_g);
+          gradient(j) -= accu(x_scaled_center(j)*pseudo_gradient);
       }
 
       if (fit_intercept)
-        g_intercept = mean(pseudo_g);
+        gradient_intercept = mean(pseudo_gradient);
 
-      double primal = f + penalty->primal(beta, k);
+      double primal = f + penalty->primal(beta, lambda);
       double dual = family->dual(y, lin_pred);
-      double infeasibility = penalty->infeasibility(g, k);
+      double infeasibility = penalty->infeasibility(gradient, lambda);
 
       accepted = (std::abs(primal - dual)/std::max(1.0, primal) < tol_rel_gap)
                   && (infeasibility <= mod_tol_infeas);
@@ -178,12 +180,12 @@ public:
       // // Lipschitz search
       while (true) {
         // Update beta and intercept
-        beta_tilde = penalty->eval(beta - (1.0/L)*g, 1.0/L, k);
+        beta_tilde = penalty->eval(beta - (1.0/L)*gradient, lambda, 1.0/L);
 
-        mat d = beta_tilde - beta;
+        vec d = beta_tilde - beta;
 
         if (fit_intercept)
-          intercept_tilde = intercept - (1.0/L)*g_intercept;
+          intercept_tilde = intercept - (1.0/L)*gradient_intercept;
 
         if (standardize && is_sparse)
           lin_pred = x*beta_tilde - arma::dot(x_scaled_center, beta_tilde);
@@ -191,10 +193,10 @@ public:
           lin_pred = x*beta_tilde;
 
         if (fit_intercept)
-          lin_pred += intercept_tilde(0);
+          lin_pred += intercept_tilde;
 
         f = family->primal(y, lin_pred);
-        mat q = f_old + d.t()*g + 0.5*L*d.t()*d;
+        mat q = f_old + d.t()*gradient + 0.5*L*d.t()*d;
 
         if (any(q.diag() >= f*(1 - 1e-12)))
           break;
@@ -216,7 +218,7 @@ public:
         lin_pred = x*beta;
 
       if (fit_intercept)
-        lin_pred += intercept(0);
+        lin_pred += intercept;
 
       if (passes % 100 == 0)
         Rcpp::checkUserInterrupt();
@@ -224,6 +226,7 @@ public:
 
     Results res{intercept,
                 beta,
+                gradient,
                 passes,
                 primals,
                 duals,
