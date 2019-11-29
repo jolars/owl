@@ -8,11 +8,9 @@
 \usage{
 score(object, x, y, measure)
 
-\method{score}{GolemGaussian}(object, x, y, measure = c("deviance",
-  "mse", "mae"))
+\method{score}{GolemGaussian}(object, x, y, measure = c("deviance", "mse", "mae"))
 
-\method{score}{GolemBinomial}(object, x, y, measure = c("deviance",
-  "mse", "mae", "accuracy", "auc"))
+\method{score}{GolemBinomial}(object, x, y, measure = c("deviance", "mse", "mae", "accuracy", "auc"))
 }
 \arguments{
 \item{object}{an object of class \code{"Golem"}}

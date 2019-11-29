@@ -4,14 +4,27 @@
 \alias{golem}
 \title{Regularized Generalized Linear Models}
 \usage{
-golem(x, y, groups = NULL, family = c("gaussian", "binomial"),
-  penalty = c("slope", "group_slope", "lasso"), solver = "fista",
-  intercept = TRUE, standardize_features = TRUE,
-  orthogonalize = TRUE, sigma = c("sequence", "estimate"),
-  n_sigma = 100, sigma_min_ratio = NULL, lambda = NULL,
-  n_lambda = 100, lambda_min_ratio = NULL, fdr = 0.2,
-  tol_rel_gap = 1e-06, tol_infeas = 1e-06, max_passes = 10000,
-  diagnostics = FALSE)
+golem(
+  x,
+  y,
+  groups = NULL,
+  family = c("gaussian", "binomial"),
+  penalty = c("slope", "group_slope"),
+  solver = "fista",
+  intercept = TRUE,
+  standardize_features = TRUE,
+  orthogonalize = TRUE,
+  sigma = c("sequence", "estimate"),
+  lambda = NULL,
+  lambda_min_ratio = if (NROW(x) < NCOL(x)) 0.01 else 1e-04,
+  n_sigma = 100,
+  fdr = 0.2,
+  screening_rule = c("none", "strong", "safe"),
+  tol_rel_gap = 1e-06,
+  tol_infeas = 1e-06,
+  max_passes = 10000,
+  diagnostics = FALSE
+)
 }
 \arguments{
 \item{x}{the feature matrix, which can be either a dense
@@ -42,21 +55,18 @@ applies to Group SLOPE)}
 
 \item{sigma}{noise estimate (only applies to SLOPE and Group SLOPE)}
 
-\item{n_sigma}{length of regularization path (only relevant for group slope)}
-
-\item{sigma_min_ratio}{smallest value for \code{sigma} as a fraction of
-\code{sigma_max}}
-
 \item{lambda}{either a character vector indicating the method used
 to construct the lambda path or the a vector or matrix}
-
-\item{n_lambda}{length of regularization path (only relevant for lasso)}
 
 \item{lambda_min_ratio}{smallest value for \code{lambda} as a fraction of
 \code{lambda_max}}
 
+\item{n_sigma}{length of regularization path}
+
 \item{fdr}{target false discovery rate (only applies to SLOPE and
 Group SLOPE)}
+
+\item{screening_rule}{type of screening rule to use}
 
 \item{tol_rel_gap}{relative tolerance threshold for duality gap check}
 
@@ -114,17 +124,6 @@ The binomial model (logistic regression) has the following objective.
 Models fit by \code{\link[=golem]{golem()}} can be regularized via several
 penalties.
 
-\strong{Lasso}
-
-The Lasso penalizes coefficients using the L1 norm. The penalty
-term in the lagrangian form of the loss function is
-
-\deqn{
-  \lambda \sum_{j=1}^p |\beta_j|
-}{
-  \lambda \sum |\beta|
-}
-
 \strong{SLOPE}
 
 SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
@@ -165,10 +164,6 @@ of the classical gradient algorithm.
 # Gaussian response, slope penalty (default) --------------------------------
 
 fit <- golem(abalone$x, abalone$y)
-
-# Binomial response, lasso penalty ------------------------------------------
-
-fit <- golem(heart$x, heart$y, family = "binomial", penalty = "lasso")
 
 }
 \seealso{

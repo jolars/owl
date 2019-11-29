@@ -20,7 +20,7 @@ current device unless stored in a variable.
 Plot the model's coefficient along the regularization path.
 }
 \examples{
-fit <- golem(heart$x, heart$y, penalty = "lasso")
+fit <- golem(heart$x, heart$y, penalty = "slope")
 plot(fit)
 }
 \seealso{

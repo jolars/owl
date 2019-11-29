@@ -4,8 +4,7 @@
 \alias{coef.Golem}
 \title{Obtain Coefficients from Model fit by Golem}
 \usage{
-\method{coef}{Golem}(object, lambda = NULL, sigma = NULL,
-  exact = FALSE, simplify = TRUE, ...)
+\method{coef}{Golem}(object, lambda = NULL, sigma = NULL, exact = FALSE, simplify = TRUE, ...)
 }
 \arguments{
 \item{object}{an object of class \code{'Golem'}.}

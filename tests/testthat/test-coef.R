@@ -8,20 +8,20 @@ test_that("intepolating coefficients works properly", {
   expect_silent(coef(fit, sigma = c(0.001, 0.04)))
 
   # check for lasso
-  fit <- golem(xy$x, xy$y, penalty = "lasso")
+  fit <- golem(xy$x, xy$y, penalty = "slope")
 
   expect_silent(coef(fit))
   expect_silent(coef(fit, lambda = c(0.2, 20)))
 
   # penalties are in the path already
-  expect_silent(coef(fit, lambda = fit$penalty$lambda[c(2, 3)]))
+  expect_silent(coef(fit, lambda = fit$lambda[c(2, 3)]))
 })
 
 test_that("simplify argument in coef() works as expected", {
   xy <- prague:::randomProblem(100, 10)
 
   # check for slope
-  fit <- golem(xy$x, xy$y, penalty = "lasso")
+  fit <- golem(xy$x, xy$y, penalty = "slope")
 
   # check simplify
   coefs <- coef(fit, simplify = TRUE)

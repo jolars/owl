@@ -8,9 +8,8 @@
 inline
 arma::mat
 slopeProx(const arma::mat& beta,
-          const double step_size,
           const arma::vec& lambda,
-          const double sigma)
+          const double shrinkage)
 {
   using namespace arma;
 
@@ -19,7 +18,7 @@ slopeProx(const arma::mat& beta,
   // collect sign of beta and work with sorted absolutes
   mat beta_sign = sign(beta);
   vec beta2 = abs(beta);
-  uvec beta_order = stable_sort_index(beta2, "descend");
+  uvec beta_order = sort_index(beta2, "descend");
   beta2 = (beta2(beta_order)).eval();
 
   vec s(p);
@@ -34,7 +33,7 @@ slopeProx(const arma::mat& beta,
   for (uword i = 0; i < p; i++) {
     idx_i(k) = i;
     idx_j(k) = i;
-    s(k)     = beta2(i) - sigma*lambda(i)*step_size;
+    s(k)     = beta2(i) - lambda(i)*shrinkage;
     w(k)     = s(k);
 
     while ((k > 0) && (w[k - 1] <= w(k))) {

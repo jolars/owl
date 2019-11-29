@@ -4,7 +4,7 @@
 #' through the resampling method chosen by the `method` argument.
 #'
 #' Note that by default this method matches all of the available metrics
-#' for the given model family against those provided in the argumet
+#' for the given model family against those provided in the argument
 #' `measure`. Collecting these measures is not particularly demanding
 #' computationally so it is almost always best to leave this argument
 #' as it is and then choose which argument to focus on in the call
@@ -22,7 +22,7 @@
 #' @param ... other arguments to pass on to [golem()]
 #'
 #' @return An object of class `"TrainedGolem"`, with the following slots:
-#' \item{summary}{a summary of the resutls with means, standard errors,
+#' \item{summary}{a summary of the results with means, standard errors,
 #'                and 0.95 confidence levels}
 #' \item{data}{the raw data from the model training}
 #' \item{optima}{a `data.frame` of the best (mean) values for the different metrics and their corresponding parameter values}
@@ -58,8 +58,6 @@ trainGolem <- function(x,
                        ...) {
   ocall <- match.call()
 
-  # dots <- list(...)
-
   measure <- match.arg(measure, several.ok = TRUE)
   method <- match.arg(method)
 
@@ -91,28 +89,17 @@ trainGolem <- function(x,
                        sep = "_")
   }
 
-  if (is_slope) {
-    sigma <- fit$penalty$sigma
+  sigma <- fit$sigma
 
-    result <- array(
-      NA,
-      dim = c(number*repeats, length(sigma), length(fdr)),
-      dimnames = list(
-        foldnames,
-        paste("sigma", signif(sigma, 2), sep = "_"),
-        paste("fdr", signif(fdr, 2), sep = "_")
-      )
+  result <- array(
+    NA,
+    dim = c(number*repeats, length(sigma), length(fdr)),
+    dimnames = list(
+      foldnames,
+      paste("sigma", signif(sigma, 2), sep = "_"),
+      paste("fdr", signif(fdr, 2), sep = "_")
     )
-  } else {
-    lambda <- fit$penalty$lambda
-    result <- array(
-      NA,
-      dim = c(number*repeats, length(lambda), 1),
-      dimnames = list(foldnames,
-                      paste("lambda", signif(lambda, 2), sep = "_"),
-                      NULL)
-    )
-  }
+  )
 
   d <- dim(result)
 
@@ -141,11 +128,7 @@ trainGolem <- function(x,
 
       for (k in seq_len(d[3])) {
 
-        if (is_slope) {
-          args$fdr <- fdr[k]
-        } else {
-          args$lambda <- lambda
-        }
+        args$fdr <- fdr[k]
 
         # collect each measure
         for (l in seq_along(measure)) {
@@ -156,11 +139,7 @@ trainGolem <- function(x,
     } # loop over each fold
   } # repeated cv
 
-  if (is_slope) {
-    grid <- expand.grid(sigma = sigma, fdr = fdr)
-  } else {
-    grid <- expand.grid(lambda = lambda)
-  }
+  grid <- expand.grid(sigma = sigma, fdr = fdr)
 
   n <- number*repeats
 
