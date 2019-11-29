@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot coefficients for a model fit by golem — plot.Golem • prague</title>
+<title>Screen features — screenFeatures • prague</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,8 +42,8 @@
 
 
 
-<meta property="og:title" content="Plot coefficients for a model fit by golem — plot.Golem" />
-<meta property="og:description" content="Plot the model's coefficient along the regularization path." />
+<meta property="og:title" content="Screen features — screenFeatures" />
+<meta property="og:description" content="Screen features" />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -131,51 +131,83 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plot coefficients for a model fit by golem</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/prague/blob/master/R/plot.R'><code>R/plot.R</code></a></small>
-    <div class="hidden name"><code>plot.Golem.Rd</code></div>
+    <h1>Screen features</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/prague/blob/master/R/screenFeatures.R'><code>R/screenFeatures.R</code></a></small>
+    <div class="hidden name"><code>screenFeatures.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Plot the model's coefficient along the regularization path.</p>
+    <p>Screen features</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for Golem</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>screenFeatures</span>(
+  <span class='no'>family</span>,
+  <span class='no'>penalty</span>,
+  <span class='no'>x</span>,
+  <span class='no'>y</span>,
+  <span class='no'>lambda</span>,
+  <span class='no'>lambda_prev</span>,
+  <span class='no'>beta_prev</span>,
+  <span class='no'>intercept_prev</span>,
+  <span class='no'>gradient_prev</span>,
+  <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"none"</span>, <span class='st'>"strong"</span>, <span class='st'>"safe"</span>)
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>an object of class <code>"Golem"</code></p></td>
+      <th>family</th>
+      <td><p>family</p></td>
     </tr>
     <tr>
-      <th>...</th>
-      <td><p>parameters that will be used to modify the call to
-<code><a href='https://rdrr.io/pkg/lattice/man/xyplot.html'>lattice::xyplot()</a></code></p></td>
+      <th>penalty</th>
+      <td><p>penalty</p></td>
+    </tr>
+    <tr>
+      <th>x</th>
+      <td><p>features</p></td>
+    </tr>
+    <tr>
+      <th>y</th>
+      <td><p>response</p></td>
+    </tr>
+    <tr>
+      <th>lambda</th>
+      <td><p>regularization sequence of current fit</p></td>
+    </tr>
+    <tr>
+      <th>lambda_prev</th>
+      <td><p>regularization sequence of previous fit</p></td>
+    </tr>
+    <tr>
+      <th>beta_prev</th>
+      <td><p>coefficients from previous fit</p></td>
+    </tr>
+    <tr>
+      <th>intercept_prev</th>
+      <td><p>intercept from previous fit</p></td>
+    </tr>
+    <tr>
+      <th>gradient_prev</th>
+      <td><p>gradient from previous fit</p></td>
+    </tr>
+    <tr>
+      <th>method</th>
+      <td><p>type of screening</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An object of class <code>"trellis"</code>, which will be plotted on the
-current device unless stored in a variable.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+    <p>A logical vector indicating whether to drop a feature or not</p>
 
-    <div class='dont-index'><p><code><a href='https://rdrr.io/pkg/lattice/man/xyplot.html'>lattice::xyplot()</a></code>, <code><a href='golem.html'>golem()</a></code>, <code><a href='plotDiagnostics.html'>plotDiagnostics()</a></code></p></div>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='golem.html'>golem</a></span>(<span class='no'>heart</span>$<span class='no'>x</span>, <span class='no'>heart</span>$<span class='no'>y</span>, <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='st'>"slope"</span>)
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit</span>)</div><div class='img'><img src='plot.Golem-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
-      <li><a href="#see-also">See also</a></li>
-      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

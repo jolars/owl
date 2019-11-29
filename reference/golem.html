@@ -142,14 +142,27 @@ optimization routines suitable to big data problems." />
 optimization routines suitable to big data problems.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>golem</span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>),
-  <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"slope"</span>, <span class='st'>"group_slope"</span>, <span class='st'>"lasso"</span>), <span class='kw'>solver</span> <span class='kw'>=</span> <span class='st'>"fista"</span>,
-  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"sequence"</span>, <span class='st'>"estimate"</span>),
-  <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>sigma_min_ratio</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>n_lambda</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
-  <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
-  <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'>golem</span>(
+  <span class='no'>x</span>,
+  <span class='no'>y</span>,
+  <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>),
+  <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"slope"</span>, <span class='st'>"group_slope"</span>),
+  <span class='kw'>solver</span> <span class='kw'>=</span> <span class='st'>"fista"</span>,
+  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"sequence"</span>, <span class='st'>"estimate"</span>),
+  <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='kw'>if</span> (<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NROW</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NCOL</a></span>(<span class='no'>x</span>)) <span class='fl'>0.01</span> <span class='kw'>else</span> <span class='fl'>1e-04</span>,
+  <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
+  <span class='kw'>screening_rule</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"none"</span>, <span class='st'>"strong"</span>, <span class='st'>"safe"</span>),
+  <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
+  <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
+  <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
+  <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -203,22 +216,9 @@ applies to Group SLOPE)</p></td>
       <td><p>noise estimate (only applies to SLOPE and Group SLOPE)</p></td>
     </tr>
     <tr>
-      <th>n_sigma</th>
-      <td><p>length of regularization path (only relevant for group slope)</p></td>
-    </tr>
-    <tr>
-      <th>sigma_min_ratio</th>
-      <td><p>smallest value for <code>sigma</code> as a fraction of
-<code>sigma_max</code></p></td>
-    </tr>
-    <tr>
       <th>lambda</th>
       <td><p>either a character vector indicating the method used
 to construct the lambda path or the a vector or matrix</p></td>
-    </tr>
-    <tr>
-      <th>n_lambda</th>
-      <td><p>length of regularization path (only relevant for lasso)</p></td>
     </tr>
     <tr>
       <th>lambda_min_ratio</th>
@@ -226,9 +226,17 @@ to construct the lambda path or the a vector or matrix</p></td>
 <code>lambda_max</code></p></td>
     </tr>
     <tr>
+      <th>n_sigma</th>
+      <td><p>length of regularization path</p></td>
+    </tr>
+    <tr>
       <th>fdr</th>
       <td><p>target false discovery rate (only applies to SLOPE and
 Group SLOPE)</p></td>
+    </tr>
+    <tr>
+      <th>screening_rule</th>
+      <td><p>type of screening rule to use</p></td>
     </tr>
     <tr>
       <th>tol_rel_gap</th>
@@ -285,12 +293,6 @@ $$</p>
 
 <p>Models fit by <code>golem()</code> can be regularized via several
 penalties.</p>
-<p><strong>Lasso</strong></p>
-<p>The Lasso penalizes coefficients using the L1 norm. The penalty
-term in the lagrangian form of the loss function is</p>
-<p>$$
-  \lambda \sum_{j=1}^p |\beta_j|
-$$</p>
 <p><strong>SLOPE</strong></p>
 <p>SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
 Unlike the latter, however, SLOPE uses a non-increasing
@@ -322,11 +324,7 @@ of the classical gradient algorithm.</p>
     <pre class="examples"><div class='input'>
 <span class='co'># Gaussian response, slope penalty (default) --------------------------------</span>
 
-<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>golem</span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>)
-
-<span class='co'># Binomial response, lasso penalty ------------------------------------------</span>
-
-<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>golem</span>(<span class='no'>heart</span>$<span class='no'>x</span>, <span class='no'>heart</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>, <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='st'>"lasso"</span>)</div></pre>
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>golem</span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

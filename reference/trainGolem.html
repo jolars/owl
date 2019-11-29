@@ -142,9 +142,18 @@ through the resampling method chosen by the method argument." />
 through the resampling method chosen by the <code>method</code> argument.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>trainGolem</span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"cv"</span>,
-  <span class='kw'>number</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>repeats</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>,
-  <span class='st'>"accuracy"</span>, <span class='st'>"auc"</span>), <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>trainGolem</span>(
+  <span class='no'>x</span>,
+  <span class='no'>y</span>,
+  <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
+  <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"cv"</span>,
+  <span class='kw'>number</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>repeats</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"accuracy"</span>, <span class='st'>"auc"</span>),
+  <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -203,7 +212,7 @@ all the possible measures for the given model will be used.</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>An object of class <code>"TrainedGolem"</code>, with the following slots:</p>
-<dt>summary</dt><dd><p>a summary of the resutls with means, standard errors,
+<dt>summary</dt><dd><p>a summary of the results with means, standard errors,
 and 0.95 confidence levels</p></dd>
 <dt>data</dt><dd><p>the raw data from the model training</p></dd>
 <dt>optima</dt><dd><p>a <code>data.frame</code> of the best (mean) values for the different metrics and their corresponding parameter values</p></dd>
@@ -214,7 +223,7 @@ and 0.95 confidence levels</p></dd>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>Note that by default this method matches all of the available metrics
-for the given model family against those provided in the argumet
+for the given model family against those provided in the argument
 <code>measure</code>. Collecting these measures is not particularly demanding
 computationally so it is almost always best to leave this argument
 as it is and then choose which argument to focus on in the call

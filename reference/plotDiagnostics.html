@@ -144,9 +144,13 @@ the model fitting resulting from a call to <code><a href='golem.html'>golem()</a
 <code>diagnostics = TRUE</code></em>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>plotDiagnostics</span>(<span class='no'>object</span>, <span class='kw'>ind</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span>(<span class='no'>object</span>$<span class='no'>diagnostics</span>$<span class='no'>penalty</span>),
-  <span class='kw'>xvar</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"time"</span>, <span class='st'>"iteration"</span>), <span class='kw'>yvar</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"objectives"</span>,
-  <span class='st'>"infeasibility"</span>), <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>plotDiagnostics</span>(
+  <span class='no'>object</span>,
+  <span class='kw'>ind</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span>(<span class='no'>object</span>$<span class='no'>diagnostics</span>$<span class='no'>penalty</span>),
+  <span class='kw'>xvar</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"time"</span>, <span class='st'>"iteration"</span>),
+  <span class='kw'>yvar</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"objectives"</span>, <span class='st'>"infeasibility"</span>),
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
