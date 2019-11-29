@@ -61,22 +61,13 @@ Slope <- function(x,
   }
 
   if (sigma_type == "sequence") {
-    # lambda_max <- lambdaMax(family, x, y, y_scale)*NROW(x)
-    #
-    # sigma <- lambda_max/min(lambda)
-    # sigma <- logSeq(sigma, sigma*lambda_min_ratio, n_sigma)
-
     lambda_max <- lambdaMax(family, x, y, y_scale)
-    ord <- order(lambda_max, decreasing = TRUE)
-    min_diff_ind <- which.max(lambda_max[ord]/lambda)
 
-    lambda <- lambda*lambda_max[ord][min_diff_ind]/lambda[min_diff_ind]
+    start <- max(sort(lambda_max, decreasing = TRUE)/lambda)
 
-    sigma <- exp(seq(log(1),
-                     log(lambda_min_ratio),
+    sigma <- exp(seq(log(start),
+                     log(start*lambda_min_ratio),
                      length.out = n_sigma))
-
-
   }
 
   lambda <- matrix(lambda, p, 1)
@@ -177,10 +168,13 @@ GroupSlope <- function(x,
   }
 
   if (sigma_type == "sequence") {
-    lambda_max <- max(lambdaMax(family, x, y, y_scale))
+    lambda_max <- lambdaMax(family, x, y, y_scale)
 
-    sigma <- lambda_max/min(lambda)
-    sigma <- logSeq(sigma, sigma*lambda_min_ratio, n_sigma)
+    start <- max(sort(lambda_max, decreasing = TRUE)/lambda)
+
+    sigma <- exp(seq(log(start),
+                     log(start*lambda_min_ratio),
+                     length.out = n_sigma))
   }
 
   lambda <- matrix(lambda, n_groups, 1)
