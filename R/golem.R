@@ -328,6 +328,7 @@ golem <- function(x,
                   sigma = sigma,
                   lambda = lambda)
 
+
   golemFit <- if (is_sparse) golemSparse else golemDense
 
   if (is_sparse)
@@ -375,8 +376,9 @@ golem <- function(x,
     fit <- golemFit(x, y, control)
   }
 
-  active_sets <- fit$active_sets
-  mode(active_sets) <- "logical"
+  # c++ to R indexing
+  active_sets <- lapply(drop(fit$active_sets),
+                        function(x) drop(x) + 1)
 
   intercept <- fit$intercept
   beta <- fit$beta

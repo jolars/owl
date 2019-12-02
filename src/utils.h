@@ -29,14 +29,6 @@ clamp(const T& x, const T& min, const T& max)
   return x > max ? max : (x < min ? min : x);
 }
 
-inline
-arma::mat
-innerProduct(const arma::mat& x,
-             const arma::mat& beta,
-             const arma::vec& x_scaled_center)
-{
-  return x * beta;
-}
 
 inline
 arma::vec
@@ -45,8 +37,7 @@ linearPredictor(const arma::mat& x,
                 const double intercept,
                 const arma::vec& x_center,
                 const arma::vec& x_scale,
-                const bool standardize_features,
-                const bool fit_intercept)
+                const bool standardize_features)
 {
   return x*beta + intercept;
 }
@@ -58,13 +49,32 @@ linearPredictor(const arma::sp_mat& x,
                 const double intercept,
                 const arma::vec& x_center,
                 const arma::vec& x_scale,
-                const bool standardize_features,
-                const bool fit_intercept)
+                const bool standardize_features)
 {
   using namespace arma;
 
   if (standardize_features)
-    return x*beta - arma::dot(x_center/x_scale, beta) + intercept;
+    return x*beta + intercept - dot(x_center/x_scale, beta);
   else
     return x*beta + intercept;
+}
+
+template <typename T>
+T
+matrixSubset(const T& x,
+             const arma::uvec& active_set)
+{
+  using namespace arma;
+
+  const uword p = active_set.n_elem;
+  const uword n = x.n_rows;
+
+  T x_subset(n, p);
+
+  for (uword j = 0; j < p; ++j) {
+    uword k = active_set(j);
+    x_subset.col(j) = x.col(k);
+  }
+
+  return x_subset;
 }

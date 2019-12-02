@@ -29,6 +29,10 @@ public:
   virtual
   double
   link(const double y) = 0;
+
+  virtual
+  double
+  fitNullModel(const arma::vec& y) = 0;
 };
 
 class Gaussian : public Family {
@@ -60,6 +64,12 @@ public:
   link(const double y)
   {
     return y;
+  }
+
+  double
+  fitNullModel(const arma::vec& y)
+  {
+    return arma::mean(y);
   }
 };
 
@@ -98,6 +108,12 @@ public:
     double z = clamp(y, pmin, pmax);
 
     return std::log((y + 1.0)/2 / (1.0 - z));
+  }
+
+  double
+  fitNullModel(const arma::vec& y)
+  {
+    return link(arma::mean(y));
   }
 };
 

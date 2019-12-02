@@ -45,7 +45,7 @@ coef.Golem <- function(object,
     object <- stats::update(object, lambda = lambda, sigma = sigma, ...)
     beta <- object$coefficients
   } else {
-    stopifnot(value > 0)
+    stopifnot(value >= 0)
     interpolation_list <- interpolatePenalty(penalty, value)
     beta <- interpolateCoefficients(beta, interpolation_list)
     n_penalties <- length(value)

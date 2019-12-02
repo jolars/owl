@@ -46,24 +46,22 @@ SLOPE::activeSet(const std::unique_ptr<Family>& family,
   } else if (screening_rule == "strong") {
 
     vec abs_grad = abs(gradient_prev);
-    uvec ord = sort_index(abs(gradient_prev), "descend");
+    uvec ord = sort_index(abs_grad, "descend");
     vec abs_grad_sorted = abs_grad(ord);
 
     uword i = 0;
     uword k = 0;
 
-    lambda.print();
+    double s{0};
 
     while (i + k < p) {
-      double tmp = mean(
-        abs_grad_sorted.subvec(k, k + i)
-        + lambda_prev.subvec(k, k + i)
-        - 2.0*lambda.subvec(k, k + i)
-      );
 
-      if (tmp >= 0) {
+      s += abs_grad_sorted(k) + lambda_prev(k) - 2*lambda(k);
+
+      if (s >= 0) {
         k = k + i + 1;
         i = 0;
+        s = 0;
       } else {
         i++;
       }
@@ -85,7 +83,7 @@ SLOPE::activeSet(const std::unique_ptr<Family>& family,
     active_set = lh >= rh;
   }
 
-  return active_set;
+  return find(active_set);
 }
 
 inline
@@ -100,5 +98,5 @@ GroupSLOPE::activeSet(const std::unique_ptr<Family>& family,
                       const std::string screening_rule)
 {
   // not implemented yet
-  return arma::ones<arma::uvec>(gradient_prev.n_elem);
+  return arma::regspace<arma::uvec>(0, gradient_prev.n_elem - 1);
 }
