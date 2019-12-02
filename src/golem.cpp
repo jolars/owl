@@ -51,33 +51,35 @@ golemCpp(const T& x,
 
   auto penalty = setupPenalty(penalty_args, groups);
 
-  cube betas(p, 1, n_sigma);
+  cube betas(p, 1, n_sigma, fill::zeros);
   cube intercepts(1, 1, n_sigma);
 
   // initialize estimates
-  auto intercept_init = as<double>(control["intercept_init"]);
-  auto beta_init      = as<vec>(control["beta_init"]);
+  auto intercept = as<double>(control["intercept_init"]);
+  auto beta      = as<vec>(control["beta_init"]);
+
+  if (fit_intercept)
+    intercept = family->fitNullModel(y);
+
+  double intercept_prev = intercept;
+  vec beta_prev(p, fill::zeros);
 
   uvec passes(n_sigma);
   std::vector<std::vector<double>> primals;
   std::vector<std::vector<double>> duals;
   std::vector<std::vector<double>> timings;
   std::vector<std::vector<double>> infeasibilities;
-
-  double intercept_prev = 0.0;
-  vec beta_prev(p, fill::zeros);
+  std::vector<std::vector<unsigned>> line_searches;
 
   vec linear_predictor_prev(n);
   vec gradient_prev(p);
   vec pseudo_gradient_prev(n);
 
-  umat active_sets(p, n_sigma);
-  uvec active_set(p);
+  // sets of active predictors
+  field<uvec> active_sets(n_sigma);
+  uvec active_set;
 
-  FISTA solver(intercept_init,
-               beta_init,
-               standardize_features,
-               x_scaled_center,
+  FISTA solver(standardize_features,
                is_sparse,
                solver_args);
 
@@ -94,55 +96,128 @@ golemCpp(const T& x,
     }
   }
 
+  Results res;
+
   for (uword k = 0; k < n_sigma; ++k) {
-    if (sigma_type == "sequence" && k == 0) {
-      // no predictors active at first step (except intercept) if
-      // using penalty sequence
-      active_set.zeros();
 
-    } else if (screening_rule == "none") {
+    if (screening_rule == "none") {
 
-      active_set.ones();
+      active_set = regspace<uvec>(0, p-1);
 
     } else {
 
-      linear_predictor_prev = x*beta_prev + intercept_prev;
-      pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
-      gradient_prev = x.t() * pseudo_gradient_prev;
+      if (sigma_type == "sequence" && k == 0) {
+        // no predictors active at first step (except intercept)
 
-      active_set = penalty->activeSet(family,
-                                      y,
-                                      gradient_prev,
-                                      pseudo_gradient_prev,
-                                      x_colnorms,
-                                      lambda*sigma(k),
-                                      lambda*sigma(k-1),
-                                      screening_rule);
+        active_set.set_size(0);
+        beta.zeros();
+
+      } else {
+
+        // NOTE(JL): the screening rules should probably not be used if
+        // the coefficients from the previous fit are already very dense
+
+        linear_predictor_prev = linearPredictor(x,
+                                                beta_prev,
+                                                intercept_prev,
+                                                x_center,
+                                                x_scale,
+                                                standardize_features);
+
+        pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
+        gradient_prev = x.t() * pseudo_gradient_prev;
+
+        active_set = penalty->activeSet(family,
+                                        y,
+                                        gradient_prev,
+                                        pseudo_gradient_prev,
+                                        x_colnorms,
+                                        lambda*sigma(k),
+                                        lambda*sigma(k-1),
+                                        screening_rule);
+      }
     }
 
-    active_sets.col(k) = active_set;
+    if (active_set.n_elem == 0) {
+      // null (intercept only) model
 
-    Results res = solver.fit(x,
-                             y,
-                             family,
-                             penalty,
-                             fit_intercept,
-                             lipschitz_constant,
-                             lambda*sigma(k));
+      if (fit_intercept)
+        intercept = family->fitNullModel(y);
 
-    beta_prev = res.beta;
-    intercept_prev = res.intercept;
+      beta.zeros();
 
-    betas.slice(k) = res.beta;
-    intercepts.slice(k) = res.intercept;
-    passes(k) = res.passes;
+      passes(k) = 0;
 
-    if (diagnostics) {
-      primals.push_back(res.primals);
-      duals.push_back(res.duals);
-      infeasibilities.push_back(res.infeasibilities);
-      timings.push_back(res.time);
+      if (diagnostics) {
+        primals.emplace_back(0);
+        duals.emplace_back(0);
+        infeasibilities.emplace_back(0);
+        timings.emplace_back(0);
+        line_searches.emplace_back(0);
+      }
+
+    } else if (active_set.n_elem == p) {
+
+      res = solver.fit(x,
+                       y,
+                       family,
+                       penalty,
+                       intercept,
+                       beta,
+                       fit_intercept,
+                       lipschitz_constant,
+                       lambda*sigma(k),
+                       x_center,
+                       x_scale);
+
+      passes(k) = res.passes;
+      beta = res.beta;
+      intercept = res.intercept;
+
+      if (diagnostics) {
+        primals.push_back(res.primals);
+        duals.push_back(res.duals);
+        infeasibilities.push_back(res.infeasibilities);
+        timings.push_back(res.time);
+        line_searches.push_back(res.line_searches);
+      }
+
+    } else {
+
+      T x_subset = matrixSubset(x, active_set);
+
+      res = solver.fit(x_subset,
+                       y,
+                       family,
+                       penalty,
+                       intercept,
+                       beta(active_set),
+                       fit_intercept,
+                       lipschitz_constant,
+                       lambda.head(active_set.n_elem)*sigma(k),
+                       x_center(active_set),
+                       x_scale(active_set));
+
+      beta(active_set) = res.beta;
+      intercept = res.intercept;
+      passes(k) = res.passes;
+
+      if (diagnostics) {
+        primals.push_back(res.primals);
+        duals.push_back(res.duals);
+        infeasibilities.push_back(res.infeasibilities);
+        timings.push_back(res.time);
+        line_searches.push_back(res.line_searches);
+      }
     }
+
+    // store coefficients and intercept
+    betas.slice(k) = beta;
+    intercepts.slice(k) = intercept;
+    intercept_prev = intercept;
+    beta_prev = beta;
+
+    active_sets(k) = active_set;
 
     Rcpp::checkUserInterrupt();
   }
@@ -155,7 +230,8 @@ golemCpp(const T& x,
     Named("primals")         = wrap(primals),
     Named("duals")           = wrap(duals),
     Named("infeasibilities") = wrap(infeasibilities),
-    Named("time")            = wrap(timings)
+    Named("time")            = wrap(timings),
+    Named("line_searches")   = wrap(line_searches)
   );
 }
 

@@ -7,65 +7,56 @@
 #include "utils.h"
 
 struct Results {
-  Results(double intercept,
-          arma::vec beta,
-          arma::vec gradient,
-          arma::uword passes,
-          std::vector<double> primals,
-          std::vector<double> duals,
-          std::vector<double> infeasibilities,
-          std::vector<double> time)
-          : intercept(intercept),
-            beta(beta),
-            gradient(gradient),
-            passes(passes),
-            primals(primals),
-            duals(duals),
-            infeasibilities(infeasibilities),
-            time(time) {}
-
   double intercept;
   arma::vec beta;
-  arma::vec gradient;
   arma::uword passes;
   std::vector<double> primals;
   std::vector<double> duals;
   std::vector<double> infeasibilities;
   std::vector<double> time;
+  std::vector<unsigned> line_searches;
+
+  Results() {}
+
+  Results(double intercept,
+          arma::vec beta,
+          arma::uword passes,
+          std::vector<double> primals,
+          std::vector<double> duals,
+          std::vector<double> infeasibilities,
+          std::vector<double> time,
+          std::vector<unsigned> line_searches)
+          : intercept(intercept),
+            beta(beta),
+            passes(passes),
+            primals(primals),
+            duals(duals),
+            infeasibilities(infeasibilities),
+            time(time),
+            line_searches(line_searches) {}
 };
 
 class Solver {
 protected:
   bool diagnostics;
-  double intercept;
-  arma::vec beta;
 };
 
 class FISTA : public Solver {
 private:
   const bool standardize;
-  arma::vec x_scaled_center;
   const bool is_sparse;
   arma::uword max_passes;
-  const double eta = 2.0;
   double tol_rel_gap = 1e-6;
   double tol_infeas = 1e-6;
 
 public:
-  FISTA(const double intercept_init,
-        const arma::vec& beta_init,
-        const bool standardize,
-        const arma::vec x_scaled_center,
+  FISTA(const bool standardize,
         const bool is_sparse,
         const Rcpp::List& args)
         : standardize(standardize),
-          x_scaled_center(x_scaled_center),
           is_sparse(is_sparse)
   {
     using Rcpp::as;
-
-    intercept   = intercept_init;
-    beta        = beta_init;
 
     max_passes  = as<arma::uword>(args["max_passes"]);
     diagnostics = as<bool>(args["diagnostics"]);
@@ -79,27 +70,40 @@ public:
       const arma::vec& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
+      const double intercept_init,
+      const arma::vec& beta_init,
       const bool fit_intercept,
-      double L,
-      const arma::vec& lambda)
+      double lipschitz_constant,
+      const arma::vec& lambda,
+      const arma::vec& x_center,
+      const arma::vec& x_scale)
   {
     using namespace arma;
 
     uword n = y.n_elem;
     uword p = x.n_cols;
 
+    double intercept = intercept_init;
     double intercept_tilde = intercept;
     double intercept_tilde_old = intercept_tilde;
 
+    vec beta(beta_init);
     vec beta_tilde(beta);
     vec beta_tilde_old(beta_tilde);
 
     vec lin_pred(n);
 
     vec gradient(p, fill::zeros);
-    vec pseudo_gradient(gradient);
+    vec pseudo_gradient(n, fill::zeros);
     double gradient_intercept = 0.0;
 
+    double learning_rate = 1.0/lipschitz_constant;
+    // double learning_rate = 1;
+
+    // line search parameters
+    double eta = 0.5;
+
+    // FISTA parameters
     double t = 1;
 
     uword passes = 0;
@@ -118,17 +122,19 @@ public:
     std::vector<double> duals;
     std::vector<double> infeasibilities;
     std::vector<double> time;
+    std::vector<unsigned> line_searches;
 
     if (diagnostics) {
       primals.reserve(max_passes);
       duals.reserve(max_passes);
       infeasibilities.reserve(max_passes);
       time.reserve(max_passes);
+      line_searches.reserve(max_passes);
       timer.tic();
     }
 
     if (standardize && is_sparse)
-      lin_pred = x*beta - arma::dot(x_scaled_center, beta);
+      lin_pred = x*beta - arma::dot(x_center/x_scale, beta);
     else
       lin_pred = x*beta;
 
@@ -146,7 +152,7 @@ public:
       // adjust gradient if sparse and standardizing
       if (is_sparse && standardize) {
         for (uword j = 0; j < p; ++j)
-          gradient(j) -= accu(x_scaled_center(j)*pseudo_gradient);
+          gradient(j) -= accu(pseudo_gradient*x_center(j)/x_scale(j));
       }
 
       if (fit_intercept)
@@ -166,8 +172,11 @@ public:
         duals.push_back(dual);
       }
 
-      if (accepted)
+      if (accepted) {
+        if (diagnostics)
+          line_searches.emplace_back(0);
         break;
+      }
 
       beta_tilde_old = beta_tilde;
 
@@ -177,18 +186,24 @@ public:
       double f_old = f;
       double t_old = t;
 
-      // // Lipschitz search
+      unsigned current_line_searches = 0;
+
+      // Backtracking line search
       while (true) {
+        current_line_searches++;
+
         // Update beta and intercept
-        beta_tilde = penalty->eval(beta - (1.0/L)*gradient, lambda, 1.0/L);
+        beta_tilde = penalty->eval(beta - learning_rate*gradient,
+                                   lambda,
+                                   learning_rate);
 
         vec d = beta_tilde - beta;
 
         if (fit_intercept)
-          intercept_tilde = intercept - (1.0/L)*gradient_intercept;
+          intercept_tilde = intercept - learning_rate*gradient_intercept;
 
         if (standardize && is_sparse)
-          lin_pred = x*beta_tilde - arma::dot(x_scaled_center, beta_tilde);
+          lin_pred = x*beta_tilde - arma::dot(x_center/x_scale, beta_tilde);
         else
           lin_pred = x*beta_tilde;
 
@@ -196,13 +211,18 @@ public:
           lin_pred += intercept_tilde;
 
         f = family->primal(y, lin_pred);
-        mat q = f_old + d.t()*gradient + 0.5*L*d.t()*d;
+        double q =
+          f_old + dot(d, gradient) + (1.0/(2*learning_rate))*accu(square(d));
 
-        if (any(q.diag() >= f*(1 - 1e-12)))
+        if (q >= f*(1 - 1e-12)) {
           break;
-        else
-          L *= eta;
+        } else {
+          learning_rate *= eta;
+        }
       }
+
+      if (diagnostics)
+        line_searches.emplace_back(current_line_searches);
 
       // FISTA step
       t = 0.5*(1.0 + std::sqrt(1.0 + 4.0*t_old*t_old));
@@ -212,13 +232,12 @@ public:
         intercept = intercept_tilde
                     + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
 
-      if (standardize && is_sparse)
-        lin_pred = x*beta - arma::dot(x_scaled_center, beta);
-      else
-        lin_pred = x*beta;
-
-      if (fit_intercept)
-        lin_pred += intercept;
+      lin_pred = linearPredictor(x,
+                                 beta,
+                                 intercept,
+                                 x_center,
+                                 x_scale,
+                                 standardize);
 
       if (passes % 100 == 0)
         Rcpp::checkUserInterrupt();
@@ -226,12 +245,12 @@ public:
 
     Results res{intercept,
                 beta,
-                gradient,
                 passes,
                 primals,
                 duals,
                 infeasibilities,
-                time};
+                time,
+                line_searches};
 
     return res;
   }

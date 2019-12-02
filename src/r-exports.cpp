@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 #include "penalties.h"
+#include "utils.h"
 
 // [[Rcpp::export]]
 arma::vec
@@ -143,3 +144,7 @@ maxSquaredRowNorm(SEXP x,
                            x_scaled_center,
                            standardize_features);
 }
+
+
+
+
