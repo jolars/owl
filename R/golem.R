@@ -178,6 +178,9 @@ golem <- function(x,
   orthogonalize <- orthogonalize && penalty == "group_slope"
   group_penalty <- penalty == "group_slope"
 
+  if (group_penalty && !(screening_rule == "none"))
+    stop("screening rules are only implemented for standard slope penalty")
+
   if (NROW(y) != NROW(x))
     stop("the number of samples in 'x' and 'y' must match")
 
