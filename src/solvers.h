@@ -39,13 +39,42 @@ struct Results {
 class Solver {
 protected:
   bool diagnostics;
+
+public:
+  virtual
+  Results
+  fit(const arma::sp_mat& x,
+      const arma::vec& y,
+      const std::unique_ptr<Family>& family,
+      const std::unique_ptr<Penalty>& penalty,
+      const double intercept_init,
+      const arma::vec& beta_init,
+      const bool fit_intercept,
+      const double lipschitz_constant,
+      const arma::vec& lambda,
+      const arma::vec& x_center,
+      const arma::vec& x_scale) = 0;
+
+  virtual
+  Results
+  fit(const arma::mat& x,
+      const arma::vec& y,
+      const std::unique_ptr<Family>& family,
+      const std::unique_ptr<Penalty>& penalty,
+      const double intercept_init,
+      const arma::vec& beta_init,
+      const bool fit_intercept,
+      const double lipschitz_constant,
+      const arma::vec& lambda,
+      const arma::vec& x_center,
+      const arma::vec& x_scale) = 0;
 };
 
 class FISTA : public Solver {
 private:
   const bool standardize;
   const bool is_sparse;
-  arma::uword max_passes;
+  arma::uword max_passes = 1e3;
   double tol_rel_gap = 1e-6;
   double tol_infeas = 1e-6;
 
@@ -64,19 +93,73 @@ public:
     tol_infeas  = as<double>(args["tol_infeas"]);
   }
 
-  template <typename T>
+  virtual
   Results
-  fit(const T& x,
+  fit(const arma::mat& x,
       const arma::vec& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
       const double intercept_init,
       const arma::vec& beta_init,
       const bool fit_intercept,
-      double lipschitz_constant,
+      const double lipschitz_constant,
       const arma::vec& lambda,
       const arma::vec& x_center,
       const arma::vec& x_scale)
+  {
+    return fitImpl(x,
+                   y,
+                   family,
+                   penalty,
+                   intercept_init,
+                   beta_init,
+                   fit_intercept,
+                   lipschitz_constant,
+                   lambda,
+                   x_center,
+                   x_scale);
+  }
+
+  virtual
+  Results
+  fit(const arma::sp_mat& x,
+      const arma::vec& y,
+      const std::unique_ptr<Family>& family,
+      const std::unique_ptr<Penalty>& penalty,
+      const double intercept_init,
+      const arma::vec& beta_init,
+      const bool fit_intercept,
+      const double lipschitz_constant,
+      const arma::vec& lambda,
+      const arma::vec& x_center,
+      const arma::vec& x_scale)
+  {
+    return fitImpl(x,
+                   y,
+                   family,
+                   penalty,
+                   intercept_init,
+                   beta_init,
+                   fit_intercept,
+                   lipschitz_constant,
+                   lambda,
+                   x_center,
+                   x_scale);
+  }
+
+  template <typename T>
+  Results
+  fitImpl(const T& x,
+          const arma::vec& y,
+          const std::unique_ptr<Family>& family,
+          const std::unique_ptr<Penalty>& penalty,
+          const double intercept_init,
+          const arma::vec& beta_init,
+          const bool fit_intercept,
+          const double lipschitz_constant,
+          const arma::vec& lambda,
+          const arma::vec& x_center,
+          const arma::vec& x_scale)
   {
     using namespace arma;
 
@@ -97,8 +180,8 @@ public:
     vec pseudo_gradient(n, fill::zeros);
     double gradient_intercept = 0.0;
 
-    // double learning_rate = 1.0/lipschitz_constant;
-    double learning_rate = 1;
+    double learning_rate = 1.0/lipschitz_constant;
+    // double learning_rate = 1;
 
     // line search parameters
     double eta = 0.5;
@@ -126,13 +209,12 @@ public:
       timer.tic();
     }
 
-    if (standardize && is_sparse)
-      lin_pred = x*beta - arma::dot(x_center/x_scale, beta);
-    else
-      lin_pred = x*beta;
-
-    if (fit_intercept)
-      lin_pred += intercept;
+    lin_pred = linearPredictor(x,
+                               beta,
+                               intercept,
+                               x_center,
+                               x_scale,
+                               standardize);
 
     // main loop
     while (!accepted && passes < max_passes) {
@@ -196,13 +278,12 @@ public:
         if (fit_intercept)
           intercept_tilde = intercept - learning_rate*gradient_intercept;
 
-        if (standardize && is_sparse)
-          lin_pred = x*beta_tilde - arma::dot(x_center/x_scale, beta_tilde);
-        else
-          lin_pred = x*beta_tilde;
-
-        if (fit_intercept)
-          lin_pred += intercept_tilde;
+        lin_pred = linearPredictor(x,
+                                   beta_tilde,
+                                   intercept_tilde,
+                                   x_center,
+                                   x_scale,
+                                   standardize);
 
         f = family->primal(y, lin_pred);
         double q =
@@ -250,3 +331,14 @@ public:
   }
 };
 
+// helper to choose solver
+std::unique_ptr<Solver>
+setupSolver(const std::string& solver_choice,
+            const bool standardize_features,
+            const bool is_sparse,
+            const Rcpp::List& args)
+{
+  return std::unique_ptr<FISTA>(new FISTA{standardize_features,
+                                          is_sparse,
+                                          args});
+}

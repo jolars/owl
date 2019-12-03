@@ -80,9 +80,10 @@ golemCpp(const T& x,
   field<uvec> active_sets(n_sigma);
   uvec active_set;
 
-  FISTA solver(standardize_features,
-               is_sparse,
-               solver_args);
+  auto solver = setupSolver(as<std::string>(solver_args["name"]),
+                            standardize_features,
+                            is_sparse,
+                            solver_args);
 
   vec x_colnorms(p);
 
@@ -159,17 +160,17 @@ golemCpp(const T& x,
 
     } else if (active_set.n_elem == p) {
 
-      res = solver.fit(x,
-                       y,
-                       family,
-                       penalty,
-                       intercept,
-                       beta,
-                       fit_intercept,
-                       lipschitz_constant,
-                       lambda*sigma(k),
-                       x_center,
-                       x_scale);
+      res = solver->fit(x,
+                        y,
+                        family,
+                        penalty,
+                        intercept,
+                        beta,
+                        fit_intercept,
+                        lipschitz_constant,
+                        lambda*sigma(k),
+                        x_center,
+                        x_scale);
 
       passes(k) = res.passes;
       beta = res.beta;
@@ -190,17 +191,17 @@ golemCpp(const T& x,
       do {
         T x_subset = matrixSubset(x, active_set);
 
-        res = solver.fit(x_subset,
-                         y,
-                         family,
-                         penalty,
-                         intercept,
-                         beta(active_set),
-                         fit_intercept,
-                         lipschitz_constant,
-                         lambda.head(active_set.n_elem)*sigma(k),
-                         x_center(active_set),
-                         x_scale(active_set));
+        res = solver->fit(x_subset,
+                          y,
+                          family,
+                          penalty,
+                          intercept,
+                          beta(active_set),
+                          fit_intercept,
+                          lipschitz_constant,
+                          lambda.head(active_set.n_elem)*sigma(k),
+                          x_center(active_set),
+                          x_scale(active_set));
 
         beta(active_set) = res.beta;
         intercept = res.intercept;
