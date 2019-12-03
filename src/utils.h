@@ -78,3 +78,18 @@ matrixSubset(const T& x,
 
   return x_subset;
 }
+
+inline
+arma::uvec
+setUnion(const arma::uvec& a,
+         const arma::uvec& b)
+{
+  using namespace arma;
+
+  std::vector<unsigned> out;
+  std::set_union(a.begin(), a.end(),
+                 b.begin(), b.end(),
+                 std::back_inserter(out));
+
+  return conv_to<uvec>::from(out);
+}

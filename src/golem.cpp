@@ -70,6 +70,7 @@ golemCpp(const T& x,
   std::vector<std::vector<double>> timings;
   std::vector<std::vector<double>> infeasibilities;
   std::vector<std::vector<unsigned>> line_searches;
+  uvec violations(n_sigma, fill::zeros);
 
   vec linear_predictor_prev(n);
   vec gradient_prev(p);
@@ -184,23 +185,48 @@ golemCpp(const T& x,
 
     } else {
 
-      T x_subset = matrixSubset(x, active_set);
+      bool kkt_violation = true;
 
-      res = solver.fit(x_subset,
-                       y,
-                       family,
-                       penalty,
-                       intercept,
-                       beta(active_set),
-                       fit_intercept,
-                       lipschitz_constant,
-                       lambda.head(active_set.n_elem)*sigma(k),
-                       x_center(active_set),
-                       x_scale(active_set));
+      do {
+        T x_subset = matrixSubset(x, active_set);
 
-      beta(active_set) = res.beta;
-      intercept = res.intercept;
-      passes(k) = res.passes;
+        res = solver.fit(x_subset,
+                         y,
+                         family,
+                         penalty,
+                         intercept,
+                         beta(active_set),
+                         fit_intercept,
+                         lipschitz_constant,
+                         lambda.head(active_set.n_elem)*sigma(k),
+                         x_center(active_set),
+                         x_scale(active_set));
+
+        beta(active_set) = res.beta;
+        intercept = res.intercept;
+        passes(k) = res.passes;
+
+        linear_predictor_prev = linearPredictor(x,
+                                                beta,
+                                                intercept,
+                                                x_center,
+                                                x_scale,
+                                                standardize_features);
+
+        pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
+        gradient_prev = x.t() * pseudo_gradient_prev;
+
+        uvec check_failures =
+          penalty->kktCheck(gradient_prev, beta, lambda*sigma(k), 1e-6);
+
+        kkt_violation = check_failures.n_elem > 0;
+        violations(k) += check_failures.n_elem;
+
+        active_set = setUnion(check_failures, active_set);
+
+        Rcpp::checkUserInterrupt();
+
+      } while (kkt_violation);
 
       if (diagnostics) {
         primals.push_back(res.primals);
@@ -231,7 +257,8 @@ golemCpp(const T& x,
     Named("duals")           = wrap(duals),
     Named("infeasibilities") = wrap(infeasibilities),
     Named("time")            = wrap(timings),
-    Named("line_searches")   = wrap(line_searches)
+    Named("line_searches")   = wrap(line_searches),
+    Named("violations")      = wrap(violations)
   );
 }
 

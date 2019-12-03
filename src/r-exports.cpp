@@ -146,5 +146,3 @@ maxSquaredRowNorm(SEXP x,
 }
 
 
-
-

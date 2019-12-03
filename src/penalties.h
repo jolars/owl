@@ -32,6 +32,28 @@ public:
             const arma::vec& lambda,
             const arma::vec& lambda_prev,
             const std::string screening_rule) = 0;
+
+  // returns the indices of coefficients for which the kkt test fails
+  arma::uvec
+  kktCheck(const arma::vec& gradient,
+           const arma::vec& beta,
+           const arma::vec& lambda,
+           const double tol = 1e-6)
+  {
+    using namespace arma;
+
+    uvec nonzeros = find(beta != 0);
+    uvec ord = sort_index(abs(gradient), "descend");
+    vec abs_gradient_sorted = abs(gradient(ord));
+
+    double rh = std::max(std::sqrt(datum::eps), tol*lambda(0));
+
+    uvec out = cumsum(abs_gradient_sorted - lambda) <= rh;
+    out(ord) = out;
+    out(nonzeros).ones();
+
+    return find(out == 0);
+  }
 };
 
 class SLOPE : public Penalty {
@@ -52,12 +74,13 @@ public:
   }
 
   double
-  infeasibility(const arma::vec& gradient, const arma::vec& lambda)
+  infeasibility(const arma::vec& gradient,
+                const arma::vec& lambda)
   {
     using namespace arma;
 
-    vec gradient_sorted = sort(abs(gradient), "descending");
-    return std::max(cumsum(gradient_sorted - lambda).max(), 0.0);
+    vec abs_gradient_sorted = sort(abs(gradient), "descending");
+    return std::max(cumsum(abs_gradient_sorted - lambda).max(), 0.0);
   }
 
   arma::uvec
@@ -69,6 +92,8 @@ public:
             const arma::vec& lambda,
             const arma::vec& lambda_prev,
             const std::string screening_rule);
+
+
 };
 
 class GroupSLOPE : public Penalty {

@@ -97,8 +97,8 @@ public:
     vec pseudo_gradient(n, fill::zeros);
     double gradient_intercept = 0.0;
 
-    double learning_rate = 1.0/lipschitz_constant;
-    // double learning_rate = 1;
+    // double learning_rate = 1.0/lipschitz_constant;
+    double learning_rate = 1;
 
     // line search parameters
     double eta = 0.5;
@@ -108,13 +108,6 @@ public:
 
     uword passes = 0;
     bool accepted = false;
-
-    double mod_tol_infeas{tol_infeas};
-
-    mod_tol_infeas *= lambda(0);
-
-    if (mod_tol_infeas < std::sqrt(datum::eps))
-      mod_tol_infeas = std::sqrt(datum::eps);
 
     // diagnostics
     wall_clock timer;
@@ -163,7 +156,8 @@ public:
       double infeasibility = penalty->infeasibility(gradient, lambda);
 
       accepted = (std::abs(primal - dual)/std::max(1.0, primal) < tol_rel_gap)
-                  && (infeasibility <= mod_tol_infeas);
+                  && (infeasibility <= std::max(std::sqrt(datum::eps),
+                                                lambda(0)*tol_infeas));
 
       if (diagnostics) {
         time.push_back(timer.toc());

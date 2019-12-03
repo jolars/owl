@@ -113,7 +113,9 @@ public:
   double
   fitNullModel(const arma::vec& y)
   {
-    return link(arma::mean(y));
+    using namespace arma;
+
+    return std::log(mean(y*0.5 + 0.5)/(1 - mean(y*0.5 + 0.5)));
   }
 };
 
