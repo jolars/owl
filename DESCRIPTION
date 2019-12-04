@@ -44,7 +44,7 @@ Description: Fast implementations of penalized Generalized Linear Models (GLM)
 License: GPL-3
 LazyData: true
 Depends:
-    R (>= 3.4.0)
+    R (>= 3.3.0)
 Imports:
     grpSLOPE,
     Matrix,
