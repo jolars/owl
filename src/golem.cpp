@@ -4,6 +4,7 @@
 #include "penalties.h"
 #include "families.h"
 #include "screening_rules.h"
+#include "lipschitzConstant.h"
 
 template <typename T>
 Rcpp::List
@@ -24,7 +25,6 @@ golemCpp(const T& x,
   auto penalty_args = as<Rcpp::List>(control["penalty"]);
   auto solver_args = as<Rcpp::List>(control["solver"]);
   auto groups = as<Rcpp::List>(control["groups"]);
-  auto lipschitz_constant = as<double>(control["lipschitz_constant"]);
 
   auto family_args = as<Rcpp::List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
@@ -44,8 +44,10 @@ golemCpp(const T& x,
   vec x_scale         = as<vec>(control["x_scale"]);
   vec x_scaled_center = x_center/x_scale;
 
+  auto family_choice = as<std::string>(family_args["name"]);
+
   // setup family and response
-  auto family = setupFamily(as<std::string>(family_args["name"]),
+  auto family = setupFamily(family_choice,
                             fit_intercept,
                             standardize_features);
 
@@ -80,9 +82,10 @@ golemCpp(const T& x,
   field<uvec> active_sets(n_sigma);
   uvec active_set;
 
-  FISTA solver(standardize_features,
-               is_sparse,
-               solver_args);
+  auto solver = setupSolver(as<std::string>(solver_args["name"]),
+                            standardize_features,
+                            is_sparse,
+                            solver_args);
 
   vec x_colnorms(p);
 
@@ -95,6 +98,17 @@ golemCpp(const T& x,
       for (uword j = 0; j < p; ++j)
         x_colnorms(j) = norm(x.col(j), 2);
     }
+  }
+
+  std::vector<double> lipschitz_constants;
+  double lipschitz_constant{1};
+
+  if (screening_rule == "none") {
+    lipschitz_constant = lipschitzConstant(x,
+                                           x_center,
+                                           x_scale,
+                                           standardize_features,
+                                           family_choice);
   }
 
   Results res;
@@ -158,18 +172,19 @@ golemCpp(const T& x,
       }
 
     } else if (active_set.n_elem == p) {
+      // all features active
 
-      res = solver.fit(x,
-                       y,
-                       family,
-                       penalty,
-                       intercept,
-                       beta,
-                       fit_intercept,
-                       lipschitz_constant,
-                       lambda*sigma(k),
-                       x_center,
-                       x_scale);
+      res = solver->fit(x,
+                        y,
+                        family,
+                        penalty,
+                        intercept,
+                        beta,
+                        fit_intercept,
+                        lipschitz_constant,
+                        lambda*sigma(k),
+                        x_center,
+                        x_scale);
 
       passes(k) = res.passes;
       beta = res.beta;
@@ -180,7 +195,8 @@ golemCpp(const T& x,
         duals.push_back(res.duals);
         infeasibilities.push_back(res.infeasibilities);
         timings.push_back(res.time);
-        line_searches.push_back(res.line_searches);
+        line_searches.emplace_back(res.line_searches);
+        lipschitz_constants.emplace_back(lipschitz_constant);
       }
 
     } else {
@@ -190,17 +206,25 @@ golemCpp(const T& x,
       do {
         T x_subset = matrixSubset(x, active_set);
 
-        res = solver.fit(x_subset,
-                         y,
-                         family,
-                         penalty,
-                         intercept,
-                         beta(active_set),
-                         fit_intercept,
-                         lipschitz_constant,
-                         lambda.head(active_set.n_elem)*sigma(k),
-                         x_center(active_set),
-                         x_scale(active_set));
+        // compute Lipschitz estimate on x subset
+        // NOTE(JL): is it worth it to do this each time?
+        lipschitz_constant = lipschitzConstant(x_subset,
+                                               x_center(active_set),
+                                               x_scale(active_set),
+                                               standardize_features,
+                                               family_choice);
+
+        res = solver->fit(x_subset,
+                          y,
+                          family,
+                          penalty,
+                          intercept,
+                          beta(active_set),
+                          fit_intercept,
+                          lipschitz_constant,
+                          lambda.head(active_set.n_elem)*sigma(k),
+                          x_center(active_set),
+                          x_scale(active_set));
 
         beta(active_set) = res.beta;
         intercept = res.intercept;
@@ -234,6 +258,7 @@ golemCpp(const T& x,
         infeasibilities.push_back(res.infeasibilities);
         timings.push_back(res.time);
         line_searches.push_back(res.line_searches);
+        lipschitz_constants.emplace_back(lipschitz_constant);
       }
     }
 
@@ -249,16 +274,17 @@ golemCpp(const T& x,
   }
 
   return Rcpp::List::create(
-    Named("intercept")       = wrap(intercepts),
-    Named("beta")            = wrap(betas),
-    Named("active_sets")     = wrap(active_sets),
-    Named("passes")          = passes,
-    Named("primals")         = wrap(primals),
-    Named("duals")           = wrap(duals),
-    Named("infeasibilities") = wrap(infeasibilities),
-    Named("time")            = wrap(timings),
-    Named("line_searches")   = wrap(line_searches),
-    Named("violations")      = wrap(violations)
+    Named("intercept")           = wrap(intercepts),
+    Named("beta")                = wrap(betas),
+    Named("active_sets")         = wrap(active_sets),
+    Named("passes")              = passes,
+    Named("primals")             = wrap(primals),
+    Named("duals")               = wrap(duals),
+    Named("infeasibilities")     = wrap(infeasibilities),
+    Named("time")                = wrap(timings),
+    Named("line_searches")       = wrap(line_searches),
+    Named("violations")          = wrap(violations),
+    Named("lipschitz_constants") = wrap(lipschitz_constants)
   );
 }
 

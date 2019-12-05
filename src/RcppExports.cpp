@@ -80,43 +80,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rowNormsSparse
-arma::vec rowNormsSparse(const arma::sp_mat& x, const arma::uword norm_type);
-RcppExport SEXP _prague_rowNormsSparse(SEXP xSEXP, SEXP norm_typeSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::sp_mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::uword >::type norm_type(norm_typeSEXP);
-    rcpp_result_gen = Rcpp::wrap(rowNormsSparse(x, norm_type));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rowNormsDense
-arma::vec rowNormsDense(const arma::mat& x, const arma::uword norm_type);
-RcppExport SEXP _prague_rowNormsDense(SEXP xSEXP, SEXP norm_typeSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::uword >::type norm_type(norm_typeSEXP);
-    rcpp_result_gen = Rcpp::wrap(rowNormsDense(x, norm_type));
-    return rcpp_result_gen;
-END_RCPP
-}
-// maxSquaredRowNorm
-double maxSquaredRowNorm(SEXP x, const arma::rowvec& x_scaled_center, const bool standardize_features);
-RcppExport SEXP _prague_maxSquaredRowNorm(SEXP xSEXP, SEXP x_scaled_centerSEXP, SEXP standardize_featuresSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type x_scaled_center(x_scaled_centerSEXP);
-    Rcpp::traits::input_parameter< const bool >::type standardize_features(standardize_featuresSEXP);
-    rcpp_result_gen = Rcpp::wrap(maxSquaredRowNorm(x, x_scaled_center, standardize_features));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_prague_golemSparse", (DL_FUNC) &_prague_golemSparse, 3},
@@ -125,9 +88,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_prague_standardizedSparseColNorms", (DL_FUNC) &_prague_standardizedSparseColNorms, 2},
     {"_prague_colNormsSparse", (DL_FUNC) &_prague_colNormsSparse, 2},
     {"_prague_colNormsDense", (DL_FUNC) &_prague_colNormsDense, 2},
-    {"_prague_rowNormsSparse", (DL_FUNC) &_prague_rowNormsSparse, 2},
-    {"_prague_rowNormsDense", (DL_FUNC) &_prague_rowNormsDense, 2},
-    {"_prague_maxSquaredRowNorm", (DL_FUNC) &_prague_maxSquaredRowNorm, 3},
     {NULL, NULL, 0}
 };
 

@@ -178,6 +178,9 @@ golem <- function(x,
   orthogonalize <- orthogonalize && penalty == "group_slope"
   group_penalty <- penalty == "group_slope"
 
+  if (group_penalty && !(screening_rule == "none"))
+    stop("screening rules are only implemented for standard slope penalty")
+
   if (NROW(y) != NROW(x))
     stop("the number of samples in 'x' and 'y' must match")
 
@@ -301,14 +304,6 @@ golem <- function(x,
   if (is.null(response_names))
     response_names <- paste0("y", seq_len(m))
 
-  lipschitz_constant <-
-    lipschitzConstant(family,
-                      x,
-                      intercept,
-                      x_center,
-                      x_scale,
-                      standardize_features)
-
   control <- list(intercept_init = intercept_init,
                   beta_init = beta_init,
                   family = family,
@@ -321,7 +316,6 @@ golem <- function(x,
                   standardize_features = standardize_features,
                   x_center = x_center,
                   x_scale = x_scale,
-                  lipschitz_constant = lipschitz_constant,
                   n_sigma = n_sigma,
                   sigma_type = sigma_type,
                   screening_rule = screening_rule,
@@ -442,6 +436,7 @@ golem <- function(x,
                  passes = fit$passes,
                  violations = fit$violations,
                  active_sets = active_sets,
+                 lipschitz_constants = fit$lipschitz_constants,
                  diagnostics = diagnostics,
                  call = ocall),
             class = c(paste0("Golem", camelCase(family$name)),
