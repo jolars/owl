@@ -61,88 +61,86 @@ colNormsDense(const arma::mat& x, const arma::uword norm_type = 2)
   return colNorms(x, norm_type);
 }
 
-template <typename T>
-arma::vec
-rowNorms(const T& x, const arma::uword norm_type = 2)
-{
-  using namespace arma;
+// template <typename T>
+// arma::vec
+// rowNorms(const T& x, const arma::uword norm_type = 2)
+// {
+//   using namespace arma;
+//
+//   uword p = x.n_cols;
+//
+//   vec norms(p);
+//
+//   for (decltype(p) i = 0; i < p; ++i)
+//     norms(i) = norm(x.row(i), norm_type);
+//
+//   return norms;
+// }
 
-  uword p = x.n_cols;
-
-  vec norms(p);
-
-  for (decltype(p) i = 0; i < p; ++i)
-    norms(i) = norm(x.row(i), norm_type);
-
-  return norms;
-}
-
-// [[Rcpp::export]]
-arma::vec
-rowNormsSparse(const arma::sp_mat& x,
-               const arma::uword norm_type = 2)
-{
-  return rowNorms(x, norm_type);
-}
-
-// [[Rcpp::export]]
-arma::vec
-rowNormsDense(const arma::mat& x, const arma::uword norm_type = 2)
-{
-  return rowNorms(x, norm_type);
-}
-
-
-double
-maxSquaredRowNorm(const arma::mat& x,
-                  const arma::rowvec& x_scaled_center,
-                  const bool standardize_features)
-{
-  return arma::norm(arma::square(x), "inf");
-}
-
-double
-maxSquaredRowNorm(const arma::sp_mat& x,
-                  const arma::rowvec& x_scaled_center,
-                  const bool standardize_features)
-{
-  using namespace arma;
-
-  double max_squared_row_norms = 0.0;
-
-  if (standardize_features) {
-    const uword n = x.n_rows;
-
-    vec squared_row_norms(n);
-
-    for (uword i = 0; i < n; ++i)
-      squared_row_norms(i) = accu(square(x.row(i) - x_scaled_center));
-
-    max_squared_row_norms = squared_row_norms.max();
-
-  } else {
-    max_squared_row_norms = sum(square(x), 1).max();
-  }
-
-  return max_squared_row_norms;
-}
-
-// [[Rcpp::export]]
-double
-maxSquaredRowNorm(SEXP x,
-                  const arma::rowvec& x_scaled_center,
-                  const bool standardize_features)
-{
-  if (Rf_isS4(x)) {
-    if (Rf_inherits(x, "dgCMatrix"))
-      return maxSquaredRowNorm(Rcpp::as<arma::sp_mat>(x),
-                               x_scaled_center,
-                               standardize_features);
-  }
-
-  return maxSquaredRowNorm(Rcpp::as<arma::mat>(x),
-                           x_scaled_center,
-                           standardize_features);
-}
+// // [[Rcpp::export]]
+// arma::vec
+// rowNormsSparse(const arma::sp_mat& x,
+//                const arma::uword norm_type = 2)
+// {
+//   return rowNorms(x, norm_type);
+// }
+//
+// // [[Rcpp::export]]
+// arma::vec
+// rowNormsDense(const arma::mat& x, const arma::uword norm_type = 2)
+// {
+//   return rowNorms(x, norm_type);
+// }
 
 
+// double
+// maxSquaredRowNorm(const arma::mat& x,
+//                   const arma::rowvec& x_scaled_center,
+//                   const bool standardize_features)
+// {
+//   return arma::norm(arma::square(x), "inf");
+// }
+//
+// double
+// maxSquaredRowNorm(const arma::sp_mat& x,
+//                   const arma::rowvec& x_scaled_center,
+//                   const bool standardize_features)
+// {
+//   using namespace arma;
+//
+//   double max_squared_row_norms = 0.0;
+//
+//   if (standardize_features) {
+//     const uword n = x.n_rows;
+//
+//     vec squared_row_norms(n);
+//
+//     for (uword i = 0; i < n; ++i)
+//       squared_row_norms(i) = accu(square(x.row(i) - x_scaled_center));
+//
+//     max_squared_row_norms = squared_row_norms.max();
+//
+//   } else {
+//     max_squared_row_norms = sum(square(x), 1).max();
+//   }
+//
+//   return max_squared_row_norms;
+// }
+//
+// // [[Rcpp::export]]
+// double
+// maxSquaredRowNorm(SEXP x,
+//                   const arma::rowvec& x_scaled_center,
+//                   const bool standardize_features)
+// {
+//   if (Rf_isS4(x)) {
+//     if (Rf_inherits(x, "dgCMatrix"))
+//       return maxSquaredRowNorm(Rcpp::as<arma::sp_mat>(x),
+//                                x_scaled_center,
+//                                standardize_features);
+//   }
+//
+//   return maxSquaredRowNorm(Rcpp::as<arma::mat>(x),
+//                            x_scaled_center,
+//                            standardize_features);
+// }

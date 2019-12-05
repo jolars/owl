@@ -25,15 +25,3 @@ colNormsDense <- function(x, norm_type = 2L) {
     .Call(`_prague_colNormsDense`, x, norm_type)
 }
 
-rowNormsSparse <- function(x, norm_type = 2L) {
-    .Call(`_prague_rowNormsSparse`, x, norm_type)
-}
-
-rowNormsDense <- function(x, norm_type = 2L) {
-    .Call(`_prague_rowNormsDense`, x, norm_type)
-}
-
-maxSquaredRowNorm <- function(x, x_scaled_center, standardize_features) {
-    .Call(`_prague_maxSquaredRowNorm`, x, x_scaled_center, standardize_features)
-}
-

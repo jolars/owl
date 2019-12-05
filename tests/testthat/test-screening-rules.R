@@ -7,7 +7,7 @@ test_that("screening rules return correct results for instances with known viola
 
   for (rule in c("none", "safe", "strong")) {
     fit <- prague::golem(d$x, d$y, screening_rule = rule, diagnostics = TRUE)
-    expect_equivalent(coefs, coef(fit))
+    expect_equivalent(coefs, coef(fit), 1e-5)
   }
 })
 
