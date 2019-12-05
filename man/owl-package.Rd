@@ -2,8 +2,8 @@
 % Please edit documentation in R/owl-package.R
 \docType{package}
 \name{owl-package}
-\alias{owl}
 \alias{owl-package}
+\alias{_PACKAGE}
 \title{owl: Generalized Linear Models for Big Data}
 \description{
 Fast implementations of penalized Generalized Linear Models (GLM)
