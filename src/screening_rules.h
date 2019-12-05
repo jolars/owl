@@ -22,7 +22,6 @@
 //   return out;
 // }
 
-inline
 arma::uvec
 SLOPE::activeSet(const std::unique_ptr<Family>& family,
                  const arma::vec& y,
@@ -86,7 +85,6 @@ SLOPE::activeSet(const std::unique_ptr<Family>& family,
   return find(active_set);
 }
 
-inline
 arma::uvec
 GroupSLOPE::activeSet(const std::unique_ptr<Family>& family,
                       const arma::vec& y,
