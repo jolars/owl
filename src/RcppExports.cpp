@@ -6,35 +6,35 @@
 
 using namespace Rcpp;
 
-// golemSparse
-Rcpp::List golemSparse(const arma::sp_mat& x, const arma::vec& y, const Rcpp::List control);
-RcppExport SEXP _prague_golemSparse(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
+// owlSparse
+Rcpp::List owlSparse(const arma::sp_mat& x, const arma::vec& y, const Rcpp::List control);
+RcppExport SEXP _owl_owlSparse(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::sp_mat& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Rcpp::List >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(golemSparse(x, y, control));
+    rcpp_result_gen = Rcpp::wrap(owlSparse(x, y, control));
     return rcpp_result_gen;
 END_RCPP
 }
-// golemDense
-Rcpp::List golemDense(const arma::mat& x, const arma::vec& y, const Rcpp::List control);
-RcppExport SEXP _prague_golemDense(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
+// owlDense
+Rcpp::List owlDense(const arma::mat& x, const arma::vec& y, const Rcpp::List control);
+RcppExport SEXP _owl_owlDense(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Rcpp::List >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(golemDense(x, y, control));
+    rcpp_result_gen = Rcpp::wrap(owlDense(x, y, control));
     return rcpp_result_gen;
 END_RCPP
 }
 // prox_slope_cpp
 arma::vec prox_slope_cpp(const arma::vec& y, const Rcpp::List& args);
-RcppExport SEXP _prague_prox_slope_cpp(SEXP ySEXP, SEXP argsSEXP) {
+RcppExport SEXP _owl_prox_slope_cpp(SEXP ySEXP, SEXP argsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,7 +46,7 @@ END_RCPP
 }
 // standardizedSparseColNorms
 arma::vec standardizedSparseColNorms(const arma::sp_mat& x, const arma::vec& x_center);
-RcppExport SEXP _prague_standardizedSparseColNorms(SEXP xSEXP, SEXP x_centerSEXP) {
+RcppExport SEXP _owl_standardizedSparseColNorms(SEXP xSEXP, SEXP x_centerSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -58,7 +58,7 @@ END_RCPP
 }
 // colNormsSparse
 arma::vec colNormsSparse(const arma::sp_mat& x, const arma::uword norm_type);
-RcppExport SEXP _prague_colNormsSparse(SEXP xSEXP, SEXP norm_typeSEXP) {
+RcppExport SEXP _owl_colNormsSparse(SEXP xSEXP, SEXP norm_typeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -70,7 +70,7 @@ END_RCPP
 }
 // colNormsDense
 arma::vec colNormsDense(const arma::mat& x, const arma::uword norm_type);
-RcppExport SEXP _prague_colNormsDense(SEXP xSEXP, SEXP norm_typeSEXP) {
+RcppExport SEXP _owl_colNormsDense(SEXP xSEXP, SEXP norm_typeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -82,16 +82,16 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_prague_golemSparse", (DL_FUNC) &_prague_golemSparse, 3},
-    {"_prague_golemDense", (DL_FUNC) &_prague_golemDense, 3},
-    {"_prague_prox_slope_cpp", (DL_FUNC) &_prague_prox_slope_cpp, 2},
-    {"_prague_standardizedSparseColNorms", (DL_FUNC) &_prague_standardizedSparseColNorms, 2},
-    {"_prague_colNormsSparse", (DL_FUNC) &_prague_colNormsSparse, 2},
-    {"_prague_colNormsDense", (DL_FUNC) &_prague_colNormsDense, 2},
+    {"_owl_owlSparse", (DL_FUNC) &_owl_owlSparse, 3},
+    {"_owl_owlDense", (DL_FUNC) &_owl_owlDense, 3},
+    {"_owl_prox_slope_cpp", (DL_FUNC) &_owl_prox_slope_cpp, 2},
+    {"_owl_standardizedSparseColNorms", (DL_FUNC) &_owl_standardizedSparseColNorms, 2},
+    {"_owl_colNormsSparse", (DL_FUNC) &_owl_colNormsSparse, 2},
+    {"_owl_colNormsDense", (DL_FUNC) &_owl_colNormsDense, 2},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_prague(DllInfo *dll) {
+RcppExport void R_init_owl(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

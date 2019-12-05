@@ -4,11 +4,11 @@ test_that("unregularized gaussian models work as expected", {
   x <- as.matrix(abalone$x)
   y <- abalone$y
   lm_fit <- lm(y ~ x)
-  g <- golem(x,
-             y,
-             family = "gaussian",
-             sigma = 1e-4,
-             penalty = "slope")
+  g <- owl(x,
+           y,
+           family = "gaussian",
+           sigma = 1e-4,
+           penalty = "slope")
 
   expect_equivalent(coef(lm_fit),
                     coef(g),

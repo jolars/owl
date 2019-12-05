@@ -2,16 +2,16 @@ test_that("model training with caret works", {
   set.seed(432)
 
   library(caret)
-  library(prague)
+  library(owl)
 
-  xy <- prague:::randomProblem(1000, 10, q = 0.5)
+  xy <- owl:::randomProblem(1000, 10, q = 0.5)
 
   ctrl <- trainControl(method = "cv", number = 3)
 
   set.seed(849)
   train <- train(xy$x,
                  xy$y,
-                 method = caretSlopeGolem(),
+                 method = caretSlopeOwl(),
                  preProc = c("center", "scale"),
                  tuneLength = 2,
                  trControl = ctrl)

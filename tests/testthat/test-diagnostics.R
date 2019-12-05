@@ -1,7 +1,7 @@
 test_that("diagnostics are working properly", {
-  xy <- prague:::randomProblem(100, 2, q = 1)
+  xy <- owl:::randomProblem(100, 2, q = 1)
 
-  fit <- golem(xy$x, xy$y, diagnostics = TRUE, n_sigma = 1, sigma = 1)
+  fit <- owl(xy$x, xy$y, diagnostics = TRUE, n_sigma = 1, sigma = 1)
 
   expect_is(fit$diagnostics, "data.frame")
   p <- plotDiagnostics(fit)

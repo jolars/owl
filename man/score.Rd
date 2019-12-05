@@ -2,18 +2,18 @@
 % Please edit documentation in R/score.R
 \name{score}
 \alias{score}
-\alias{score.GolemGaussian}
-\alias{score.GolemBinomial}
-\title{Return the loss of a golem model}
+\alias{score.OwlGaussian}
+\alias{score.OwlBinomial}
+\title{Return the loss of a owl model}
 \usage{
 score(object, x, y, measure)
 
-\method{score}{GolemGaussian}(object, x, y, measure = c("deviance", "mse", "mae"))
+\method{score}{OwlGaussian}(object, x, y, measure = c("deviance", "mse", "mae"))
 
-\method{score}{GolemBinomial}(object, x, y, measure = c("deviance", "mse", "mae", "accuracy", "auc"))
+\method{score}{OwlBinomial}(object, x, y, measure = c("deviance", "mse", "mae", "accuracy", "auc"))
 }
 \arguments{
-\item{object}{an object of class \code{"Golem"}}
+\item{object}{an object of class \code{"Owl"}}
 
 \item{x}{feature matrix}
 
@@ -31,12 +31,12 @@ value in \code{measure}.
 }
 \description{
 This function is a unified interface to return various types of loss for a
-model fit with \code{\link[=golem]{golem()}}.
+model fit with \code{\link[=owl]{owl()}}.
 }
 \examples{
 x <- subset(infert, select = c("induced", "age", "pooled.stratum"))
 y <- infert$case
 
-fit <- golem(x, y, family = "binomial")
+fit <- owl(x, y, family = "binomial")
 score(fit, x, y, measure = "auc")
 }

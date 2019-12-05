@@ -24,14 +24,14 @@ unorthogonalize <- function(betas,
         bi <- tryCatch({
           Matrix::solve(ortho[[i]]$R, ci)
         }, error = function(err) {
-          warning(paste("golem caught an error:", err))
+          warning(paste("owl caught an error:", err))
           rep(NA, li)
         })
       } else {
         bi <- tryCatch({
           backsolve(ortho[[i]]$R, ci)
         }, error = function(err) {
-          warning(paste("golem caught an error:", err))
+          warning(paste("owl caught an error:", err))
           rep(NA, li)
         })
       }

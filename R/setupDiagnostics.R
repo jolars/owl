@@ -1,7 +1,7 @@
 #' Setup a data.frame of diagnostics
 #'
 #' @param res the result from calling the C++ routine used to fit a model
-#'   in golem
+#'   in owl
 #'
 #' @return A data.frame
 #'

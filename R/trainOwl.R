@@ -1,6 +1,6 @@
-#' Train a golem model
+#' Train a owl model
 #'
-#' This function trains a model fit by [golem()] by tuning its parameters
+#' This function trains a model fit by [owl()] by tuning its parameters
 #' through the resampling method chosen by the `method` argument.
 #'
 #' Note that by default this method matches all of the available metrics
@@ -8,9 +8,9 @@
 #' `measure`. Collecting these measures is not particularly demanding
 #' computationally so it is almost always best to leave this argument
 #' as it is and then choose which argument to focus on in the call
-#' to [plot.TrainedGolem()].
+#' to [plot.TrainedOwl()].
 #'
-#' @inheritParams golem
+#' @inheritParams owl
 #' @param method type of model tuning method
 #' @param number number of folds (cross-validation)
 #' @param repeats number of repeats for each fold (for repeated *k*-fold
@@ -19,9 +19,9 @@
 #'   supply *multiple* values here and that, by default,
 #'   all the possible measures for the given model will be used.
 #' @param n_cores number of cores to use for parallel processing
-#' @param ... other arguments to pass on to [golem()]
+#' @param ... other arguments to pass on to [owl()]
 #'
-#' @return An object of class `"TrainedGolem"`, with the following slots:
+#' @return An object of class `"TrainedOwl"`, with the following slots:
 #' \item{summary}{a summary of the results with means, standard errors,
 #'                and 0.95 confidence levels}
 #' \item{data}{the raw data from the model training}
@@ -32,30 +32,30 @@
 #'
 #' @export
 #'
-#' @seealso [parallel::parallel], [plot.TrainedGolem()]
+#' @seealso [parallel::parallel], [plot.TrainedOwl()]
 #'
 #' @examples
 #' # 8-fold cross-validation repeated 5 times
-#' tune <- trainGolem(subset(mtcars, select = c("mpg", "drat", "wt")),
+#' tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
 #'                    mtcars$hp,
 #'                    fdr = c(0.1, 0.2),
 #'                    penalty = "slope",
 #'                    number = 8,
 #'                    repeats = 5)
-trainGolem <- function(x,
-                       y,
-                       groups = NULL,
-                       fdr = 0.2,
-                       method = "cv",
-                       number = 10,
-                       repeats = 1,
-                       measure = c("deviance",
-                                   "mse",
-                                   "mae",
-                                   "accuracy",
-                                   "auc"),
-                       n_cores = 1,
-                       ...) {
+trainOwl <- function(x,
+                     y,
+                     groups = NULL,
+                     fdr = 0.2,
+                     method = "cv",
+                     number = 10,
+                     repeats = 1,
+                     measure = c("deviance",
+                                 "mse",
+                                 "mae",
+                                 "accuracy",
+                                 "auc"),
+                     n_cores = 1,
+                     ...) {
   ocall <- match.call()
 
   measure <- match.arg(measure, several.ok = TRUE)
@@ -70,7 +70,7 @@ trainGolem <- function(x,
             repeats >= 1)
 
   # get initial penalty sequence
-  fit <- golem(x, y, groups = groups, ...)
+  fit <- owl(x, y, groups = groups, ...)
 
   # match measure against accepted measure for the given family
   ok <- switch(fit$family$name,
@@ -133,7 +133,7 @@ trainGolem <- function(x,
         # collect each measure
         for (l in seq_along(measure)) {
           result_list[[l]][j + (i-1)*number, , k] <-
-            score(do.call(golem, args), x_test, y_test, measure[l])
+            score(do.call(owl, args), x_test, y_test, measure[l])
         }
       } # loop over each outer parameter (e.g. fdr)
     } # loop over each fold
@@ -182,9 +182,9 @@ trainGolem <- function(x,
     switch(
       m,
       deviance = {
-        if (inherits(fit, "GolemGaussian"))
+        if (inherits(fit, "OwlGaussian"))
           "Mean-Squared Error"
-        else if (inherits(fit, "GolemBinomial"))
+        else if (inherits(fit, "OwlBinomial"))
           "Binomial Deviance"
       },
       mse = "Mean Squared Error",
@@ -203,6 +203,6 @@ trainGolem <- function(x,
                                       stringsAsFactors = FALSE),
                  model = fit,
                  call = ocall),
-            class = "TrainedGolem")
+            class = "TrainedOwl")
 }
 

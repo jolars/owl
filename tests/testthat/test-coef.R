@@ -1,14 +1,14 @@
 test_that("intepolating coefficients works properly", {
-  xy <- prague:::randomProblem(100, 10)
+  xy <- owl:::randomProblem(100, 10)
 
   # check for slope
-  fit <- golem(xy$x, xy$y)
+  fit <- owl(xy$x, xy$y)
 
   expect_type(coef(fit), "double")
   expect_silent(coef(fit, sigma = c(0.001, 0.04)))
 
   # check for lasso
-  fit <- golem(xy$x, xy$y, penalty = "slope")
+  fit <- owl(xy$x, xy$y, penalty = "slope")
 
   expect_silent(coef(fit))
   expect_silent(coef(fit, lambda = c(0.2, 20)))
@@ -18,10 +18,10 @@ test_that("intepolating coefficients works properly", {
 })
 
 test_that("simplify argument in coef() works as expected", {
-  xy <- prague:::randomProblem(100, 10)
+  xy <- owl:::randomProblem(100, 10)
 
   # check for slope
-  fit <- golem(xy$x, xy$y, penalty = "slope")
+  fit <- owl(xy$x, xy$y, penalty = "slope")
 
   # check simplify
   coefs <- coef(fit, simplify = TRUE)
@@ -32,10 +32,10 @@ test_that("simplify argument in coef() works as expected", {
 })
 
 test_that("refitting works if exact = TRUE", {
-  xy <- prague:::randomProblem(100, 10)
+  xy <- owl:::randomProblem(100, 10)
 
   # check for slope
-  fit <- golem(xy$x, xy$y)
+  fit <- owl(xy$x, xy$y)
 
   # check simplify
   coefs <- coef(fit, sigma = 0.4, exact = TRUE, x = xy$x, y = xy$y)

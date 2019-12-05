@@ -1,9 +1,9 @@
-#' Generate predictions from golem models
+#' Generate predictions from owl models
 #'
-#' Return predictions from models fit by [golem()].
+#' Return predictions from models fit by [owl()].
 #'
-#' @param object an object of class `"Golem"`, typically the result of
-#'   a call to [golem()]
+#' @param object an object of class `"owl"`, typically the result of
+#'   a call to [owl()]
 #' @param x new data
 #' @param type type of prediction; `"link"` returns the linear predictors,
 #'   `"response"` returns the result of applying the link function,
@@ -27,18 +27,18 @@
 #'
 #'
 #' @examples
-#' fit <- with(mtcars, golem(cbind(mpg, hp), vs, family = "binomial"))
+#' fit <- with(mtcars, owl(cbind(mpg, hp), vs, family = "binomial"))
 #' predict(fit, with(mtcars, cbind(mpg, hp)), type = "class")
 #'
 #' @export
-predict.Golem <- function(object,
-                          x,
-                          lambda = NULL,
-                          sigma = NULL,
-                          type = "link",
-                          exact = FALSE,
-                          simplify = TRUE,
-                          ...) {
+predict.Owl <- function(object,
+                        x,
+                        lambda = NULL,
+                        sigma = NULL,
+                        type = "link",
+                        exact = FALSE,
+                        simplify = TRUE,
+                        ...) {
   # This method (the base method) only generates linear predictors
 
   if (inherits(x, "sparseMatrix"))
@@ -70,16 +70,16 @@ predict.Golem <- function(object,
   lin_pred
 }
 
-#' @rdname predict.Golem
+#' @rdname predict.Owl
 #' @export
-predict.GolemGaussian <- function(object,
-                                  x,
-                                  lambda = NULL,
-                                  sigma = NULL,
-                                  type = c("link", "response"),
-                                  exact = FALSE,
-                                  simplify = TRUE,
-                                  ...) {
+predict.OwlGaussian <- function(object,
+                                x,
+                                lambda = NULL,
+                                sigma = NULL,
+                                type = c("link", "response"),
+                                exact = FALSE,
+                                simplify = TRUE,
+                                ...) {
   type <- match.arg(type)
 
   out <- NextMethod(object, type = type) # always linear predictors
@@ -90,16 +90,16 @@ predict.GolemGaussian <- function(object,
   out
 }
 
-#' @rdname predict.Golem
+#' @rdname predict.Owl
 #' @export
-predict.GolemBinomial <- function(object,
-                                  x,
-                                  lambda = NULL,
-                                  sigma = NULL,
-                                  type = c("link", "response", "class"),
-                                  exact = FALSE,
-                                  simplify = TRUE,
-                                  ...) {
+predict.OwlBinomial <- function(object,
+                                x,
+                                lambda = NULL,
+                                sigma = NULL,
+                                type = c("link", "response", "class"),
+                                exact = FALSE,
+                                simplify = TRUE,
+                                ...) {
 
   type <- match.arg(type)
 

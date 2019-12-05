@@ -8,7 +8,7 @@ setupDiagnostics(res)
 }
 \arguments{
 \item{res}{the result from calling the C++ routine used to fit a model
-in golem}
+in owl}
 }
 \value{
 A data.frame

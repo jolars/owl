@@ -1,9 +1,9 @@
-#' Return the loss of a golem model
+#' Return the loss of a owl model
 #'
 #' This function is a unified interface to return various types of loss for a
-#' model fit with [golem()].
+#' model fit with [owl()].
 #'
-#' @param object an object of class `"Golem"`
+#' @param object an object of class `"Owl"`
 #' @param x feature matrix
 #' @param y response
 #' @param measure type of target measure. The default, `"deviance"`,
@@ -21,14 +21,14 @@
 #' x <- subset(infert, select = c("induced", "age", "pooled.stratum"))
 #' y <- infert$case
 #'
-#' fit <- golem(x, y, family = "binomial")
+#' fit <- owl(x, y, family = "binomial")
 #' score(fit, x, y, measure = "auc")
 score <- function(object, x, y, measure)
   UseMethod("score")
 
 #' @rdname score
 #' @export
-score.GolemGaussian <- function(object,
+score.OwlGaussian <- function(object,
                                 x,
                                 y,
                                 measure = c("deviance", "mse", "mae")) {
@@ -45,7 +45,7 @@ score.GolemGaussian <- function(object,
 
 #' @rdname score
 #' @export
-score.GolemBinomial <- function(object,
+score.OwlBinomial <- function(object,
                                 x,
                                 y,
                                 measure = c("deviance",

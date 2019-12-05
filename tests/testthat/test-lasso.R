@@ -3,17 +3,17 @@ test_that("lasso and slope fits are equivalent if all lambda are equal", {
   glmnet.control(fdev = 0)
 
   set.seed(1)
-  xy <- prague:::randomProblem(100, 10)
+  xy <- owl:::randomProblem(100, 10)
   x <- xy$x
   y <- xy$y
 
   lasso <- glmnet(x, y, standardize = FALSE)
   lambda <- lasso$lambda*nrow(x)
 
-  slope <- golem(x, y, penalty = "slope",
-                 standardize_features = FALSE,
-                 lambda = rep(lambda[1], ncol(x)),
-                 sigma = exp(seq(log(1), log(1e-4), length.out = 100)))
+  slope <- owl(x, y, penalty = "slope",
+               standardize_features = FALSE,
+               lambda = rep(lambda[1], ncol(x)),
+               sigma = exp(seq(log(1), log(1e-4), length.out = 100)))
 
   lasso_coef <- coef(lasso)
   slope_coef <- coef(slope)

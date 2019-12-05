@@ -4,18 +4,18 @@
 #' model tuning using caret. Note that this function does not properly work
 #' with sparse feature matrices and standardization due to the way
 #' resampling is implemented in caret. So for these cases, please
-#' check out [trainGolem()] instead.
+#' check out [trainOwl()] instead.
 #'
 #' @return A model description list to be used in the `method` argument
 #' in [caret::train()].
 #'
-#' @seealso [caret::train()], [trainGolem()], [golem()]
+#' @seealso [caret::train()], [trainOwl()], [owl()]
 #'
 #' @export
-caretSlopeGolem <- function() {
+caretSlopeOwl <- function() {
   list(
-    label = "golem",
-    library = c("prague", "Matrix"),
+    label = "owl",
+    library = c("owl", "Matrix"),
     type = c("Regression", "Classification"),
 
     parameters = data.frame(parameter = c("sigma", "fdr"),
@@ -34,12 +34,12 @@ caretSlopeGolem <- function() {
       else
         fam <- "gaussian"
 
-      fit <- prague::golem(x,
-                           y,
-                           family = fam,
-                           penalty = "slope",
-                           n_sigma = len + 2,
-                           standardize_features = FALSE)
+      fit <- owl::owl(x,
+                      y,
+                      family = fam,
+                      penalty = "slope",
+                      n_sigma = len + 2,
+                      standardize_features = FALSE)
 
       sigma <- fit$sigma
       sigma <- sigma[-c(1, length(sigma))]
@@ -103,7 +103,7 @@ caretSlopeGolem <- function() {
       dots$fdr <- param$fdr
       dots$standardize_features = FALSE
 
-      out <- do.call(prague::golem, dots)
+      out <- do.call(owl::owl, dots)
 
       if (!is.na(param$sigma[1]))
         out$sigmaOpt <- param$sigma[1]
@@ -112,7 +112,7 @@ caretSlopeGolem <- function() {
     },
 
     predict = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
-      library(prague)
+      library(owl)
 
       if (!is.matrix(newdata))
         newdata <- Matrix::as.matrix(newdata)

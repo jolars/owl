@@ -8,9 +8,9 @@
 
 template <typename T>
 Rcpp::List
-golemCpp(const T& x,
-         const arma::vec& y,
-         const Rcpp::List control)
+owlCpp(const T& x,
+       const arma::vec& y,
+       const Rcpp::List control)
 {
   using namespace arma;
   using Rcpp::as;
@@ -291,18 +291,18 @@ golemCpp(const T& x,
 
 // [[Rcpp::export]]
 Rcpp::List
-golemSparse(const arma::sp_mat& x,
-            const arma::vec& y,
-            const Rcpp::List control)
+owlSparse(const arma::sp_mat& x,
+          const arma::vec& y,
+          const Rcpp::List control)
 {
-  return golemCpp(x, y, control);
+  return owlCpp(x, y, control);
 }
 
 // [[Rcpp::export]]
 Rcpp::List
-golemDense(const arma::mat& x,
-           const arma::vec& y,
-           const Rcpp::List control)
+owlDense(const arma::mat& x,
+         const arma::vec& y,
+         const Rcpp::List control)
 {
-  return golemCpp(x, y, control);
+  return owlCpp(x, y, control);
 }

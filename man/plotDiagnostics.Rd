@@ -13,7 +13,7 @@ plotDiagnostics(
 )
 }
 \arguments{
-\item{object}{an object of class \code{"Golem"}.}
+\item{object}{an object of class \code{"Owl"}.}
 
 \item{ind}{either "last"}
 
@@ -33,10 +33,10 @@ will be plotted when its default \code{print()} method is called.
 }
 \description{
 This function plots various diagnostics collected during
-the model fitting resulting from a call to \code{\link[=golem]{golem()}} \emph{provided that
+the model fitting resulting from a call to \code{\link[=owl]{owl()}} \emph{provided that
 \code{diagnostics = TRUE}}.
 }
 \examples{
-x <- golem(abalone$x, abalone$y, sigma = 2, diagnostics = TRUE)
+x <- owl(abalone$x, abalone$y, sigma = 2, diagnostics = TRUE)
 plotDiagnostics(x)
 }

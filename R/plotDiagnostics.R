@@ -1,11 +1,10 @@
-
 #' Plot results from diagnostics collected during model fitting
 #'
 #' This function plots various diagnostics collected during
-#' the model fitting resulting from a call to [golem()] *provided that
+#' the model fitting resulting from a call to [owl()] *provided that
 #' `diagnostics = TRUE`*.
 #'
-#' @param object an object of class `"Golem"`.
+#' @param object an object of class `"Owl"`.
 #' @param ind either "last"
 #' @param xvar what to place on the x axis. `iteration` plots each iteration, `time`
 #'   plots the wall-clock time.
@@ -20,7 +19,7 @@
 #' @export
 #'
 #' @examples
-#' x <- golem(abalone$x, abalone$y, sigma = 2, diagnostics = TRUE)
+#' x <- owl(abalone$x, abalone$y, sigma = 2, diagnostics = TRUE)
 #' plotDiagnostics(x)
 plotDiagnostics <- function(object,
                             ind = max(object$diagnostics$penalty),
@@ -28,7 +27,7 @@ plotDiagnostics <- function(object,
                             yvar = c("objectives", "infeasibility"),
                             ...) {
 
-  stopifnot(inherits(object, "Golem"),
+  stopifnot(inherits(object, "Owl"),
             is.numeric(ind),
             length(ind) == 1)
 
@@ -37,7 +36,7 @@ plotDiagnostics <- function(object,
 
   if (is.null(object$diagnostics))
     stop("no diagnostics found in", enquote(substitute(object)),
-         "; did you call golem() with diagnostics = TRUE?")
+         "; did you call owl() with diagnostics = TRUE?")
 
   d <- object$diagnostics
 

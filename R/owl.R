@@ -30,7 +30,7 @@
 #' }
 #'
 #' @section Penalties:
-#' Models fit by [golem()] can be regularized via several
+#' Models fit by [owl()] can be regularized via several
 #' penalties.
 #'
 #'
@@ -59,7 +59,7 @@
 #' }
 #'
 #' @section Solvers:
-#' There is currently a single solver available for [golem()].
+#' There is currently a single solver available for [owl()].
 #'
 #' **FISTA**
 #'
@@ -98,7 +98,7 @@
 #'   primal and dual objectives, and infeasibility)
 #' @param screening_rule type of screening rule to use
 #'
-#' @return An object of class `"Golem"` with the following slots:
+#' @return An object of class `"Owl"` with the following slots:
 #' \item{coefficients}{a three-dimensional array of the coefficients from the
 #'                     model fit, including the intercept if it was fit.
 #'                     There is one row for each coefficient, one column
@@ -107,34 +107,34 @@
 #' \item{nonzeros}{a numeric}
 #' @export
 #'
-#' @seealso [plot.Golem()], [plotDiagnostics()], [score()], [predict.Golem()],
-#'   [trainGolem()]
+#' @seealso [plot.Owl()], [plotDiagnostics()], [score()], [predict.Owl()],
+#'   [trainOwl()]
 #'
 #' @examples
 #'
 #' # Gaussian response, slope penalty (default) --------------------------------
 #'
-#' fit <- golem(abalone$x, abalone$y)
+#' fit <- owl(abalone$x, abalone$y)
 #'
-golem <- function(x,
-                  y,
-                  groups = NULL,
-                  family = c("gaussian", "binomial"),
-                  penalty = c("slope", "group_slope"),
-                  solver = "fista",
-                  intercept = TRUE,
-                  standardize_features = TRUE,
-                  orthogonalize = TRUE,
-                  sigma = c("sequence", "estimate"),
-                  lambda = NULL,
-                  lambda_min_ratio = if (NROW(x) < NCOL(x)) 1e-2 else 1e-4,
-                  n_sigma = 100,
-                  fdr = 0.2,
-                  screening_rule = c("none", "strong", "safe"),
-                  tol_rel_gap = 1e-6,
-                  tol_infeas = 1e-6,
-                  max_passes = 1e4,
-                  diagnostics = FALSE) {
+owl <- function(x,
+                y,
+                groups = NULL,
+                family = c("gaussian", "binomial"),
+                penalty = c("slope", "group_slope"),
+                solver = "fista",
+                intercept = TRUE,
+                standardize_features = TRUE,
+                orthogonalize = TRUE,
+                sigma = c("sequence", "estimate"),
+                lambda = NULL,
+                lambda_min_ratio = if (NROW(x) < NCOL(x)) 1e-2 else 1e-4,
+                n_sigma = 100,
+                fdr = 0.2,
+                screening_rule = c("none", "strong", "safe"),
+                tol_rel_gap = 1e-6,
+                tol_infeas = 1e-6,
+                max_passes = 1e4,
+                diagnostics = FALSE) {
 
   ocall <- match.call()
 
@@ -323,7 +323,7 @@ golem <- function(x,
                   lambda = lambda)
 
 
-  golemFit <- if (is_sparse) golemSparse else golemDense
+  owlFit <- if (is_sparse) owlSparse else owlDense
 
   if (is_sparse)
     x <- methods::as(x, "dgCMatrix")
@@ -331,7 +331,7 @@ golem <- function(x,
   if (sigma_type == "estimate") {
     if (inherits(family, "Gaussian")) {
       control$sigma <- sigma <- stats::sd(y)
-      fit <- golemFit(x, y, control)
+      fit <- owlFit(x, y, control)
 
       S_new <- which(fit$beta != 0)
       S <- c()
@@ -359,15 +359,15 @@ golem <- function(x,
         control$intercept_init <- fit$intercept
         control$beta_init <- as.matrix(fit$beta)
 
-        fit <- golemFit(x, y, control)
+        fit <- owlFit(x, y, control)
         S_new <- which(fit$beta != 0)
       }
     } else if (inherits(family, "Binomial")) {
       control$sigma <- penalty$sigma <- sigma <- 0.5
-      fit <- golemFit(x, y, control)
+      fit <- owlFit(x, y, control)
     }
   } else {
-    fit <- golemFit(x, y, control)
+    fit <- owlFit(x, y, control)
   }
 
   # c++ to R indexing
@@ -439,7 +439,7 @@ golem <- function(x,
                  lipschitz_constants = fit$lipschitz_constants,
                  diagnostics = diagnostics,
                  call = ocall),
-            class = c(paste0("Golem", camelCase(family$name)),
-                      paste0("Golem", camelCase(penalty$name)),
-                      "Golem"))
+            class = c(paste0("Owl", camelCase(family$name)),
+                      paste0("Owl", camelCase(penalty$name)),
+                      "Owl"))
 }

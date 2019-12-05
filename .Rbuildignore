@@ -8,6 +8,6 @@
 ^appveyor\.yml$
 ^\.travis\.yml$
 ^README\.Rmd$
-^golem\.Rproj$
+^owl\.Rproj$
 ^\.Rproj\.user$
 ^pkgdown$

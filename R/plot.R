@@ -1,21 +1,21 @@
-#' Plot coefficients for a model fit by golem
+#' Plot coefficients for a model fit by owl
 #'
 #' Plot the model's coefficient along the regularization path.
 #'
-#' @param x an object of class `"Golem"`
+#' @param x an object of class `"Owl"`
 #' @param ... parameters that will be used to modify the call to
 #'   [lattice::xyplot()]
 #'
-#' @seealso [lattice::xyplot()], [golem()], [plotDiagnostics()]
+#' @seealso [lattice::xyplot()], [owl()], [plotDiagnostics()]
 #'
 #' @return An object of class `"trellis"`, which will be plotted on the
 #'   current device unless stored in a variable.
 #' @export
 #'
 #' @examples
-#' fit <- golem(heart$x, heart$y, penalty = "slope")
+#' fit <- owl(heart$x, heart$y, penalty = "slope")
 #' plot(fit)
-plot.Golem = function(x, ...) {
+plot.Owl = function(x, ...) {
   object <- x
 
   coefs <- object$coefficients
@@ -91,9 +91,9 @@ plot.Golem = function(x, ...) {
 
 #' Plot Results from Cross-Validation
 #'
-#' @param x an object of class `'TrainedGolem'`, typically from a call
-#'   to [trainGolem()]
-#' @param measure any of the measures used in the call to [trainGolem()]
+#' @param x an object of class `'TrainedOwl'`, typically from a call
+#'   to [trainOwl()]
+#' @param measure any of the measures used in the call to [trainOwl()]
 #' @param ci_alpha alpha (opacity) for fill in confidence limits
 #' @param ci_col color for border of confidence limits
 #' @param ... other arguments that are passed on to [lattice::xyplot()]
@@ -102,7 +102,7 @@ plot.Golem = function(x, ...) {
 #' @param ci_border color (or flag to turn off and on) the border of the
 #'   confidence limits
 #'
-#' @seealso [trainGolem()], [lattice::xyplot()], [lattice::panel.xyplot()]
+#' @seealso [trainOwl()], [lattice::xyplot()], [lattice::panel.xyplot()]
 #'
 #' @return An object of class `'trellis'` is returned and, if used
 #'   interactively, will most likely have its print function
@@ -114,13 +114,13 @@ plot.Golem = function(x, ...) {
 #' @examples
 #' # Cross-validation for a SLOPE binomial model
 #' set.seed(123)
-#' tune <- trainGolem(subset(mtcars, select = c("mpg", "drat", "wt")),
+#' tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
 #'                    mtcars$hp,
 #'                    fdr = c(0.1, 0.2),
 #'                    penalty = "slope",
 #'                    number = 10)
 #' plot(tune, ci_col = "salmon", col = "black")
-plot.TrainedGolem <-
+plot.TrainedOwl <-
   function(x,
            measure = x$measure$measure[1],
            plot_min = TRUE,

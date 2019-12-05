@@ -1,27 +1,27 @@
-#' Obtain Coefficients from Model fit by Golem
+#' Obtain Coefficients from Model fit by Owl
 #'
 #' This function is equivalent to simply calling `drop(object$coefficients)`
-#' on a model fit by [golem()].
+#' on a model fit by [owl()].
 #'
-#' @param object an object of class `'Golem'`.
+#' @param object an object of class `'Owl'`.
 #' @param ... arguments that are passed on to [stats::update()] (and therefore
-#'   also to [golem()]) if `exact = TRUE` and the given penalty
+#'   also to [owl()]) if `exact = TRUE` and the given penalty
 #'   is not in `object`
-#' @inheritParams predict.Golem
+#' @inheritParams predict.Owl
 #'
 #' @return Coefficients from the model after having dropped extraneous
 #'   dimensions by calling drop.
 #'
 #' @export
 #' @examples
-#' fit <- golem(mtcars$mpg, mtcars$vs, n_sigma = 1)
+#' fit <- owl(mtcars$mpg, mtcars$vs, n_sigma = 1)
 #' coef(fit)
-coef.Golem <- function(object,
-                       lambda = NULL,
-                       sigma = NULL,
-                       exact = FALSE,
-                       simplify = TRUE,
-                       ...) {
+coef.Owl <- function(object,
+                     lambda = NULL,
+                     sigma = NULL,
+                     exact = FALSE,
+                     simplify = TRUE,
+                     ...) {
   beta <- object$coefficients
 
   # p <- NROW(beta)

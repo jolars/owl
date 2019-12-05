@@ -53,12 +53,12 @@ colNorms <- function(x, norm_type = 2) {
     colNormsDense(x, norm_type)
 }
 
-rowNorms <- function(x, norm_type = 2) {
-  if (inherits(x, "sparseMatrix"))
-    rowNormsSparse(x, norm_type)
-  else
-    rowNormsDense(x, norm_type)
-}
+# rowNorms <- function(x, norm_type = 2) {
+#   if (inherits(x, "sparseMatrix"))
+#     rowNormsSparse(x, norm_type)
+#   else
+#     rowNormsDense(x, norm_type)
+# }
 
 randomProblem <- function(n = 1000,
                           p = 100,

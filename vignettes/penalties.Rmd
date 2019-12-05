@@ -1,11 +1,11 @@
 ---
-title: "Regularization penalties in prague"
+title: "Regularization penalties in owl"
 author: "Johan Larsson"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-bibliography: prague.bib
+bibliography: owl.bib
 vignette: >
-  %\VignetteIndexEntry{Regularization penalties in prague}
+  %\VignetteIndexEntry{Regularization penalties in owl}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -27,7 +27,7 @@ Benjamini--Hochberg procedure for multiple comparisons.
 Let's set up a simple experiment to see how SLOPE controls the FDR.
 
 ```{r, fig.cap = "Control of false discovery rate using SLOPE."}
-library(prague)
+library(owl)
 library(lattice)
 
 # proportion of real signals
@@ -39,18 +39,18 @@ for (i in seq_along(q)) {
   n <- 1000
   p <- n/2
   sigma <- 1
-  problem <- prague:::randomProblem(n, p, q = q[i], sigma = sigma)
+  problem <- owl:::randomProblem(n, p, q = q[i], sigma = sigma)
   
   x <- problem$x
   y <- problem$y
   signals <- problem$nonzero
   
-  fit <- golem(x,
-               y,
-               penalty = "slope", 
-               lambda = "gaussian", 
-               sigma = sigma,
-               intercept = FALSE)
+  fit <- owl(x,
+             y,
+             penalty = "slope", 
+             lambda = "gaussian", 
+             sigma = sigma,
+             intercept = FALSE)
   
   selected_golem <- which(abs(coef(fit)) > 0)
   V <- length(setdiff(selected_golem, signals))

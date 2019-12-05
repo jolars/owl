@@ -1,16 +1,16 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# prague <img src='man/figures/logo.png' align="right" height="106" />
+# owl <img src='man/figures/logo.svg' align="right" height="139" />
 
 <!-- badges: start -->
 
 [![Travis build
-status](https://travis-ci.org/jolars/prague.svg?branch=master)](https://travis-ci.org/jolars/prague)
+status](https://travis-ci.org/jolars/owl.svg?branch=master)](https://travis-ci.org/jolars/owl)
 [![AppVeyor build
-status](https://ci.appveyor.com/api/projects/status/github/jolars/prague?branch=master&svg=true)](https://ci.appveyor.com/project/jolars/prague)
+status](https://ci.appveyor.com/api/projects/status/github/jolars/owl?branch=master&svg=true)](https://ci.appveyor.com/project/jolars/owl)
 [![Coverage
-status](https://codecov.io/gh/jolars/prague/branch/master/graph/badge.svg)](https://codecov.io/github/jolars/prague?branch=master)
+status](https://codecov.io/gh/jolars/owl/branch/master/graph/badge.svg)](https://codecov.io/github/jolars/owl?branch=master)
 <!-- badges: end -->
 
 Fast glms for big data
@@ -22,11 +22,11 @@ You can install the development version from
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("jolars/prague")
+remotes::install_github("jolars/owl")
 ```
 
 ## Code of conduct
 
-Please note that **prague** is released with a [Contributor Code of
+Please note that **owl** is released with a [Contributor Code of
 Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree
 to abide by its terms.
