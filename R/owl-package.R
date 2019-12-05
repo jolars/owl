@@ -1,12 +1,12 @@
-#' @useDynLib owl, .registration = TRUE
-#' @importFrom Rcpp sourceCpp
-#' @import Matrix
 #' @keywords internal
-#'
+#' @aliases owl-package
 "_PACKAGE"
 
 # The following block is used by usethis to automatically manage
 # roxygen namespace tags. Modify with care!
 ## usethis namespace: start
+#' @useDynLib owl, .registration = TRUE
+#' @importFrom Rcpp sourceCpp
+#' @import Matrix
 ## usethis namespace: end
 NULL
