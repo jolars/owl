@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Abalone — abalone • owl</title>
+<title>Obtain Coefficients from Model fit by Owl — coef.Owl • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,11 +42,9 @@
 
 
 
-<meta property="og:title" content="Abalone — abalone" />
-<meta property="og:description" content="This data set contains observations of abalones, the common
-name for any of a group of sea snails. The goal is to predict the
-age of an individual abalone given physical measurements such as
-sex, weight, and height." />
+<meta property="og:title" content="Obtain Coefficients from Model fit by Owl — coef.Owl" />
+<meta property="og:description" content="This function is equivalent to simply calling drop(object$coefficients)
+on a model fit by owl()." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -134,48 +132,73 @@ sex, weight, and height." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Abalone</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/data.R'><code>R/data.R</code></a></small>
-    <div class="hidden name"><code>abalone.Rd</code></div>
+    <h1>Obtain Coefficients from Model fit by Owl</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/coef.R'><code>R/coef.R</code></a></small>
+    <div class="hidden name"><code>coef.Owl.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This data set contains observations of abalones, the common
-name for any of a group of sea snails. The goal is to predict the
-age of an individual abalone given physical measurements such as
-sex, weight, and height.</p>
+    <p>This function is equivalent to simply calling <code><a href='https://rdrr.io/r/base/drop.html'>drop(object$coefficients)</a></code>
+on a model fit by <code><a href='owl.html'>owl()</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='no'>abalone</span></pre>
+    <pre class="usage"><span class='co'># S3 method for Owl</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>object</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>exact</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)</pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>object</th>
+      <td><p>an object of class <code>'Owl'</code>.</p></td>
+    </tr>
+    <tr>
+      <th>lambda</th>
+      <td><p>penalty parameter for Lasso-type models; if <code>NULL</code>, the
+values used in the original fit will be used</p></td>
+    </tr>
+    <tr>
+      <th>sigma</th>
+      <td><p>penalty parameter for SLOPE models; if <code>NULL</code>, the
+values used in the original fit will be used</p></td>
+    </tr>
+    <tr>
+      <th>exact</th>
+      <td><p>if <code>TRUE</code> and the given parameter values differ from those in
+the original fit, the model will be refit by calling <code><a href='https://rdrr.io/r/stats/update.html'>stats::update()</a></code> on
+the object with the new parameters. If <code>FALSE</code>, the predicted values
+will be based on interpolated coefficients from the original
+penalty path.</p></td>
+    </tr>
+    <tr>
+      <th>simplify</th>
+      <td><p>if <code>TRUE</code>, <code><a href='https://rdrr.io/r/base/drop.html'>base::drop()</a></code> will be called before returning
+the coefficients to drop extraneous dimensions</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>arguments that are passed on to <code><a href='https://rdrr.io/r/stats/update.html'>stats::update()</a></code> (and therefore
+also to <code><a href='owl.html'>owl()</a></code>) if <code>exact = TRUE</code> and the given penalty
+is not in <code>object</code></p></td>
+    </tr>
+    </table>
 
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list with two items representing 20,640 observations from
-9 variables</p><dl class='dl-horizontal'>
-<dt>sex</dt><dd><p>sex of abalone, 1 for female</p></dd>
-<dt>infant</dt><dd><p>indicates that the person is an infant</p></dd>
-<dt>length</dt><dd><p>longest shell measurement in mm</p></dd>
-<dt>diameter</dt><dd><p>perpendicular to length in mm</p></dd>
-<dt>height</dt><dd><p>height in mm including meat in shell</p></dd>
-<dt>weight_whole</dt><dd><p>weight of entire abalone</p></dd>
-<dt>weight_shucked</dt><dd><p>weight of meat</p></dd>
-<dt>weight_viscera</dt><dd><p>weight of viscera</p></dd>
-<dt>weight_shell</dt><dd><p>weight of shell</p></dd>
-<dt>rings</dt><dd><p>rings. +1.5 gives the age in years</p></dd>
+    <p>Coefficients from the model after having dropped extraneous
+dimensions by calling drop.</p>
 
-</dl>
-    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
-
-    <p>Pace, R. Kelley and Ronald Barry, Sparse Spatial Autoregressions,
-Statistics and Probability Letters, 33 (1997) 291-297.</p>
-
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='owl.html'>owl</a></span>(<span class='no'>mtcars</span>$<span class='no'>mpg</span>, <span class='no'>mtcars</span>$<span class='no'>vs</span>, <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>fit</span>)</div><div class='output co'>#&gt; (Intercept)          V1 
+#&gt;      0.4375      0.0000 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#format">Format</a></li>
-      <li><a href="#source">Source</a></li>
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

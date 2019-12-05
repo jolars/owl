@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot results from diagnostics collected during model fitting — plotDiagnostics • prague</title>
+<title>Plot results from diagnostics collected during model fitting — plotDiagnostics • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -44,7 +44,7 @@
 
 <meta property="og:title" content="Plot results from diagnostics collected during model fitting — plotDiagnostics" />
 <meta property="og:description" content="This function plots various diagnostics collected during
-the model fitting resulting from a call to golem() provided that
+the model fitting resulting from a call to owl() provided that
 diagnostics = TRUE." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
@@ -78,7 +78,7 @@ diagnostics = TRUE." />
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">prague</a>
+        <a class="navbar-link" href="../index.html">owl</a>
         <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
       </span>
     </div>
@@ -105,7 +105,7 @@ diagnostics = TRUE." />
       <a href="../articles/benchmarks.html">Benchmarks</a>
     </li>
     <li>
-      <a href="../articles/penalties.html">Regularization penalties in prague</a>
+      <a href="../articles/penalties.html">Regularization penalties in owl</a>
     </li>
   </ul>
 </li>
@@ -115,7 +115,7 @@ diagnostics = TRUE." />
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jolars/prague">
+  <a href="https://github.com/jolars/owl">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -134,13 +134,13 @@ diagnostics = TRUE." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Plot results from diagnostics collected during model fitting</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/prague/blob/master/R/plotDiagnostics.R'><code>R/plotDiagnostics.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/plotDiagnostics.R'><code>R/plotDiagnostics.R</code></a></small>
     <div class="hidden name"><code>plotDiagnostics.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>This function plots various diagnostics collected during
-the model fitting resulting from a call to <code><a href='golem.html'>golem()</a></code> <em>provided that
+the model fitting resulting from a call to <code><a href='owl.html'>owl()</a></code> <em>provided that
 <code>diagnostics = TRUE</code></em>.</p>
     </div>
 
@@ -157,7 +157,7 @@ the model fitting resulting from a call to <code><a href='golem.html'>golem()</a
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>object</th>
-      <td><p>an object of class <code>"Golem"</code>.</p></td>
+      <td><p>an object of class <code>"Owl"</code>.</p></td>
     </tr>
     <tr>
       <th>ind</th>
@@ -187,7 +187,7 @@ the infeasibility metric.</p></td>
 will be plotted when its default <code><a href='https://rdrr.io/r/base/print.html'>print()</a></code> method is called.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='golem.html'>golem</a></span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+    <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='owl.html'>owl</a></span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 <span class='fu'>plotDiagnostics</span>(<span class='no'>x</span>)</div><div class='img'><img src='plotDiagnostics-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

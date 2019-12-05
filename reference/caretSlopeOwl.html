@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Abalone — abalone • owl</title>
+<title>Model objects for model tuning with caret — caretSlopeOwl • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,11 +42,12 @@
 
 
 
-<meta property="og:title" content="Abalone — abalone" />
-<meta property="og:description" content="This data set contains observations of abalones, the common
-name for any of a group of sea snails. The goal is to predict the
-age of an individual abalone given physical measurements such as
-sex, weight, and height." />
+<meta property="og:title" content="Model objects for model tuning with caret — caretSlopeOwl" />
+<meta property="og:description" content="This function can be used in a call to caret::train() to enable
+model tuning using caret. Note that this function does not properly work
+with sparse feature matrices and standardization due to the way
+resampling is implemented in caret. So for these cases, please
+check out trainOwl() instead." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -134,48 +135,36 @@ sex, weight, and height." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Abalone</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/data.R'><code>R/data.R</code></a></small>
-    <div class="hidden name"><code>abalone.Rd</code></div>
+    <h1>Model objects for model tuning with caret</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/caretOwl.R'><code>R/caretOwl.R</code></a></small>
+    <div class="hidden name"><code>caretSlopeOwl.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This data set contains observations of abalones, the common
-name for any of a group of sea snails. The goal is to predict the
-age of an individual abalone given physical measurements such as
-sex, weight, and height.</p>
+    <p>This function can be used in a call to <code><a href='https://rdrr.io/pkg/caret/man/train.html'>caret::train()</a></code> to enable
+model tuning using caret. Note that this function does not properly work
+with sparse feature matrices and standardization due to the way
+resampling is implemented in caret. So for these cases, please
+check out <code><a href='trainOwl.html'>trainOwl()</a></code> instead.</p>
     </div>
 
-    <pre class="usage"><span class='no'>abalone</span></pre>
+    <pre class="usage"><span class='fu'>caretSlopeOwl</span>()</pre>
 
 
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list with two items representing 20,640 observations from
-9 variables</p><dl class='dl-horizontal'>
-<dt>sex</dt><dd><p>sex of abalone, 1 for female</p></dd>
-<dt>infant</dt><dd><p>indicates that the person is an infant</p></dd>
-<dt>length</dt><dd><p>longest shell measurement in mm</p></dd>
-<dt>diameter</dt><dd><p>perpendicular to length in mm</p></dd>
-<dt>height</dt><dd><p>height in mm including meat in shell</p></dd>
-<dt>weight_whole</dt><dd><p>weight of entire abalone</p></dd>
-<dt>weight_shucked</dt><dd><p>weight of meat</p></dd>
-<dt>weight_viscera</dt><dd><p>weight of viscera</p></dd>
-<dt>weight_shell</dt><dd><p>weight of shell</p></dd>
-<dt>rings</dt><dd><p>rings. +1.5 gives the age in years</p></dd>
+    <p>A model description list to be used in the <code>method</code> argument
+in <code><a href='https://rdrr.io/pkg/caret/man/train.html'>caret::train()</a></code>.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-</dl>
-    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
-
-    <p>Pace, R. Kelley and Ronald Barry, Sparse Spatial Autoregressions,
-Statistics and Probability Letters, 33 (1997) 291-297.</p>
+    <div class='dont-index'><p><code><a href='https://rdrr.io/pkg/caret/man/train.html'>caret::train()</a></code>, <code><a href='trainOwl.html'>trainOwl()</a></code>, <code><a href='owl.html'>owl()</a></code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#format">Format</a></li>
-      <li><a href="#source">Source</a></li>
+      <li><a href="#value">Value</a></li>
+      <li><a href="#see-also">See also</a></li>
     </ul>
 
   </div>

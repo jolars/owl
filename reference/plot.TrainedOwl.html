@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Abalone — abalone • owl</title>
+<title>Plot Results from Cross-Validation — plot.TrainedOwl • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,11 +42,8 @@
 
 
 
-<meta property="og:title" content="Abalone — abalone" />
-<meta property="og:description" content="This data set contains observations of abalones, the common
-name for any of a group of sea snails. The goal is to predict the
-age of an individual abalone given physical measurements such as
-sex, weight, and height." />
+<meta property="og:title" content="Plot Results from Cross-Validation — plot.TrainedOwl" />
+<meta property="og:description" content="Plot Results from Cross-Validation" />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -134,48 +131,89 @@ sex, weight, and height." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Abalone</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/data.R'><code>R/data.R</code></a></small>
-    <div class="hidden name"><code>abalone.Rd</code></div>
+    <h1>Plot Results from Cross-Validation</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/plot.R'><code>R/plot.R</code></a></small>
+    <div class="hidden name"><code>plot.TrainedOwl.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This data set contains observations of abalones, the common
-name for any of a group of sea snails. The goal is to predict the
-age of an individual abalone given physical measurements such as
-sex, weight, and height.</p>
+    <p>Plot Results from Cross-Validation</p>
     </div>
 
-    <pre class="usage"><span class='no'>abalone</span></pre>
+    <pre class="usage"><span class='co'># S3 method for TrainedOwl</span>
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(
+  <span class='no'>x</span>,
+  <span class='kw'>measure</span> <span class='kw'>=</span> <span class='no'>x</span>$<span class='no'>measure</span>$<span class='no'>measure</span>[<span class='fl'>1</span>],
+  <span class='kw'>plot_min</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>ci_alpha</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
+  <span class='kw'>ci_border</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>ci_col</span> <span class='kw'>=</span> <span class='kw pkg'>lattice</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lattice/man/trellis.par.get.html'>trellis.par.get</a></span>(<span class='st'>"superpose.line"</span>)$<span class='no'>col</span>,
+  <span class='no'>...</span>
+)</pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>x</th>
+      <td><p>an object of class <code>'TrainedOwl'</code>, typically from a call
+to <code><a href='trainOwl.html'>trainOwl()</a></code></p></td>
+    </tr>
+    <tr>
+      <th>measure</th>
+      <td><p>any of the measures used in the call to <code><a href='trainOwl.html'>trainOwl()</a></code></p></td>
+    </tr>
+    <tr>
+      <th>plot_min</th>
+      <td><p>whether to mark the location of the penalty corresponding
+to the best prediction score</p></td>
+    </tr>
+    <tr>
+      <th>ci_alpha</th>
+      <td><p>alpha (opacity) for fill in confidence limits</p></td>
+    </tr>
+    <tr>
+      <th>ci_border</th>
+      <td><p>color (or flag to turn off and on) the border of the
+confidence limits</p></td>
+    </tr>
+    <tr>
+      <th>ci_col</th>
+      <td><p>color for border of confidence limits</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>other arguments that are passed on to <code><a href='https://rdrr.io/pkg/lattice/man/xyplot.html'>lattice::xyplot()</a></code></p></td>
+    </tr>
+    </table>
 
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list with two items representing 20,640 observations from
-9 variables</p><dl class='dl-horizontal'>
-<dt>sex</dt><dd><p>sex of abalone, 1 for female</p></dd>
-<dt>infant</dt><dd><p>indicates that the person is an infant</p></dd>
-<dt>length</dt><dd><p>longest shell measurement in mm</p></dd>
-<dt>diameter</dt><dd><p>perpendicular to length in mm</p></dd>
-<dt>height</dt><dd><p>height in mm including meat in shell</p></dd>
-<dt>weight_whole</dt><dd><p>weight of entire abalone</p></dd>
-<dt>weight_shucked</dt><dd><p>weight of meat</p></dd>
-<dt>weight_viscera</dt><dd><p>weight of viscera</p></dd>
-<dt>weight_shell</dt><dd><p>weight of shell</p></dd>
-<dt>rings</dt><dd><p>rings. +1.5 gives the age in years</p></dd>
+    <p>An object of class <code>'trellis'</code> is returned and, if used
+interactively, will most likely have its print function
+<code><a href='https://rdrr.io/pkg/lattice/man/print.trellis.html'>lattice::print.trellis()</a></code>) invoked, which draws the plot on the
+current display device.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-</dl>
-    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+    <div class='dont-index'><p><code><a href='trainOwl.html'>trainOwl()</a></code>, <code><a href='https://rdrr.io/pkg/lattice/man/xyplot.html'>lattice::xyplot()</a></code>, <code><a href='https://rdrr.io/pkg/lattice/man/panel.xyplot.html'>lattice::panel.xyplot()</a></code></p></div>
 
-    <p>Pace, R. Kelley and Ronald Barry, Sparse Spatial Autoregressions,
-Statistics and Probability Letters, 33 (1997) 291-297.</p>
-
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'># Cross-validation for a SLOPE binomial model</span>
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>123</span>)
+<span class='no'>tune</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='trainOwl.html'>trainOwl</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span>(<span class='no'>mtcars</span>, <span class='kw'>select</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"mpg"</span>, <span class='st'>"drat"</span>, <span class='st'>"wt"</span>)),
+                   <span class='no'>mtcars</span>$<span class='no'>hp</span>,
+                   <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>),
+                   <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='st'>"slope"</span>,
+                   <span class='kw'>number</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>tune</span>, <span class='kw'>ci_col</span> <span class='kw'>=</span> <span class='st'>"salmon"</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"black"</span>)</div><div class='img'><img src='plot.TrainedOwl-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#format">Format</a></li>
-      <li><a href="#source">Source</a></li>
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
+      <li><a href="#see-also">See also</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

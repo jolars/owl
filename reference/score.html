@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Return the loss of a golem model — score • prague</title>
+<title>Return the loss of a owl model — score • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,9 +42,9 @@
 
 
 
-<meta property="og:title" content="Return the loss of a golem model — score" />
+<meta property="og:title" content="Return the loss of a owl model — score" />
 <meta property="og:description" content="This function is a unified interface to return various types of loss for a
-model fit with golem()." />
+model fit with owl()." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -77,7 +77,7 @@ model fit with golem()." />
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">prague</a>
+        <a class="navbar-link" href="../index.html">owl</a>
         <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
       </span>
     </div>
@@ -104,7 +104,7 @@ model fit with golem()." />
       <a href="../articles/benchmarks.html">Benchmarks</a>
     </li>
     <li>
-      <a href="../articles/penalties.html">Regularization penalties in prague</a>
+      <a href="../articles/penalties.html">Regularization penalties in owl</a>
     </li>
   </ul>
 </li>
@@ -114,7 +114,7 @@ model fit with golem()." />
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jolars/prague">
+  <a href="https://github.com/jolars/owl">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -132,22 +132,22 @@ model fit with golem()." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Return the loss of a golem model</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/prague/blob/master/R/score.R'><code>R/score.R</code></a></small>
+    <h1>Return the loss of a owl model</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/score.R'><code>R/score.R</code></a></small>
     <div class="hidden name"><code>score.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>This function is a unified interface to return various types of loss for a
-model fit with <code><a href='golem.html'>golem()</a></code>.</p>
+model fit with <code><a href='owl.html'>owl()</a></code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='no'>measure</span>)
 
-<span class='co'># S3 method for GolemGaussian</span>
+<span class='co'># S3 method for OwlGaussian</span>
 <span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>))
 
-<span class='co'># S3 method for GolemBinomial</span>
+<span class='co'># S3 method for OwlBinomial</span>
 <span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"accuracy"</span>, <span class='st'>"auc"</span>))</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -155,7 +155,7 @@ model fit with <code><a href='golem.html'>golem()</a></code>.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>object</th>
-      <td><p>an object of class <code>"Golem"</code></p></td>
+      <td><p>an object of class <code>"Owl"</code></p></td>
     </tr>
     <tr>
       <th>x</th>
@@ -184,7 +184,7 @@ value in <code>measure</code>.</p>
     <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span>(<span class='no'>infert</span>, <span class='kw'>select</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"induced"</span>, <span class='st'>"age"</span>, <span class='st'>"pooled.stratum"</span>))
 <span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='no'>infert</span>$<span class='no'>case</span>
 
-<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='golem.html'>golem</a></span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>)
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='owl.html'>owl</a></span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>)
 <span class='fu'>score</span>(<span class='no'>fit</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='st'>"auc"</span>)</div><div class='output co'>#&gt;        p1        p2        p3        p4        p5        p6        p7        p8 
 #&gt; 0.5150055 0.4921504 0.4952903 0.5150055 0.5142753 0.5269076 0.5020811 0.5042716 
 #&gt;        p9       p10       p11       p12       p13       p14       p15       p16 

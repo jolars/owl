@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Benchmarks • prague</title>
+<title>Benchmarks • owl</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
 <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
@@ -37,7 +37,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">prague</a>
+        <a class="navbar-link" href="../index.html">owl</a>
         <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
       </span>
     </div>
@@ -64,7 +64,7 @@
       <a href="../articles/benchmarks.html">Benchmarks</a>
     </li>
     <li>
-      <a href="../articles/penalties.html">Regularization penalties in prague</a>
+      <a href="../articles/penalties.html">Regularization penalties in owl</a>
     </li>
   </ul>
 </li>
@@ -74,7 +74,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/jolars/prague">
+  <a href="https://github.com/jolars/owl">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -97,7 +97,7 @@
             
             <h4 class="date">2019-12-05</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/jolars/prague/blob/master/vignettes/benchmarks.Rmd"><code>vignettes/benchmarks.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jolars/owl/blob/master/vignettes/benchmarks.Rmd"><code>vignettes/benchmarks.Rmd</code></a></small>
       <div class="hidden name"><code>benchmarks.Rmd</code></div>
 
     </div>
@@ -107,19 +107,19 @@
 <div id="diagnostics" class="section level2">
 <h2 class="hasAnchor">
 <a href="#diagnostics" class="anchor"></a>Diagnostics</h2>
-<p>In this vignette, we will provide a matrix of benchmarks for the solvers, penalties, and GLM families in <strong>prague</strong>.</p>
+<p>In this vignette, we will provide a matrix of benchmarks for the solvers, penalties, and GLM families in <strong>owl</strong>.</p>
 <p>First, we setup a function to plot the results from the fit.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(prague)</a></code></pre></div>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(owl)</a></code></pre></div>
 <div id="gaussian-model" class="section level3">
 <h3 class="hasAnchor">
 <a href="#gaussian-model" class="anchor"></a>Gaussian model</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(abalone<span class="op">$</span>x, </a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">             abalone<span class="op">$</span>y,</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">             <span class="dt">family =</span> <span class="st">"gaussian"</span>,</a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">             <span class="dt">penalty =</span> <span class="st">"slope"</span>,</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">             <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">             <span class="dt">sigma =</span> <span class="st">"estimate"</span>)</a>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/owl.html">owl</a></span>(abalone<span class="op">$</span>x, </a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">           abalone<span class="op">$</span>y,</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">           <span class="dt">family =</span> <span class="st">"gaussian"</span>,</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">           <span class="dt">penalty =</span> <span class="st">"slope"</span>,</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">           <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">           <span class="dt">sigma =</span> <span class="st">"estimate"</span>)</a>
 <a class="sourceLine" id="cb2-7" data-line-number="7"><span class="kw"><a href="../reference/plotDiagnostics.html">plotDiagnostics</a></span>(fit)</a></code></pre></div>
 <div class="figure">
 <img src="benchmarks_files/figure-html/unnamed-chunk-2-1.png" alt="Objective loss over time for the abalone data set (Gaussian response)." width="700"><p class="caption">
@@ -130,12 +130,12 @@ Objective loss over time for the abalone data set (Gaussian response).
 <div id="binomial-model" class="section level3">
 <h3 class="hasAnchor">
 <a href="#binomial-model" class="anchor"></a>Binomial model</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/golem.html">golem</a></span>(heart<span class="op">$</span>x,</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">             heart<span class="op">$</span>y,</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3">             <span class="dt">family =</span> <span class="st">"gaussian"</span>,</a>
-<a class="sourceLine" id="cb3-4" data-line-number="4">             <span class="dt">penalty =</span> <span class="st">"slope"</span>,</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">             <span class="dt">sigma =</span> <span class="st">"estimate"</span>,</a>
-<a class="sourceLine" id="cb3-6" data-line-number="6">             <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>)</a>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/owl.html">owl</a></span>(heart<span class="op">$</span>x,</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">           heart<span class="op">$</span>y,</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">           <span class="dt">family =</span> <span class="st">"gaussian"</span>,</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">           <span class="dt">penalty =</span> <span class="st">"slope"</span>,</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">           <span class="dt">sigma =</span> <span class="st">"estimate"</span>,</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">           <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb3-7" data-line-number="7"><span class="kw"><a href="../reference/plotDiagnostics.html">plotDiagnostics</a></span>(fit)</a></code></pre></div>
 <div class="figure">
 <img src="benchmarks_files/figure-html/unnamed-chunk-3-1.png" alt="Objective loss over time for the heart data set (binomial response)." width="700"><p class="caption">
