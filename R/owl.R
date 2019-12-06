@@ -121,7 +121,7 @@ owl <- function(x,
                 groups = NULL,
                 family = c("gaussian", "binomial"),
                 penalty = c("slope", "group_slope"),
-                solver = "fista",
+                solver = c("fista", "admm"),
                 intercept = TRUE,
                 standardize_features = TRUE,
                 orthogonalize = TRUE,
@@ -212,6 +212,13 @@ owl <- function(x,
     x <- as.matrix(x)
   }
 
+  if (is_sparse && standardize_features && solver == "admm")
+    stop("the ADMM solver does not (yet) work with sparse features",
+         "and standardization")
+
+  if (is_sparse && solver == "admm")
+    stop("the ADMM solver does not (yet) work with sparse features")
+
   if (penalty == "group_slope" &&
       standardize_features &&
       is_sparse &&
@@ -289,10 +296,15 @@ owl <- function(x,
   n_sigma <- length(penalty$sigma)
 
   # setup solver settings
-  solver <- Fista(tol_rel_gap = tol_rel_gap,
-                  tol_infeas = tol_infeas,
-                  max_passes = max_passes,
-                  diagnostics = diagnostics)
+  solver <- switch(solver,
+                   fista = Fista(tol_rel_gap = tol_rel_gap,
+                                 tol_infeas = tol_infeas,
+                                 max_passes = max_passes,
+                                 diagnostics = diagnostics),
+                   admm = ADMM(tol_rel_gap = tol_rel_gap,
+                               tol_infeas = tol_infeas,
+                               max_passes = max_passes,
+                               diagnostics = diagnostics))
 
   # collect response and variable names (if they are given) and otherwise
   # make new
