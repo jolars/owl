@@ -257,8 +257,10 @@ caretSlopeOwl <- function() {
       x
     },
 
-    tags = c("Generalized Linear Model", "Implicit Feature Selection",
-             "L1 Regularization", "Linear Classifier",
+    tags = c("Generalized Linear Model",
+             "Implicit Feature Selection",
+             "L1 Regularization",
+             "Linear Classifier",
              "Linear Regression")
   )
 }
