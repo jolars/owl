@@ -11,7 +11,7 @@ ADMM(tol_rel = 1e-05, tol_abs = 1e-04, alpha = 1.6)
 
 \item{tol_abs}{absolute tolerance criterion for convergence}
 
-\item{alpha}{over-regularization paramter, must be in \link{1.0, 1.8}}
+\item{alpha}{over-regularization paramter, must be in \verb{(1.0, 1.8})}
 }
 \value{
 An object of clas \verb{c("ADMM", "Solver"}
