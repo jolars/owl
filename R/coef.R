@@ -24,17 +24,10 @@ coef.Owl <- function(object,
                      ...) {
   beta <- object$coefficients
 
-  # p <- NROW(beta)
-  # m <- NCOL(beta)
   n_penalties <- dim(beta)[3]
 
-  if (object$penalty$name %in% c("slope", "group_slope")) {
-    penalty <- object$sigma
-    value <- sigma
-  } else {
-    penalty <- object$lambda
-    value <- lambda
-  }
+  penalty <- object$sigma
+  value <- sigma
 
   if (is.null(value)) {
     n_penalties <- length(penalty)

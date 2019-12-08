@@ -91,12 +91,11 @@
 #'   `lambda_max`
 #' @param fdr target false discovery rate (only applies to SLOPE and
 #'   Group SLOPE)
-#' @param tol_rel_gap relative tolerance threshold for duality gap check
-#' @param tol_infeas tolerance threshold for infeasibility
 #' @param max_passes maximum number of passes for optimizer
 #' @param diagnostics should diagnostics be saved for the model fit (timings,
 #'   primal and dual objectives, and infeasibility)
 #' @param screening_rule type of screening rule to use
+#' @param ... arguments passed on to the solver (see [FISTA()], and [ADMM()])
 #'
 #' @return An object of class `"Owl"` with the following slots:
 #' \item{coefficients}{a three-dimensional array of the coefficients from the
@@ -131,10 +130,9 @@ owl <- function(x,
                 n_sigma = 100,
                 fdr = 0.2,
                 screening_rule = c("none", "strong", "safe"),
-                tol_rel_gap = 1e-6,
-                tol_infeas = 1e-6,
                 max_passes = 1e4,
-                diagnostics = FALSE) {
+                diagnostics = FALSE,
+                ...) {
 
   ocall <- match.call()
 
@@ -154,8 +152,6 @@ owl <- function(x,
   stopifnot(
     is.null(lambda_min_ratio) ||
       (lambda_min_ratio > 0 && lambda_min_ratio < 1),
-    tol_rel_gap > 0,
-    tol_infeas > 0,
     max_passes > 0,
     fdr > 0,
     fdr < 1,
@@ -166,8 +162,6 @@ owl <- function(x,
     is.null(lambda) ||
       is.character(lambda) || is.numeric(lambda),
     is.finite(max_passes),
-    is.finite(tol_rel_gap),
-    is.finite(tol_infeas),
     is.logical(diagnostics),
     is.logical(intercept),
     is.logical(standardize_features),
@@ -177,6 +171,13 @@ owl <- function(x,
   fit_intercept <- intercept
   orthogonalize <- orthogonalize && penalty == "group_slope"
   group_penalty <- penalty == "group_slope"
+
+  n <- NROW(x)
+  p <- NCOL(x)
+  m <- NCOL(y)
+
+  # convert sparse x to dgCMatrix class from package Matrix.
+  is_sparse <- inherits(x, "sparseMatrix")
 
   if (group_penalty && !(screening_rule == "none"))
     stop("screening rules are only implemented for standard slope penalty")
@@ -196,21 +197,11 @@ owl <- function(x,
   if (anyNA(groups))
     stop("NA values are not allowed in 'groups'")
 
-  n <- NROW(x)
-  p <- NCOL(x)
-  m <- NCOL(y)
+  if (!standardize_features && intercept && solver == "admm")
+    stop("'standardize_features' must be set to true when using ADMM")
 
-  intercept_init <- double(m)
-  beta_init <- matrix(0, p, m)
-
-  # convert sparse x to dgCMatrix class from package Matrix.
-  is_sparse <- inherits(x, "sparseMatrix")
-
-  if (is_sparse) {
-    x <- methods::as(x, "dgCMatrix")
-  } else {
-    x <- as.matrix(x)
-  }
+  if (family != "gaussian" && solver == "admm")
+    stop("the ADMM solver currently only works with Gaussian responses")
 
   if (is_sparse && standardize_features && solver == "admm")
     stop("the ADMM solver does not (yet) work with sparse features",
@@ -225,6 +216,15 @@ owl <- function(x,
       orthogonalize)
     stop("orthogonalization is currently not implemented for sparse data ",
          "when standardization is required")
+
+  if (is_sparse) {
+    x <- methods::as(x, "dgCMatrix")
+  } else {
+    x <- as.matrix(x)
+  }
+
+  intercept_init <- double(m)
+  beta_init <- matrix(0, p, m)
 
   # setup response
   family <- switch(family,
@@ -265,6 +265,9 @@ owl <- function(x,
     weights <- rep(1, NCOL(x))
   }
 
+  if (is_sparse)
+    x <- methods::as(x, "dgCMatrix")
+
   # setup penalty settings
   penalty <- switch(
     penalty,
@@ -297,14 +300,8 @@ owl <- function(x,
 
   # setup solver settings
   solver <- switch(solver,
-                   fista = Fista(tol_rel_gap = tol_rel_gap,
-                                 tol_infeas = tol_infeas,
-                                 max_passes = max_passes,
-                                 diagnostics = diagnostics),
-                   admm = ADMM(tol_rel_gap = tol_rel_gap,
-                               tol_infeas = tol_infeas,
-                               max_passes = max_passes,
-                               diagnostics = diagnostics))
+                   fista = FISTA(...),
+                   admm = ADMM(...))
 
   # collect response and variable names (if they are given) and otherwise
   # make new
@@ -332,13 +329,11 @@ owl <- function(x,
                   sigma_type = sigma_type,
                   screening_rule = screening_rule,
                   sigma = sigma,
-                  lambda = lambda)
-
+                  lambda = lambda,
+                  max_passes = max_passes,
+                  diagnostics = diagnostics)
 
   owlFit <- if (is_sparse) owlSparse else owlDense
-
-  if (is_sparse)
-    x <- methods::as(x, "dgCMatrix")
 
   if (sigma_type == "estimate") {
     if (inherits(family, "Gaussian")) {
@@ -439,11 +434,8 @@ owl <- function(x,
 
   structure(list(coefficients = coefficients,
                  nonzeros = nonzeros,
-                 family = family,
-                 penalty = penalty,
                  lambda = lambda,
                  sigma = sigma,
-                 solver = solver,
                  class_names = class_names,
                  passes = fit$passes,
                  violations = fit$violations,

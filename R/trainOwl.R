@@ -73,12 +73,15 @@ trainOwl <- function(x,
   fit <- owl(x, y, groups = groups, ...)
 
   # match measure against accepted measure for the given family
-  ok <- switch(fit$family$name,
+  family <- if (inherits(fit, "OwlGaussian"))
+    "gaussian"
+  else if (inherits(fit, "OwlBinomial"))
+    "binomial"
+
+  ok <- switch(family,
                gaussian = c("deviance", "mse", "mae"),
                binomial = c("deviance", "mse", "mae", "accuracy", "auc"))
   measure <- measure[measure %in% ok]
-
-  is_slope <- fit$penalty$name %in% c("slope", "group_slope")
 
   foldnames <- paste("fold", seq_len(number), sep = "_")
 
@@ -164,16 +167,12 @@ trainOwl <- function(x,
     else
       best_ind <- which.min(s$mean)
 
-    if (is_slope) {
-      optima[[i]] <- data.frame(sigma = s[best_ind, "sigma"],
-                                fdr = s[best_ind, "fdr"],
-                                measure = measure[i],
-                                mean = s$mean[best_ind],
-                                lo = s$lo[best_ind],
-                                hi = s$hi[best_ind])
-    } else {
-      optima[[i]] <- data.frame(lambda = summary[[i]][best_ind, "lambda"])
-    }
+    optima[[i]] <- data.frame(sigma = s[best_ind, "sigma"],
+                              fdr = s[best_ind, "fdr"],
+                              measure = measure[i],
+                              mean = s$mean[best_ind],
+                              lo = s$lo[best_ind],
+                              hi = s$hi[best_ind])
   }
 
   optima <- do.call(rbind, optima)

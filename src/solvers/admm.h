@@ -10,24 +10,27 @@ class ADMM : public Solver {
 private:
   const bool standardize;
   const bool is_sparse;
-  arma::uword max_passes = 1e3;
-  double tol_rel_gap = 1e-6;
-  double tol_infeas = 1e-6;
+  const bool diagnostics;
+  const arma::uword max_passes;
+  const double tol_rel;
+  const double tol_abs;
+  const double alpha;
 
 public:
   ADMM(const bool standardize,
        const bool is_sparse,
-       const Rcpp::List& args)
+       const bool diagnostics,
+       const arma::uword max_passes,
+       const double tol_rel,
+       const double tol_abs,
+       const double alpha)
        : standardize(standardize),
-         is_sparse(is_sparse)
-  {
-    using Rcpp::as;
-
-    max_passes  = as<arma::uword>(args["max_passes"]);
-    diagnostics = as<bool>(args["diagnostics"]);
-    tol_rel_gap = as<double>(args["tol_rel_gap"]);
-    tol_infeas  = as<double>(args["tol_infeas"]);
-  }
+         is_sparse(is_sparse),
+         diagnostics(diagnostics),
+         max_passes(max_passes),
+         tol_rel(tol_rel),
+         tol_abs(tol_abs),
+         alpha(alpha) {}
 
   Results
   fit(const arma::sp_mat& x,
@@ -44,6 +47,8 @@ public:
   {
     // not yet implemented
     Results res;
+
+    Rcpp::stop("not yet implemented");
 
     return res;
   }
@@ -67,88 +72,98 @@ public:
     uword p = x.n_cols;
 
     double intercept = intercept_init;
-    double intercept_tilde = intercept;
-    double intercept_tilde_old = intercept_tilde;
 
     vec beta(beta_init);
-    // vec beta_tilde(beta);
-    // vec beta_tilde_old(beta_tilde);
+    vec beta_hat(beta);
 
-    // vec lin_pred(n);
-
-    // vec gradient(p, fill::zeros);
-    // vec pseudo_gradient(n, fill::zeros);
-    // double gradient_intercept = 0.0;
-
-    double learning_rate = 1.0/lipschitz_constant;
-    // double learning_rate = 1;
-
-    // line search parameters
-    // double eta = 0.5;
-
-    // FISTA parameters
-    // double t = 1;
-
-    // uword passes = 0;
-    // bool accepted = false;
+    vec linear_predictor(n);
 
     // diagnostics
-    // wall_clock timer;
-    // std::vector<double> primals;
-    // std::vector<double> duals;
-    // std::vector<double> infeasibilities;
-    // std::vector<double> time;
-    // std::vector<unsigned> line_searches;
-    //
-    // if (diagnostics) {
-    //   primals.reserve(max_passes);
-    //   duals.reserve(max_passes);
-    //   infeasibilities.reserve(max_passes);
-    //   time.reserve(max_passes);
-    //   line_searches.reserve(max_passes);
-    //   timer.tic();
-    // }
+    wall_clock timer;
+    std::vector<double> primals;
+    std::vector<double> duals;
+    std::vector<double> infeasibilities;
+    std::vector<double> time;
+    std::vector<unsigned> line_searches;
+
+    if (diagnostics) {
+      primals.reserve(max_passes);
+      duals.reserve(max_passes);
+      infeasibilities.reserve(max_passes);
+      time.reserve(max_passes);
+      line_searches.reserve(max_passes);
+      timer.tic();
+    }
 
 		double rho = 1/lambda.max();
-		double tol_inf = 1e-8;
 
-    // Precompute M = (X^TX + rho I)^{-1}
-		// and MXtY = M * X^T * Y for proximal steps of quadratic part
-		mat M;
-		M = x.t() * x;
-		M.diag() += rho;
-		M = inv(M);
-		vec MXtY = M * (x.t() * y);
-		vec lam_seq_rho = lambda/rho;
+		vec xTy = x.t() * y;
+		mat L, U;
 
-		// Prepare variables before starting ADMM loop
-		vec z = zeros(p);
-		vec u = zeros(p);
-		vec z_new(p);
+		if (n >= p)
+		  lu(L, U, x.t()*x + rho*speye(p, p));
+		else
+		  lu(L, U, speye(n, n) + (1/rho)*(x * x.t()));
+
+		vec z(p, fill::zeros);
+		vec u(p, fill::zeros);
+		vec z_old(z);
 		double dual_feas, primal_feas;
 
 		// ADMM loop
 		uword i = 0;
 
-		for (i = 0; i < max_passes; ++i) {
+		while (i < max_passes) {
 
-			beta = MXtY + M*rho*(z - u);
-			z_new = penalty->eval(beta + u, lambda, 1/rho);
-			u += beta - z_new;
+		  mat q = xTy + rho*(z - u);
 
-			dual_feas = norm(rho*(z_new - z), 2);
-			primal_feas = norm(z_new - beta, 2);
+		  if (n >= p)
+		    beta = solve(U, solve(L, q));
+		  else
+		    beta = q/rho - (x.t() * solve(U, solve(L, x*q)))/(rho*rho);
 
-			z = z_new;
+		  z_old = z;
+		  beta_hat = alpha*beta + (1 - alpha)*z_old;
+		  z = penalty->eval(beta_hat + u, lambda, 1/rho);
 
-			if (primal_feas < tol_inf && dual_feas < tol_inf) {
+		  u += beta_hat - z;
+
+			primal_feas = norm(beta - z);
+			dual_feas = norm(-rho*(z - z_old));
+
+			linear_predictor = linearPredictor(x,
+                                      beta,
+                                      intercept,
+                                      x_center,
+                                      x_scale,
+                                      standardize);
+
+			double primal =
+			  family->primal(y, linear_predictor) + penalty->primal(beta, lambda);
+
+			if (diagnostics) {
+			  primals.emplace_back(primal);
+        time.emplace_back(timer.toc());
+        infeasibilities.emplace_back(datum::nan);
+        duals.emplace_back(datum::nan);
+        line_searches.emplace_back(0);
+			}
+
+			double primal_tol =
+			  std::sqrt(p)*tol_abs + tol_rel*std::max(norm(beta), norm(-z));
+			double dual_tol =
+			  std::sqrt(p)*tol_abs + tol_rel*norm(rho*u);
+
+			++i;
+
+			if (primal_feas < primal_tol && dual_feas < dual_tol) {
 				break;
 			}
 		}
 
     Results res{intercept,
-                beta,
-                i + 1,
+                z,
+                i,
                 primals,
                 duals,
                 infeasibilities,
@@ -158,57 +173,3 @@ public:
     return res;
   }
 };
-//
-//
-// using namespace arma;
-// using namespace Rcpp;
-//
-// arma::vec slope_admm(const mat& X,
-//                      const vec& Y,
-//                      NumericVector& lambda,
-//                      const int& p,
-//                      const double& rho,
-//                      int max_iter=500,
-//                      double tol_inf = 1e-08) {
-//
-// 		// Precompute M = (X^TX + rho I)^{-1}
-// 		// and MXtY = M * X^T * Y for proximal steps of quadratic part
-// 		mat M = X.t() * X;
-// 		for (int i=0; i<p; ++i) {
-// 			M.at(i,i) += rho;
-// 		}
-// 		M = M.i();
-// 		vec MXtY = M * (X.t() * Y);
-// 		NumericVector lam_seq_rho = lambda/rho;
-//
-// 		// Prepare variables before starting ADMM loop
-// 		int i=0;
-// 		vec x = zeros(p);
-// 		vec z = zeros(p);
-// 		vec u = zeros(p);
-// 		NumericVector z_new = NumericVector(p);
-// 		vec z_new_arma = zeros(p);
-// 		NumericVector x_plus_u(p);
-// 		double dual_feas, primal_feas;
-//
-// 		// ADMM loop
-// 		while (i < max_iter) {
-// 			x = MXtY + M*(rho*(z - u));
-// 			x_plus_u = as<NumericVector>(wrap(x+u));
-// 			z_new = prox_sorted_L1_C(x_plus_u, lam_seq_rho);
-// 			z_new_arma = as<arma::vec>(z_new);
-// 			u += (x - z_new_arma);
-//
-// 			dual_feas = arma::norm(rho*(z_new_arma - z));
-// 			primal_feas = arma::norm(z_new_arma - x);
-//
-// 			z = z_new_arma;
-// 			if (primal_feas < tol_inf && dual_feas < tol_inf){
-// 				i = max_iter;
-// 			}
-//
-// 			++i;
-// 		}
-//
-// 		return z;
-// }
