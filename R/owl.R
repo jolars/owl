@@ -130,7 +130,7 @@ owl <- function(x,
                 n_sigma = 100,
                 fdr = 0.2,
                 screening_rule = c("none", "strong", "safe"),
-                max_passes = 1e4,
+                max_passes = 1e6,
                 diagnostics = FALSE,
                 ...) {
 

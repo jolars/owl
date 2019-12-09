@@ -20,7 +20,7 @@ owl(
   n_sigma = 100,
   fdr = 0.2,
   screening_rule = c("none", "strong", "safe"),
-  max_passes = 10000,
+  max_passes = 1e+06,
   diagnostics = FALSE,
   ...
 )
