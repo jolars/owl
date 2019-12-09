@@ -9,11 +9,13 @@ lipschitzConstant(const arma::mat& x,
                   const bool standardize_features,
                   const std::string family)
 {
-  if (x.n_rows > x.n_cols) {
-    return arma::eig_sym(x.t() * x).max();
-  } else {
-    return arma::eig_sym(x * x.t()).max();
-  }
+  double out = x.n_rows >= x.n_cols ? arma::eig_sym(x.t() * x).max()
+                                    : arma::eig_sym(x * x.t()).max();
+
+  if (family == "binomial")
+    out /= 4;
+
+  return out;
 }
 
 double
@@ -39,7 +41,7 @@ lipschitzConstant(const arma::sp_mat& x,
 
     const vec x_center_scaled = x_center/x_scale;
 
-    if (n > p) {
+    if (n >= p) {
 
       xx = x.t() * x;
 
@@ -65,13 +67,13 @@ lipschitzConstant(const arma::sp_mat& x,
       xx += accu(square(x_center_scaled));
     }
 
-    out = eig_sym(xx).max();
+    out = abs(eig_sym(xx)).max();
 
   } else {
 
     sp_mat xx;
 
-    if (n > p)
+    if (n >= p)
       xx = x.t() * x;
     else
       xx = x * x.t();
