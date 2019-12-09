@@ -85,6 +85,36 @@ public:
   }
 };
 
+class Poisson : public Family {
+public:
+  double
+  primal(const arma::vec& y, const arma::vec& lin_pred)
+  {
+    using namespace arma;
+    return -accu(y % lin_pred - exp(lin_pred));
+  }
+
+  double
+  dual(const arma::vec& y, const arma::vec& lin_pred)
+  {
+    using namespace arma;
+    const vec theta = y - exp(lin_pred);
+    return -accu((y - theta) % log(y - theta) - y + theta);
+  }
+
+  arma::vec
+  pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
+  {
+    return arma::exp(lin_pred) - y;
+  }
+
+  double
+  fitNullModel(const arma::vec& y)
+  {
+    return std::log(arma::mean(y));
+  }
+};
+
 // helper to choose family
 inline
 std::unique_ptr<Family>
@@ -92,6 +122,8 @@ setupFamily(const std::string& family_choice)
 {
   if (family_choice == "binomial")
     return std::unique_ptr<Binomial>(new Binomial);
+  else if (family_choice == "poisson")
+    return std::unique_ptr<Poisson>(new Poisson);
   else
     return std::unique_ptr<Gaussian>(new Gaussian);
 }
