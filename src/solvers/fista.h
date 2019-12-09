@@ -117,7 +117,6 @@ public:
     double gradient_intercept = 0.0;
 
     double learning_rate = 1.0/lipschitz_constant;
-    // double learning_rate = 1;
 
     // line search parameters
     double eta = 0.9;
@@ -198,9 +197,6 @@ public:
 
       double f_old = f;
       double t_old = t;
-
-      // increase learning rate between iterations
-      learning_rate = std::min(1.0/lipschitz_constant, 2*learning_rate);
 
       unsigned current_line_searches = 0;
 
