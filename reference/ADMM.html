@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • owl</title>
+<title>ADMM (Alternating Direction Method of Multipliers) — ADMM • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,7 +42,8 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="ADMM (Alternating Direction Method of Multipliers) — ADMM" />
+<meta property="og:description" content="ADMM (Alternating Direction Method of Multipliers)" />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -63,7 +64,7 @@
   </head>
 
   <body>
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -128,132 +129,48 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>ADMM (Alternating Direction Method of Multipliers)</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/solvers.R'><code>R/solvers.R</code></a></small>
+    <div class="hidden name"><code>ADMM.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>ADMM (Alternating Direction Method of Multipliers)</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>ADMM</span>(<span class='kw'>tol_rel</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>, <span class='kw'>tol_abs</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>1.6</span>)</pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      <tr>
-        
-        <td>
-          <p><code><a href="ADMM.html">ADMM()</a></code> </p>
-        </td>
-        <td><p>ADMM (Alternating Direction Method of Multipliers)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="FISTA.html">FISTA()</a></code> </p>
-        </td>
-        <td><p>FISTA (Fast Iterative Shrinking--Thresholding Algorithm)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="abalone.html">abalone</a></code> </p>
-        </td>
-        <td><p>Abalone</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="caretSlopeOwl.html">caretSlopeOwl()</a></code> </p>
-        </td>
-        <td><p>Model objects for model tuning with caret</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="coef.Owl.html">coef(<i>&lt;Owl&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Obtain Coefficients from Model fit by Owl</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="heart.html">heart</a></code> </p>
-        </td>
-        <td><p>Heart Disease</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="owl.html">owl()</a></code> </p>
-        </td>
-        <td><p>Regularized Generalized Linear Models</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot.Owl.html">plot(<i>&lt;Owl&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Plot coefficients for a model fit by owl</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot.TrainedOwl.html">plot(<i>&lt;TrainedOwl&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Plot Results from Cross-Validation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plotDiagnostics.html">plotDiagnostics()</a></code> </p>
-        </td>
-        <td><p>Plot results from diagnostics collected during model fitting</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="predict.Owl.html">predict(<i>&lt;Owl&gt;</i>)</a></code> <code><a href="predict.Owl.html">predict(<i>&lt;OwlGaussian&gt;</i>)</a></code> <code><a href="predict.Owl.html">predict(<i>&lt;OwlBinomial&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Generate predictions from owl models</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="score.html">score()</a></code> </p>
-        </td>
-        <td><p>Return the loss of a owl model</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="screenFeatures.html">screenFeatures()</a></code> </p>
-        </td>
-        <td><p>Screen features</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="student.html">student</a></code> </p>
-        </td>
-        <td><p>Student Performance</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="trainOwl.html">trainOwl()</a></code> </p>
-        </td>
-        <td><p>Train a owl model</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="wine.html">wine</a></code> </p>
-        </td>
-        <td><p>Wine Cultivars</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>tol_rel</th>
+      <td><p>relative tolerance criterion for convergence</p></td>
+    </tr>
+    <tr>
+      <th>tol_abs</th>
+      <td><p>absolute tolerance criterion for convergence</p></td>
+    </tr>
+    <tr>
+      <th>alpha</th>
+      <td><p>over-regularization paramter, must be in <code>(1.0, 1.8</code>)</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>An object of clas <code>c("ADMM", "Solver"</code></p>
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
     </ul>
+
   </div>
 </div>
 
