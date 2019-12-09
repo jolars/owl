@@ -4,7 +4,7 @@
 \alias{FISTA}
 \title{FISTA (Fast Iterative Shrinking--Thresholding Algorithm)}
 \usage{
-FISTA(tol_rel_gap = 1e-06, tol_infeas = 1e-06)
+FISTA(tol_rel_gap = 1e-05, tol_infeas = 1e-04)
 }
 \arguments{
 \item{tol_rel_gap}{relative tolerance criterion for the duality gap}

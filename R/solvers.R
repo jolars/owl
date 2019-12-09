@@ -8,8 +8,8 @@
 #'
 #' @return An object of class `c("Fista", "Solver")`
 #' @export
-FISTA <- function(tol_rel_gap = 1e-6,
-                  tol_infeas = 1e-6) {
+FISTA <- function(tol_rel_gap = 1e-5,
+                  tol_infeas = 1e-4) {
 
   stopifnot(tol_rel_gap >= 0,
             tol_infeas >= 0,

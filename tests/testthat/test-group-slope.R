@@ -14,7 +14,7 @@ test_that("results from group slope mirror those from grpSLOPE package", {
   gslope_fit <- grpSLOPE::grpSLOPE(x, y, group = grp, fdr = fdr, sigma = sigma)
 
   expect_equivalent(coef(g), coef(gslope_fit, scaled = FALSE),
-                    tol = 1e-5)
+                    tol = 1e-4)
 })
 
 test_that("uneven group input is handled correctly", {
@@ -33,7 +33,7 @@ test_that("uneven group input is handled correctly", {
 
   expect_equivalent(coef(g),
                     coef(gslope_fit, scaled = FALSE),
-                    tol = 1e-6)
+                    tol = 1e-4)
 })
 
 test_that("binomial group slope models work", {
