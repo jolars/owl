@@ -187,39 +187,3 @@ GroupSlope <- function(x,
                  lambda = lambda),
             class = c("GroupSlope", "Penalty"))
 }
-
-Lasso <- function(x,
-                  y,
-                  y_scale,
-                  family,
-                  lambda = NULL,
-                  lambda_min_ratio = NULL,
-                  n_sigma = 100) {
-
-  if (is.null(lambda_min_ratio))
-    lambda_min_ratio <- ifelse(NROW(x) < NCOL(x), 0.01, 0.0001)
-
-  # lambda (regularization strength)
-  if (is.null(lambda)) {
-    lambda_max <- max(lambdaMax(family, x, y, y_scale))/NROW(x)
-
-    lambda <- logSeq(lambda_max,
-                     lambda_max*lambda_min_ratio,
-                     n_sigma)
-    lambda_scale <- max(y_scale)
-
-  } else {
-    lambda <- as.double(lambda)
-    stopifnot(length(lambda) > 0, all(lambda >= 0))
-    lambda_scale <- 1
-  }
-
-  lambda_scale <- lambda_scale/NROW(x)
-  lambda <- matrix(lambda, 1, length(lambda))
-
-  structure(list(name = "lasso",
-                 tuning_parameters = c("lambda"),
-                 lambda = lambda,
-                 lambda_scale = lambda_scale),
-            class = c("Lasso", "Penalty"))
-}
