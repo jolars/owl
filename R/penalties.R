@@ -170,7 +170,15 @@ GroupSlope <- function(x,
   if (sigma_type == "sequence") {
     lambda_max <- lambdaMax(family, x, y, y_scale)
 
-    start <- max(sort(lambda_max, decreasing = TRUE)/lambda)
+    new_lambda_max <- double(length(lambda))
+
+    group_id <- groups$group_id
+
+    for (i in seq_along(lambda)) {
+      new_lambda_max <- norm(as.matrix(lambda_max[group_id[[i]]]), "F")
+    }
+
+    start <- max(sort(new_lambda_max, decreasing = TRUE)/lambda)
 
     sigma <- exp(seq(log(start),
                      log(start*lambda_min_ratio),
