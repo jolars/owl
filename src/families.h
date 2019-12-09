@@ -5,14 +5,7 @@
 #include "utils.h"
 
 class Family {
-protected:
-  const bool fit_intercept;
-  const bool standardize;
-
 public:
-  Family(const bool fit_intercept, const bool standardize)
-         : fit_intercept(fit_intercept), standardize(standardize) {}
-
   virtual
   double
   primal(const arma::vec& y, const arma::vec& lin_pred) = 0;
@@ -37,9 +30,6 @@ public:
 
 class Gaussian : public Family {
 public:
-  Gaussian(const bool fit_intercept, const bool standardize)
-           : Family(fit_intercept, standardize) {}
-
   double
   primal(const arma::vec& y, const arma::vec& lin_pred)
   {
@@ -75,9 +65,6 @@ public:
 
 class Binomial : public Family {
 public:
-  Binomial(const bool fit_intercept, const bool standardize)
-           : Family(fit_intercept, standardize) {}
-
   double
   primal(const arma::vec& y, const arma::vec& lin_pred)
   {
@@ -122,15 +109,11 @@ public:
 // helper to choose family
 inline
 std::unique_ptr<Family>
-setupFamily(const std::string& family_choice,
-            const bool fit_intercept,
-            const bool standardize)
+setupFamily(const std::string& family_choice)
 {
   if (family_choice == "binomial")
-    return std::unique_ptr<Binomial>(new Binomial{fit_intercept,
-                                                  standardize});
+    return std::unique_ptr<Binomial>(new Binomial);
   else
-    return std::unique_ptr<Gaussian>(new Gaussian{fit_intercept,
-                                                  standardize});
+    return std::unique_ptr<Gaussian>(new Gaussian);
 }
 

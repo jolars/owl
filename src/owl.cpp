@@ -49,11 +49,8 @@ owlCpp(const T& x,
 
   auto family_choice = as<std::string>(family_args["name"]);
 
-  // setup family and response
-  auto family = setupFamily(family_choice,
-                            fit_intercept,
-                            standardize_features);
-
+  // setup family and penalty
+  auto family = setupFamily(family_choice);
   auto penalty = setupPenalty(penalty_args, groups);
 
   cube betas(p, 1, n_sigma, fill::zeros);
