@@ -15,11 +15,11 @@ test_that("sparse and dense implementations give equivalent results", {
       sparse_coefs <- coef(g)
 
       g <- owl(as.matrix(x), y, family = family,
-                 standardize_features = standardize)
+               standardize_features = standardize)
 
       dense_coefs <- coef(g)
 
-      expect_equal(sparse_coefs, dense_coefs, tol = 1e-4)
+      expect_equal(sparse_coefs, dense_coefs, tol = 1e-6)
     }
   }
 
@@ -31,18 +31,22 @@ test_that("sparse and dense implementations give equivalent results", {
   beta <- d$beta
 
   for (orthogonalize in c(TRUE, FALSE)) {
-    sparse_coefs <- coef(owl(x, y,
-                             sigma = 1,
-                             penalty = "group_slope",
-                             groups = d$groups,
-                             standardize_features = FALSE,
-                             orthogonalize = orthogonalize))
-    dense_coefs <- coef(owl(as.matrix(x), y,
-                            sigma = 1,
-                            penalty = "group_slope",
-                            groups = d$groups,
-                            standardize_features = FALSE,
-                            orthogonalize = orthogonalize))
-    expect_equal(sparse_coefs, dense_coefs, tol = 1e-7)
+    sparse_fit <- owl(x, y,
+                      sigma = 1,
+                      penalty = "group_slope",
+                      groups = d$groups,
+                      standardize_features = FALSE,
+                      diagnostics = TRUE,
+                      orthogonalize = orthogonalize)
+    sparse_coefs <- coef(sparse_fit)
+    dense_fit <- owl(as.matrix(x), y,
+                     sigma = 1,
+                     penalty = "group_slope",
+                     groups = d$groups,
+                     standardize_features = FALSE,
+                     diagnostics = TRUE,
+                     orthogonalize = orthogonalize)
+    dense_coefs <- coef(dense_fit)
+    expect_equal(sparse_coefs, dense_coefs, tol = 1e-3)
   }
 })

@@ -3,7 +3,7 @@ test_that("predictions work for all models", {
 
   for (family in c("gaussian", "binomial")) {
     for (penalty in c("slope", "group_slope")) {
-      xy <- owl:::randomProblem(100, 10, response = family, n_groups = 2)
+      xy <- owl:::randomProblem(100, 10, response = family, n_groups = 3)
       x <- xy$x
       y <- xy$y
 
@@ -12,6 +12,8 @@ test_that("predictions work for all models", {
                  groups = xy$groups,
                  family = family,
                  penalty = penalty,
+                 orthogonalize = FALSE,
+                 diagnostics = TRUE,
                  n_sigma = 10)
 
       for (type in c("link", "response", "class")) {
