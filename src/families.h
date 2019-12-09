@@ -21,10 +21,6 @@ public:
 
   virtual
   double
-  link(const double y) = 0;
-
-  virtual
-  double
   fitNullModel(const arma::vec& y) = 0;
 };
 
@@ -48,12 +44,6 @@ public:
   pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
   {
     return -(y - lin_pred);
-  }
-
-  double
-  link(const double y)
-  {
-    return y;
   }
 
   double
@@ -84,17 +74,6 @@ public:
   pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
   {
     return -y / (1.0 + arma::exp(y % lin_pred));
-  }
-
-  double
-  link(const double y)
-  {
-    // TODO(johan): consider letting the user choose this
-    double pmin = 1e-9;
-    double pmax = 1.0 - pmin;
-    double z = clamp(y, pmin, pmax);
-
-    return std::log((y + 1.0)/2 / (1.0 - z));
   }
 
   double
