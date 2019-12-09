@@ -24,11 +24,14 @@ owlCpp(const T& x,
   // parameter packs for penalty and solver
   auto penalty_args = as<Rcpp::List>(control["penalty"]);
   auto solver_args = as<Rcpp::List>(control["solver"]);
+
+  auto max_passes = as<uword>(control["max_passes"]);
+  auto diagnostics = as<bool>(control["diagnostics"]);
+
   auto groups = as<Rcpp::List>(control["groups"]);
 
   auto family_args = as<Rcpp::List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
-  auto diagnostics = as<bool>(solver_args["diagnostics"]);
   auto screening_rule = as<std::string>(control["screening_rule"]);
   auto sigma_type = as<std::string>(control["sigma_type"]);
 
@@ -85,6 +88,8 @@ owlCpp(const T& x,
   auto solver = setupSolver(as<std::string>(solver_args["name"]),
                             standardize_features,
                             is_sparse,
+                            diagnostics,
+                            max_passes,
                             solver_args);
 
   vec x_colnorms(p);

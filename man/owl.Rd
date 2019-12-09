@@ -10,7 +10,7 @@ owl(
   groups = NULL,
   family = c("gaussian", "binomial"),
   penalty = c("slope", "group_slope"),
-  solver = "fista",
+  solver = c("fista", "admm"),
   intercept = TRUE,
   standardize_features = TRUE,
   orthogonalize = TRUE,
@@ -20,10 +20,9 @@ owl(
   n_sigma = 100,
   fdr = 0.2,
   screening_rule = c("none", "strong", "safe"),
-  tol_rel_gap = 1e-06,
-  tol_infeas = 1e-06,
   max_passes = 10000,
-  diagnostics = FALSE
+  diagnostics = FALSE,
+  ...
 )
 }
 \arguments{
@@ -68,14 +67,12 @@ Group SLOPE)}
 
 \item{screening_rule}{type of screening rule to use}
 
-\item{tol_rel_gap}{relative tolerance threshold for duality gap check}
-
-\item{tol_infeas}{tolerance threshold for infeasibility}
-
 \item{max_passes}{maximum number of passes for optimizer}
 
 \item{diagnostics}{should diagnostics be saved for the model fit (timings,
 primal and dual objectives, and infeasibility)}
+
+\item{...}{arguments passed on to the solver (see \code{\link[=FISTA]{FISTA()}}, and \code{\link[=ADMM]{ADMM()}})}
 }
 \value{
 An object of class \code{"Owl"} with the following slots:

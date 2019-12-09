@@ -10,24 +10,24 @@ class FISTA : public Solver {
 private:
   const bool standardize;
   const bool is_sparse;
-  arma::uword max_passes = 1e3;
-  double tol_rel_gap = 1e-6;
-  double tol_infeas = 1e-6;
+  const bool diagnostics;
+  const arma::uword max_passes;
+  const double tol_rel_gap;
+  const double tol_infeas;
 
 public:
   FISTA(const bool standardize,
         const bool is_sparse,
-        const Rcpp::List& args)
+        const bool diagnostics,
+        const arma::uword max_passes,
+        const double tol_rel_gap,
+        const double tol_infeas)
         : standardize(standardize),
-          is_sparse(is_sparse)
-  {
-    using Rcpp::as;
-
-    max_passes  = as<arma::uword>(args["max_passes"]);
-    diagnostics = as<bool>(args["diagnostics"]);
-    tol_rel_gap = as<double>(args["tol_rel_gap"]);
-    tol_infeas  = as<double>(args["tol_infeas"]);
-  }
+          is_sparse(is_sparse),
+          diagnostics(diagnostics),
+          max_passes(max_passes),
+          tol_rel_gap(tol_rel_gap),
+          tol_infeas(tol_infeas) {}
 
   virtual
   Results
@@ -120,7 +120,7 @@ public:
     // double learning_rate = 1;
 
     // line search parameters
-    double eta = 0.5;
+    double eta = 0.9;
 
     // FISTA parameters
     double t = 1;
@@ -173,9 +173,10 @@ public:
       double dual = family->dual(y, lin_pred);
       double infeasibility = penalty->infeasibility(gradient, lambda);
 
-      accepted = (std::abs(primal - dual)/std::max(1.0, primal) < tol_rel_gap)
-                  && (infeasibility <= std::max(std::sqrt(datum::eps),
-                                                lambda(0)*tol_infeas));
+      double small = std::sqrt(datum::eps);
+
+      accepted = (std::abs(primal - dual)/std::max(small, primal) < tol_rel_gap)
+                  && (infeasibility <= std::max(small, lambda(0)*tol_infeas));
 
       if (diagnostics) {
         time.push_back(timer.toc());
