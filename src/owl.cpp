@@ -6,31 +6,29 @@
 #include "screening_rules.h"
 #include "lipschitzConstant.h"
 
+using namespace Rcpp;
+using namespace arma;
+
 template <typename T>
 Rcpp::List
 owlCpp(const T& x,
        const arma::vec& y,
        const Rcpp::List control)
 {
-  using namespace arma;
-  using Rcpp::as;
-  using Rcpp::Named;
-  using Rcpp::wrap;
-
   // auto n = x.n_rows;
   auto p = x.n_cols;
   auto n = x.n_rows;
 
   // parameter packs for penalty and solver
-  auto penalty_args = as<Rcpp::List>(control["penalty"]);
-  auto solver_args = as<Rcpp::List>(control["solver"]);
+  auto penalty_args = as<List>(control["penalty"]);
+  auto solver_args = as<List>(control["solver"]);
 
   auto max_passes = as<uword>(control["max_passes"]);
   auto diagnostics = as<bool>(control["diagnostics"]);
 
-  auto groups = as<Rcpp::List>(control["groups"]);
+  auto groups = as<List>(control["groups"]);
 
-  auto family_args = as<Rcpp::List>(control["family"]);
+  auto family_args = as<List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
   auto screening_rule = as<std::string>(control["screening_rule"]);
   auto sigma_type = as<std::string>(control["sigma_type"]);
@@ -250,7 +248,7 @@ owlCpp(const T& x,
 
         active_set = setUnion(check_failures, active_set);
 
-        Rcpp::checkUserInterrupt();
+        checkUserInterrupt();
 
       } while (kkt_violation);
 
@@ -272,10 +270,10 @@ owlCpp(const T& x,
 
     active_sets(k) = active_set;
 
-    Rcpp::checkUserInterrupt();
+    checkUserInterrupt();
   }
 
-  return Rcpp::List::create(
+  return List::create(
     Named("intercept")           = wrap(intercepts),
     Named("beta")                = wrap(betas),
     Named("active_sets")         = wrap(active_sets),
