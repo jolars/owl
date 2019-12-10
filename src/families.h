@@ -4,6 +4,8 @@
 #include <memory>
 #include "utils.h"
 
+using namespace arma;
+
 class Family {
 public:
   virtual
@@ -85,6 +87,33 @@ public:
   }
 };
 
+class Poisson : public Family {
+public:
+  double
+  primal(const arma::vec& y, const arma::vec& lin_pred)
+  {
+    return -accu(y % lin_pred - trunc_exp(lin_pred) - lgamma(y + 1));
+  }
+
+  double
+  dual(const arma::vec& y, const arma::vec& lin_pred)
+  {
+    return -accu(trunc_exp(lin_pred) % (lin_pred - 1) - lgamma(y + 1));
+  }
+
+  arma::vec
+  pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
+  {
+    return arma::trunc_exp(lin_pred) - y;
+  }
+
+  double
+  fitNullModel(const arma::vec& y)
+  {
+    return std::log(arma::mean(y));
+  }
+};
+
 // helper to choose family
 inline
 std::unique_ptr<Family>
@@ -92,6 +121,8 @@ setupFamily(const std::string& family_choice)
 {
   if (family_choice == "binomial")
     return std::unique_ptr<Binomial>(new Binomial);
+  else if (family_choice == "poisson")
+    return std::unique_ptr<Poisson>(new Poisson);
   else
     return std::unique_ptr<Gaussian>(new Gaussian);
 }

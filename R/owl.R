@@ -14,7 +14,7 @@
 #' objective.
 #'
 #' \deqn{
-#'   ||\boldsymbol{y} - \boldsymbol{X\beta}||_2^2
+#'   ||y - X\beta||_2^2
 #' }{
 #'   ||y - X\beta||_2^2
 #' }
@@ -24,15 +24,24 @@
 #' The binomial model (logistic regression) has the following objective.
 #'
 #' \deqn{
-#'   \sum_{i=1}^n \log\left[1+ \exp\left(- y_i\boldsymbol{x}_i'\boldsymbol{\beta} \right) \right]
+#'   \sum_{i=1}^n \log\left(1+ \exp\left(- y_i \left(x_i^T\beta + \alpha \right) \right) \right)
 #' }{
-#'   \sum log[1+ exp(- y_i x_i' \beta)]
+#'   \sum log(1+ exp(- y_i x_i^T \beta))
+#' }
+#'
+#' **Poisson**
+#'
+#' In poisson regression, we use the following objective.
+#'
+#' \deqn{
+#'   -\sum_{i=1}^n \left(y_i\left(x_i^T\beta + \alpha\right) - \exp\left(x_i^T\beta + \alpha\right)\right)
+#' }{
+#'   -\sum (y_i(x_i^T\beta + \alpha) - exp(x_i^T\beta + \alpha))
 #' }
 #'
 #' @section Penalties:
 #' Models fit by [owl()] can be regularized via several
 #' penalties.
-#'
 #'
 #' **SLOPE**
 #'
@@ -118,7 +127,7 @@
 owl <- function(x,
                 y,
                 groups = NULL,
-                family = c("gaussian", "binomial"),
+                family = c("gaussian", "binomial", "poisson"),
                 penalty = c("slope", "group_slope"),
                 solver = c("fista", "admm"),
                 intercept = TRUE,
@@ -135,6 +144,7 @@ owl <- function(x,
                 ...) {
 
   ocall <- match.call()
+  solver_options <- list(...)
 
   family <- match.arg(family)
   penalty <- match.arg(penalty)
@@ -217,6 +227,12 @@ owl <- function(x,
     stop("orthogonalization is currently not implemented for sparse data ",
          "when standardization is required")
 
+  if (identical(solver_options$line_search, FALSE) && family == "poisson")
+    stop("line search must be enabled for poisson models")
+
+  if (identical(solver_options$line_search, FALSE) && penalty == "group_slope")
+    stop("line search must be enabled for group slope")
+
   if (is_sparse) {
     x <- methods::as(x, "dgCMatrix")
   } else {
@@ -229,7 +245,8 @@ owl <- function(x,
   # setup response
   family <- switch(family,
                    gaussian = Gaussian(),
-                   binomial = Binomial())
+                   binomial = Binomial(),
+                   poisson = Poisson())
 
   res <- preProcessResponse(family, y)
   y <- res$y
@@ -274,7 +291,10 @@ owl <- function(x,
 
     slope = Slope(x = x,
                   y = y,
+                  x_center = x_center,
+                  x_scale = x_scale,
                   y_scale = y_scale,
+                  standardize_features = standardize_features,
                   lambda = lambda,
                   sigma = sigma,
                   lambda_min_ratio = lambda_min_ratio,
@@ -284,7 +304,10 @@ owl <- function(x,
 
     group_slope = GroupSlope(x = x,
                              y = y,
+                             x_center = x_center,
+                             x_scale = x_scale,
                              y_scale = y_scale,
+                             standardize_features = standardize_features,
                              groups = groups,
                              lambda = lambda,
                              sigma = sigma,
@@ -298,10 +321,15 @@ owl <- function(x,
   lambda <- penalty$lambda
   n_sigma <- length(penalty$sigma)
 
+  if (family == "gaussian" && !(inherits(penalty, "GroupSlope")))
+    solver_options$line_search <- FALSE
+  else
+    solver_options$line_search <- TRUE
+
   # setup solver settings
   solver <- switch(solver,
-                   fista = FISTA(...),
-                   admm = ADMM(...))
+                   fista = do.call(FISTA, solver_options),
+                   admm = do.call(ADMM, solver_options))
 
   # collect response and variable names (if they are given) and otherwise
   # make new
@@ -371,6 +399,9 @@ owl <- function(x,
       }
     } else if (inherits(family, "Binomial")) {
       control$sigma <- penalty$sigma <- sigma <- 0.5
+      fit <- owlFit(x, y, control)
+    } else if (inherits(family, "Poisson")) {
+      control$sigma <- penalty$sigma <- sigma <- 1
       fit <- owlFit(x, y, control)
     }
   } else {

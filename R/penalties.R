@@ -1,6 +1,9 @@
 Slope <- function(x,
                   y,
+                  x_center,
+                  x_scale,
                   y_scale,
+                  standardize_features,
                   lambda = c("gaussian", "bhq"),
                   sigma = c("sequence", "estimate"),
                   lambda_min_ratio = NULL,
@@ -61,7 +64,13 @@ Slope <- function(x,
   }
 
   if (sigma_type == "sequence") {
-    lambda_max <- lambdaMax(family, x, y, y_scale)
+    lambda_max <- lambdaMax(x,
+                            y,
+                            x_center,
+                            x_scale,
+                            y_scale,
+                            family$name,
+                            standardize_features)
 
     start <- max(sort(lambda_max, decreasing = TRUE)/lambda)
 
@@ -83,7 +92,10 @@ Slope <- function(x,
 
 GroupSlope <- function(x,
                        y,
+                       x_center,
+                       x_scale,
                        y_scale,
+                       standardize_features,
                        groups,
                        lambda = c("corrected", "mean", "max"),
                        sigma = c("sequence", "estimate"),
@@ -168,7 +180,13 @@ GroupSlope <- function(x,
   }
 
   if (sigma_type == "sequence") {
-    lambda_max <- lambdaMax(family, x, y, y_scale)
+    lambda_max <- lambdaMax(x,
+                            y,
+                            x_center,
+                            x_scale,
+                            y_scale,
+                            family$name,
+                            standardize_features)
 
     new_lambda_max <- double(length(lambda))
 

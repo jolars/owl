@@ -5,20 +5,31 @@
 #' @param tol_rel_gap relative tolerance criterion for the duality gap
 #' @param tol_infeas tolerance criterion for infeasibility of the
 #'   dual objective
+#' @param line_search whether to perform line search
+#' @param line_search_frequency at which iterations to perform line search
+#' @param ... ignored
 #'
 #' @return An object of class `c("Fista", "Solver")`
 #' @export
 FISTA <- function(tol_rel_gap = 1e-5,
-                  tol_infeas = 1e-4) {
+                  tol_infeas = 1e-4,
+                  line_search = FALSE,
+                  line_search_frequency = 1,
+                  ...) {
 
   stopifnot(tol_rel_gap >= 0,
             tol_infeas >= 0,
+            is.logical(line_search),
+            line_search_frequency >= 1,
             is.finite(tol_rel_gap),
-            is.finite(tol_infeas))
+            is.finite(tol_infeas),
+            is.finite(line_search_frequency))
 
   structure(list(name = "fista",
                  tol_rel_gap = tol_rel_gap,
-                 tol_infeas = tol_infeas),
+                 tol_infeas = tol_infeas,
+                 line_search = line_search,
+                 line_search_frequency = line_search_frequency),
             class = c("FISTA", "Solver"))
 }
 
@@ -26,13 +37,15 @@ FISTA <- function(tol_rel_gap = 1e-5,
 #'
 #' @param tol_rel relative tolerance criterion for convergence
 #' @param tol_abs absolute tolerance criterion for convergence
-#' @param alpha over-regularization paramter, must be in `(1.0, 1.8`)
+#' @param alpha over-regularization parameter, must be in `(1.0, 1.8`)
+#' @param ... ignored
 #'
-#' @return An object of clas `c("ADMM", "Solver"`
+#' @return An object of class `c("ADMM", "Solver"`
 #' @export
 ADMM <- function(tol_rel = 1e-5,
                  tol_abs = 1e-4,
-                 alpha = 1.6) {
+                 alpha = 1.6,
+                 ...) {
 
   stopifnot(tol_rel >= 0,
             tol_abs >= 0,

@@ -126,7 +126,31 @@ predict.OwlBinomial <- function(object,
   out
 }
 
+#' @rdname predict.Owl
+#' @export
+predict.OwlPoisson <- function(object,
+                               x,
+                               sigma = NULL,
+                               type = c("link", "response"),
+                               exact = FALSE,
+                               simplify = TRUE,
+                               ...) {
 
+  type <- match.arg(type)
+
+  lin_pred <- NextMethod(object, type = type)
+
+  out <- switch(
+    type,
+    link = lin_pred,
+    response = exp(lin_pred)
+  )
+
+  if (simplify)
+    out <- drop(out)
+
+  out
+}
 
 
 

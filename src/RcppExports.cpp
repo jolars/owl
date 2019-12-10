@@ -80,6 +80,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// lambdaMax
+arma::vec lambdaMax(SEXP x, const arma::vec& y, const arma::vec& x_center, const arma::vec& x_scale, const arma::vec& y_scale, const std::string& family, const bool standardize_features);
+RcppExport SEXP _owl_lambdaMax(SEXP xSEXP, SEXP ySEXP, SEXP x_centerSEXP, SEXP x_scaleSEXP, SEXP y_scaleSEXP, SEXP familySEXP, SEXP standardize_featuresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x_center(x_centerSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x_scale(x_scaleSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y_scale(y_scaleSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type family(familySEXP);
+    Rcpp::traits::input_parameter< const bool >::type standardize_features(standardize_featuresSEXP);
+    rcpp_result_gen = Rcpp::wrap(lambdaMax(x, y, x_center, x_scale, y_scale, family, standardize_features));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_owl_owlSparse", (DL_FUNC) &_owl_owlSparse, 3},
@@ -88,6 +105,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_owl_standardizedSparseColNorms", (DL_FUNC) &_owl_standardizedSparseColNorms, 2},
     {"_owl_colNormsSparse", (DL_FUNC) &_owl_colNormsSparse, 2},
     {"_owl_colNormsDense", (DL_FUNC) &_owl_colNormsDense, 2},
+    {"_owl_lambdaMax", (DL_FUNC) &_owl_lambdaMax, 7},
     {NULL, NULL, 0}
 };
 

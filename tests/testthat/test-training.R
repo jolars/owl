@@ -2,7 +2,7 @@ test_that("model training works with trainOwl", {
   set.seed(48)
 
   for (family in c("gaussian", "binomial")) {
-    xy <- owl:::randomProblem(1e2, 4, n_groups = 2, response = family)
+    xy <- owl:::randomProblem(1e3, 4, n_groups = 2, response = family)
 
     for (penalty in c("slope", "group_slope")) {
 
@@ -14,7 +14,7 @@ test_that("model training works with trainOwl", {
                       number = 2,
                       fdr = c(0.1, 0.2),
                       repeats = 2,
-                      n_sigma = 3)
+                      n_sigma = 2)
       expect_s3_class(fit, "TrainedOwl")
     }
   }

@@ -13,7 +13,7 @@ lipschitzConstant(const arma::mat& x,
                                     : arma::eig_sym(x * x.t()).max();
 
   if (family == "binomial")
-    out /= 4;
+    out *= 4;
 
   return out;
 }
@@ -82,7 +82,7 @@ lipschitzConstant(const arma::sp_mat& x,
   }
 
   if (family == "binomial")
-    out /= 4;
+    out *= 4;
 
   return out;
 }

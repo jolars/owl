@@ -1,3 +1,32 @@
+#' Bodyfat
+#'
+#' The response (`y`) corresponds to
+#' estimates of percentage of body fat from application of
+#' Siri's 1956 equation to measurements of underwater weighing, as well as
+#' age, weight, height, and a variety of
+#' body circumference measurements.
+#'
+#' @format A list with two items representing 252 observations from
+#'   14 variables
+#' \describe{
+#'   \item{age}{age (years)}
+#'   \item{weight}{weight (lbs)}
+#'   \item{height}{height (inches)}
+#'   \item{neck}{neck circumference (cm)}
+#'   \item{chest}{chest circumference (cm)}
+#'   \item{abdomen}{abdomen circumference (cm)}
+#'   \item{hip}{hip circumference (cm)}
+#'   \item{thigh}{thigh circumference (cm)}
+#'   \item{knee}{knee circumference (cm)}
+#'   \item{ankle}{ankle circumference (cm)}
+#'   \item{biceps}{biceps circumference (cm)}
+#'   \item{forearm}{forearm circumference (cm)}
+#'   \item{wrist}{wrist circumference (cm)}
+#' }
+#' @source http://lib.stat.cmu.edu/datasets/bodyfat
+#' @source https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression.html
+"bodyfat"
+
 #' Abalone
 #'
 #' This data set contains observations of abalones, the common

@@ -14,6 +14,8 @@ private:
   const arma::uword max_passes;
   const double tol_rel_gap;
   const double tol_infeas;
+  const bool line_search;
+  const arma::uword line_search_frequency;
 
 public:
   FISTA(const bool standardize,
@@ -21,13 +23,17 @@ public:
         const bool diagnostics,
         const arma::uword max_passes,
         const double tol_rel_gap,
-        const double tol_infeas)
+        const double tol_infeas,
+        const bool line_search,
+        const arma::uword line_search_frequency)
         : standardize(standardize),
           is_sparse(is_sparse),
           diagnostics(diagnostics),
           max_passes(max_passes),
           tol_rel_gap(tol_rel_gap),
-          tol_infeas(tol_infeas) {}
+          tol_infeas(tol_infeas),
+          line_search(line_search),
+          line_search_frequency(line_search_frequency) {}
 
   virtual
   Results
@@ -119,7 +125,7 @@ public:
     double learning_rate = 1.0/lipschitz_constant;
 
     // line search parameters
-    double eta = 0.9;
+    double eta = 0.5;
 
     // FISTA parameters
     double t = 1;
@@ -201,15 +207,44 @@ public:
       unsigned current_line_searches = 0;
 
       // Backtracking line search
-      while (true) {
-        current_line_searches++;
+      if (line_search && passes % line_search_frequency == 0) {
+        while (true) {
+          current_line_searches++;
 
+          // Update beta and intercept
+          beta_tilde = penalty->eval(beta - learning_rate*gradient,
+                                     lambda,
+                                     learning_rate);
+
+          vec d = beta_tilde - beta;
+
+          if (fit_intercept)
+            intercept_tilde = intercept - learning_rate*gradient_intercept;
+
+          lin_pred = linearPredictor(x,
+                                     beta_tilde,
+                                     intercept_tilde,
+                                     x_center,
+                                     x_scale,
+                                     standardize);
+
+          f = family->primal(y, lin_pred);
+          double q =
+            f_old + dot(d, gradient) + (1.0/(2*learning_rate))*accu(square(d));
+
+          if (q >= f*(1 - 1e-12)) {
+            break;
+          } else {
+            learning_rate *= eta;
+          }
+
+          Rcpp::checkUserInterrupt();
+        }
+      } else {
         // Update beta and intercept
         beta_tilde = penalty->eval(beta - learning_rate*gradient,
                                    lambda,
                                    learning_rate);
-
-        vec d = beta_tilde - beta;
 
         if (fit_intercept)
           intercept_tilde = intercept - learning_rate*gradient_intercept;
@@ -220,16 +255,6 @@ public:
                                    x_center,
                                    x_scale,
                                    standardize);
-
-        f = family->primal(y, lin_pred);
-        double q =
-          f_old + dot(d, gradient) + (1.0/(2*learning_rate))*accu(square(d));
-
-        if (q >= f*(1 - 1e-12)) {
-          break;
-        } else {
-          learning_rate *= eta;
-        }
       }
 
       if (diagnostics)

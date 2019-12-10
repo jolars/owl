@@ -60,14 +60,15 @@ colNorms <- function(x, norm_type = 2) {
 #     rowNormsDense(x, norm_type)
 # }
 
-randomProblem <- function(n = 1000,
-                          p = 100,
-                          q = 0.2,
-                          n_groups = NULL,
-                          density = 1,
-                          amplitude = 3,
-                          sigma = 1,
-                          response = c("gaussian", "binomial")) {
+randomProblem <-
+  function(n = 1000,
+           p = 100,
+           q = 0.2,
+           n_groups = NULL,
+           density = 1,
+           amplitude = if (match.arg(response) == "poisson") 1 else 3,
+           sigma = 1,
+           response = c("gaussian", "binomial", "poisson")) {
   if (density == 1) {
     x <- matrix(stats::rnorm(n*p), n)
   } else {
@@ -83,13 +84,19 @@ randomProblem <- function(n = 1000,
     nonzero <- sample(p, max(floor(q*p), 1))
   }
 
-  beta <- amplitude * (1:p %in% nonzero)
+  signs <- sample(c(-1, 1), p, replace = TRUE)
+
+  beta <- signs * amplitude * (1:p %in% nonzero)
 
   y <- switch(match.arg(response),
               gaussian = x %*% beta + stats::rnorm(n, sd = sigma),
               binomial = {
                 y <- x %*% beta + stats::rnorm(n, sd = sigma)
                 (sign(y) + 1)/2
+              },
+              poisson = {
+                lambda <- as.double(exp(x %*% beta))
+                y <- stats::rpois(n, lambda)
               })
 
   dimnames(x) <- list(seq_len(nrow(x)),
