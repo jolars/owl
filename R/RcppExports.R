@@ -29,3 +29,7 @@ lambdaMax <- function(x, y, x_center, x_scale, y_scale, family, standardize_feat
     .Call(`_owl_lambdaMax`, x, y, x_center, x_scale, y_scale, family, standardize_features)
 }
 
+standardize <- function(x) {
+    .Call(`_owl_standardize`, x)
+}
+

@@ -239,6 +239,16 @@ owl <- function(x,
     x <- as.matrix(x)
   }
 
+  # collect response and variable names (if they are given) and otherwise
+  # make new
+  response_names <- colnames(y)
+  variable_names <- colnames(x)
+
+  if (is.null(variable_names))
+    variable_names <- paste0("V", seq_len(p))
+  if (is.null(response_names))
+    response_names <- paste0("y", seq_len(m))
+
   intercept_init <- double(m)
   beta_init <- matrix(0, p, m)
 
@@ -255,10 +265,18 @@ owl <- function(x,
   class_names <- res$class_names
 
   # setup feature matrix
-  res <- standardize(x, standardize_features)
-  x <- res$x
-  x_center <- res$x_center
-  x_scale <- res$x_scale
+  if (standardize_features) {
+    res <- standardize(x)
+    x <- res$x
+    x_center <- res$x_center
+    x_scale <- res$x_scale
+  } else {
+    x_center <- rep(0, p)
+    x_scale <- rep(1, p)
+  }
+
+  names(x_center) <- variable_names
+  names(x_scale) <- variable_names
 
   if (group_penalty) {
     res <- groupify(x,
@@ -330,16 +348,6 @@ owl <- function(x,
   solver <- switch(solver,
                    fista = do.call(FISTA, solver_options),
                    admm = do.call(ADMM, solver_options))
-
-  # collect response and variable names (if they are given) and otherwise
-  # make new
-  response_names <- colnames(y)
-  variable_names <- colnames(x)
-
-  if (is.null(variable_names))
-    variable_names <- paste0("V", seq_len(p))
-  if (is.null(response_names))
-    response_names <- paste0("y", seq_len(m))
 
   control <- list(intercept_init = intercept_init,
                   beta_init = beta_init,

@@ -97,6 +97,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// standardize
+Rcpp::List standardize(SEXP x);
+RcppExport SEXP _owl_standardize(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(standardize(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_owl_owlSparse", (DL_FUNC) &_owl_owlSparse, 3},
@@ -106,6 +117,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_owl_colNormsSparse", (DL_FUNC) &_owl_colNormsSparse, 2},
     {"_owl_colNormsDense", (DL_FUNC) &_owl_colNormsDense, 2},
     {"_owl_lambdaMax", (DL_FUNC) &_owl_lambdaMax, 7},
+    {"_owl_standardize", (DL_FUNC) &_owl_standardize, 1},
     {NULL, NULL, 0}
 };
 

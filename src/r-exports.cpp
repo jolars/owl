@@ -2,6 +2,7 @@
 #include "penalties.h"
 #include "utils.h"
 
+using namespace Rcpp;
 using namespace arma;
 
 // [[Rcpp::export]]
@@ -220,3 +221,72 @@ lambdaMax(SEXP x,
 //                            x_scaled_center,
 //                            standardize_features);
 // }
+
+Rcpp::List
+standardizeDense(arma::mat x)
+{
+  const uword p = x.n_cols;
+  const uword n = x.n_rows;
+
+  vec x_center(p);
+  vec x_scale(p);
+
+  for (uword j = 0; j < p; ++j) {
+    x_center(j) = accu(x.col(j))/n;
+    x_scale(j) = norm(x.col(j) - x_center(j), 2);
+  }
+
+  // don't scale zero-variance predictors
+  x_scale.replace(0, 1);
+
+  for (uword j = 0; j < p; ++j) {
+    x.col(j) -= x_center(j);
+    x.col(j) /= x_scale(j);
+  }
+
+  return List::create(
+    Named("x") = wrap(x),
+    Named("x_center") = wrap(x_center),
+    Named("x_scale") = wrap(x_scale)
+  );
+}
+
+Rcpp::List
+standardizeSparse(arma::sp_mat x)
+{
+  const uword p = x.n_cols;
+  const uword n = x.n_rows;
+
+  vec x_center(p);
+  vec x_scale(p);
+
+  for (uword j = 0; j < p; ++j) {
+    x_center(j) = accu(x.col(j))/n;
+    x_scale(j) = norm(x.col(j) - x_center(j), 2);
+  }
+
+  // don't scale zero-variance predictors
+  x_scale.replace(0, 1);
+
+  for (uword j = 0; j < p; ++j) {
+    x.col(j) /= x_scale(j);
+  }
+
+  return List::create(
+    Named("x") = wrap(x),
+    Named("x_center") = wrap(x_center),
+    Named("x_scale") = wrap(x_scale)
+  );
+}
+
+// [[Rcpp::export]]
+Rcpp::List
+standardize(SEXP x)
+{
+  bool is_sparse = isSparse(x);
+
+  if (is_sparse)
+    return standardizeSparse(Rcpp::as<sp_mat>(x));
+  else
+    return standardizeDense(Rcpp::as<mat>(x));
+}
