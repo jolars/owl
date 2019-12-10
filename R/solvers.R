@@ -37,10 +37,10 @@ FISTA <- function(tol_rel_gap = 1e-5,
 #'
 #' @param tol_rel relative tolerance criterion for convergence
 #' @param tol_abs absolute tolerance criterion for convergence
-#' @param alpha over-regularization paramter, must be in `(1.0, 1.8`)
+#' @param alpha over-regularization parameter, must be in `(1.0, 1.8`)
 #' @param ... ignored
 #'
-#' @return An object of clas `c("ADMM", "Solver"`
+#' @return An object of class `c("ADMM", "Solver"`
 #' @export
 ADMM <- function(tol_rel = 1e-5,
                  tol_abs = 1e-4,
