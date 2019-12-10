@@ -8,7 +8,7 @@ owl(
   x,
   y,
   groups = NULL,
-  family = c("gaussian", "binomial"),
+  family = c("gaussian", "binomial", "poisson"),
   penalty = c("slope", "group_slope"),
   solver = c("fista", "admm"),
   intercept = TRUE,
@@ -100,7 +100,7 @@ The Gaussian model (Ordinary Least Squares) minimizes the following
 objective.
 
 \deqn{
-  ||\boldsymbol{y} - \boldsymbol{X\beta}||_2^2
+  ||y - X\beta||_2^2
 }{
   ||y - X\beta||_2^2
 }
@@ -110,9 +110,19 @@ objective.
 The binomial model (logistic regression) has the following objective.
 
 \deqn{
-  \sum_{i=1}^n \log\left[1+ \exp\left(- y_i\boldsymbol{x}_i'\boldsymbol{\beta} \right) \right]
+  \sum_{i=1}^n \log\left(1+ \exp\left(- y_i \left(x_i^T\beta + \alpha \right) \right) \right)
 }{
-  \sum log[1+ exp(- y_i x_i' \beta)]
+  \sum log(1+ exp(- y_i x_i^T \beta))
+}
+
+\strong{Poisson}
+
+In poisson regression, we use the following objective.
+
+\deqn{
+  -\sum_{i=1}^n \left(y_i\left(x_i^T\beta + \alpha\right) - \exp\left(x_i^T\beta + \alpha\right)\right)
+}{
+  -\sum (y_i(x_i^T\beta + \alpha) - exp(x_i^T\beta + \alpha))
 }
 }
 

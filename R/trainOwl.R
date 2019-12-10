@@ -77,6 +77,8 @@ trainOwl <- function(x,
     "gaussian"
   else if (inherits(fit, "OwlBinomial"))
     "binomial"
+  else if (inherits(fit, "OwnPoisson"))
+    "poisson"
 
   ok <- switch(family,
                gaussian = c("deviance", "mse", "mae"),
@@ -185,6 +187,8 @@ trainOwl <- function(x,
           "Mean-Squared Error"
         else if (inherits(fit, "OwlBinomial"))
           "Binomial Deviance"
+        else if (inherits(fit, "OwlPoisson"))
+          "Mean-Squared Error"
       },
       mse = "Mean Squared Error",
       mae = "Mean Absolute Error",

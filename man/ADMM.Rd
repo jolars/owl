@@ -4,7 +4,7 @@
 \alias{ADMM}
 \title{ADMM (Alternating Direction Method of Multipliers)}
 \usage{
-ADMM(tol_rel = 1e-05, tol_abs = 1e-04, alpha = 1.6)
+ADMM(tol_rel = 1e-05, tol_abs = 1e-04, alpha = 1.6, ...)
 }
 \arguments{
 \item{tol_rel}{relative tolerance criterion for convergence}
@@ -12,6 +12,8 @@ ADMM(tol_rel = 1e-05, tol_abs = 1e-04, alpha = 1.6)
 \item{tol_abs}{absolute tolerance criterion for convergence}
 
 \item{alpha}{over-regularization paramter, must be in \verb{(1.0, 1.8})}
+
+\item{...}{ignored}
 }
 \value{
 An object of clas \verb{c("ADMM", "Solver"}

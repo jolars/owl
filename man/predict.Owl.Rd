@@ -4,6 +4,7 @@
 \alias{predict.Owl}
 \alias{predict.OwlGaussian}
 \alias{predict.OwlBinomial}
+\alias{predict.OwlPoisson}
 \title{Generate predictions from owl models}
 \usage{
 \method{predict}{Owl}(
@@ -34,6 +35,16 @@
   lambda = NULL,
   sigma = NULL,
   type = c("link", "response", "class"),
+  exact = FALSE,
+  simplify = TRUE,
+  ...
+)
+
+\method{predict}{OwlPoisson}(
+  object,
+  x,
+  sigma = NULL,
+  type = c("link", "response"),
   exact = FALSE,
   simplify = TRUE,
   ...

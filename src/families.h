@@ -4,6 +4,8 @@
 #include <memory>
 #include "utils.h"
 
+using namespace arma;
+
 class Family {
 public:
   virtual
@@ -90,22 +92,19 @@ public:
   double
   primal(const arma::vec& y, const arma::vec& lin_pred)
   {
-    using namespace arma;
-    return -accu(y % lin_pred - exp(lin_pred));
+    return -accu(y % lin_pred - trunc_exp(lin_pred) - lgamma(y + 1));
   }
 
   double
   dual(const arma::vec& y, const arma::vec& lin_pred)
   {
-    using namespace arma;
-    const vec theta = y - exp(lin_pred);
-    return -accu((y - theta) % log(y - theta) - y + theta);
+    return -accu(trunc_exp(lin_pred) % (lin_pred - 1) - lgamma(y + 1));
   }
 
   arma::vec
   pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
   {
-    return arma::exp(lin_pred) - y;
+    return arma::trunc_exp(lin_pred) - y;
   }
 
   double

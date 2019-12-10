@@ -47,3 +47,18 @@ preProcessResponse.Binomial <- function(object, y) {
        n_classes = 1L,
        class_names = class_names)
 }
+
+preProcessResponse.Poisson <- function(object, y) {
+  if (NCOL(y) > 1)
+    stop("response for poisson regression must be one-dimensional.")
+
+  if (any(y < 0))
+    stop("cannot have negative responses in poisson model")
+
+  list(y = y,
+       y_center = 0,
+       y_scale = 1,
+       n_classes = 1L,
+       class_names = NA_character_)
+
+}

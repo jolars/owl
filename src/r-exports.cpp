@@ -2,6 +2,8 @@
 #include "penalties.h"
 #include "utils.h"
 
+using namespace arma;
+
 // [[Rcpp::export]]
 arma::vec
 prox_slope_cpp(const arma::vec& y, const Rcpp::List& args)
@@ -59,6 +61,80 @@ arma::vec
 colNormsDense(const arma::mat& x, const arma::uword norm_type = 2)
 {
   return colNorms(x, norm_type);
+}
+
+template <typename T>
+arma::vec
+lambdaMax(const T& x,
+          const arma::vec& y,
+          const arma::vec& x_center,
+          const arma::vec& x_scale,
+          const arma::vec& y_scale,
+          const std::string& family,
+          const bool standardize_features,
+          const bool is_sparse)
+{
+  const uword p = x_center.n_elem;
+  vec lambda_max(p);
+
+  if (family == "binomial") {
+    vec y_new = (y + 1)/2;
+
+    // standardize
+    double y_center = mean(y_new);
+    y_new -= y_center;
+
+    lambda_max = x.t() * y_new;
+
+    if (is_sparse && standardize_features) {
+      for (uword j = 0; j < p; ++j)
+        lambda_max(j) -= accu(y_new * x_center(j)/x_scale(j));
+    }
+
+  } else {
+
+    lambda_max = x.t() * y;
+
+    if (is_sparse && standardize_features) {
+      for (uword j = 0; j < p; ++j)
+        lambda_max(j) -= accu(y * x_center(j)/x_scale(j));
+    }
+  }
+
+  return abs(lambda_max);
+}
+
+// [[Rcpp::export]]
+arma::vec
+lambdaMax(SEXP x,
+          const arma::vec& y,
+          const arma::vec& x_center,
+          const arma::vec& x_scale,
+          const arma::vec& y_scale,
+          const std::string& family,
+          const bool standardize_features)
+{
+  vec lambda_max;
+  const bool is_sparse = isSparse(x);
+
+  if (is_sparse)
+    return lambdaMax(Rcpp::as<sp_mat>(x),
+                     y,
+                     x_center,
+                     x_scale,
+                     y_scale,
+                     family,
+                     standardize_features,
+                     is_sparse);
+  else
+    return lambdaMax(Rcpp::as<mat>(x),
+                     y,
+                     x_center,
+                     x_scale,
+                     y_scale,
+                     family,
+                     standardize_features,
+                     is_sparse);
 }
 
 // template <typename T>
