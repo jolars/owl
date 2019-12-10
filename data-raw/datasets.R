@@ -1,4 +1,36 @@
-# abalone (gaussian) ------------------------------------------------------
+# bodyfat (gaussian) ------------------------------------------------------
+
+temp_file <- tempfile()
+
+download.file(
+  "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/bodyfat",
+  temp_file
+)
+
+tmp <- e1071::read.matrix.csr(temp_file, fac = FALSE)
+unlink(temp_file)
+tmp_x <- as.data.frame(as.matrix(tmp$x))
+colnames(tmp_x) <- c("siri_1956",
+                     "age",
+                     "weight",
+                     "height",
+                     "neck",
+                     "chest",
+                     "abdomen",
+                     "hip",
+                     "thigh",
+                     "knee",
+                     "ankle",
+                     "biceps",
+                     "foream",
+                     "wrist")
+
+# omit the siri 1956 equation
+bodyfat <- list(x = tmp_x[, -1], y = tmp_x[, 1])
+
+usethis::use_data(bodyfat, overwrite = TRUE)
+
+# abalone (poisson) -------------------------------------------------------
 
 temp_file <- tempfile()
 
