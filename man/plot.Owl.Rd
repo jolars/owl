@@ -4,10 +4,12 @@
 \alias{plot.Owl}
 \title{Plot coefficients for a model fit by owl}
 \usage{
-\method{plot}{Owl}(x, ...)
+\method{plot}{Owl}(x, intercept = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class \code{"Owl"}}
+
+\item{intercept}{whether to plot the intercept}
 
 \item{...}{parameters that will be used to modify the call to
 \code{\link[lattice:xyplot]{lattice::xyplot()}}}

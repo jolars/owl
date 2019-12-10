@@ -5,6 +5,7 @@
 #' @param x an object of class `"Owl"`
 #' @param ... parameters that will be used to modify the call to
 #'   [lattice::xyplot()]
+#' @param intercept whether to plot the intercept
 #'
 #' @seealso [lattice::xyplot()], [owl()], [plotDiagnostics()]
 #'
@@ -15,10 +16,15 @@
 #' @examples
 #' fit <- owl(heart$x, heart$y, penalty = "slope")
 #' plot(fit)
-plot.Owl = function(x, ...) {
+plot.Owl = function(x, intercept = FALSE, ...) {
   object <- x
 
   coefs <- object$coefficients
+
+  intercept_in_model <- "(Intercept)" %in% rownames(coefs)
+
+  if (intercept_in_model && !intercept)
+    coefs <- coefs[-1, , , drop = FALSE]
 
   if (is.null(coefs))
     stop("nothing to plot since model is yet to be fit")
@@ -35,6 +41,10 @@ plot.Owl = function(x, ...) {
   d <- as.data.frame(as.table(coefs))
   d$x <- rep(x, each = p*m)
 
+  n_col <- length(lattice::trellis.par.get("superpose.line")$col)
+  lty <- rep(1:4, each = n_col)
+  superpose.line <- list(lty = lty)
+
   args <- list(
     x = if (m > 1)
       quote(Freq ~ x | Var2)
@@ -45,13 +55,14 @@ plot.Owl = function(x, ...) {
     data = quote(d),
     ylab = expression(hat(beta)),
     xlab = xlab,
+    par.settings = list(superpose.line = superpose.line),
     # scales = list(x = list(log = "e")),
     # xscale.components = function(lim, ...) {
     #   x <- lattice::xscale.components.default(lim, ...)
     #   x$bottom$labels$labels <- parse(text = x$bottom$labels$labels)
     #   x
     # },
-    auto.key = if (p <= 10)
+    auto.key = if (p <= 20)
       list(space = "right", lines = TRUE, points = FALSE)
     else FALSE,
     abline = within(lattice::trellis.par.get("reference.line"), {h = 0})
