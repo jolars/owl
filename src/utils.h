@@ -93,3 +93,16 @@ setUnion(const arma::uvec& a,
 
   return conv_to<uvec>::from(out);
 }
+
+inline
+bool
+isSparse(SEXP x)
+{
+  bool is_sparse = false;
+
+  if (Rf_isS4(x))
+    if (Rf_inherits(x, "dgCMatrix"))
+      is_sparse = true;
+
+  return is_sparse;
+}
