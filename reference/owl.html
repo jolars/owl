@@ -146,7 +146,7 @@ optimization routines suitable to big data problems.</p>
   <span class='no'>x</span>,
   <span class='no'>y</span>,
   <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>),
+  <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>, <span class='st'>"poisson"</span>),
   <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"slope"</span>, <span class='st'>"group_slope"</span>),
   <span class='kw'>solver</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"fista"</span>, <span class='st'>"admm"</span>),
   <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
@@ -275,12 +275,17 @@ each family plus a penalty term.</p>
 <p>The Gaussian model (Ordinary Least Squares) minimizes the following
 objective.</p>
 <p>$$
-  ||\boldsymbol{y} - \boldsymbol{X\beta}||_2^2
+  ||y - X\beta||_2^2
 $$</p>
 <p><strong>Binomial</strong></p>
 <p>The binomial model (logistic regression) has the following objective.</p>
 <p>$$
-  \sum_{i=1}^n \log\left[1+ \exp\left(- y_i\boldsymbol{x}_i'\boldsymbol{\beta} \right) \right]
+  \sum_{i=1}^n \log\left(1+ \exp\left(- y_i \left(x_i^T\beta + \alpha \right) \right) \right)
+$$</p>
+<p><strong>Poisson</strong></p>
+<p>In poisson regression, we use the following objective.</p>
+<p>$$
+  -\sum_{i=1}^n \left(y_i\left(x_i^T\beta + \alpha\right) - \exp\left(x_i^T\beta + \alpha\right)\right)
 $$</p>
     <h2 class="hasAnchor" id="penalties"><a class="anchor" href="#penalties"></a>Penalties</h2>
 

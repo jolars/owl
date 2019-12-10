@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ADMM (Alternating Direction Method of Multipliers) — ADMM • owl</title>
+<title>Bodyfat — bodyfat • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,8 +42,12 @@
 
 
 
-<meta property="og:title" content="ADMM (Alternating Direction Method of Multipliers) — ADMM" />
-<meta property="og:description" content="ADMM (Alternating Direction Method of Multipliers)" />
+<meta property="og:title" content="Bodyfat — bodyfat" />
+<meta property="og:description" content="The response (y) corresponds to
+estimates of percentage of body fat from application of
+Siri's 1956 equation to measurements of underwater weighing, as well as
+age, weight, height, and a variety of
+body circumference measurements." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -131,48 +135,52 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>ADMM (Alternating Direction Method of Multipliers)</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/solvers.R'><code>R/solvers.R</code></a></small>
-    <div class="hidden name"><code>ADMM.Rd</code></div>
+    <h1>Bodyfat</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/data.R'><code>R/data.R</code></a></small>
+    <div class="hidden name"><code>bodyfat.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>ADMM (Alternating Direction Method of Multipliers)</p>
+    <p>The response (<code>y</code>) corresponds to
+estimates of percentage of body fat from application of
+Siri's 1956 equation to measurements of underwater weighing, as well as
+age, weight, height, and a variety of
+body circumference measurements.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>ADMM</span>(<span class='kw'>tol_rel</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>, <span class='kw'>tol_abs</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>1.6</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='no'>bodyfat</span></pre>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>tol_rel</th>
-      <td><p>relative tolerance criterion for convergence</p></td>
-    </tr>
-    <tr>
-      <th>tol_abs</th>
-      <td><p>absolute tolerance criterion for convergence</p></td>
-    </tr>
-    <tr>
-      <th>alpha</th>
-      <td><p>over-regularization parameter, must be in <code>(1.0, 1.8</code>)</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>ignored</p></td>
-    </tr>
-    </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>An object of class <code>c("ADMM", "Solver"</code></p>
+    <p>A list with two items representing 252 observations from
+14 variables</p><dl class='dl-horizontal'>
+<dt>age</dt><dd><p>age (years)</p></dd>
+<dt>weight</dt><dd><p>weight (lbs)</p></dd>
+<dt>height</dt><dd><p>height (inches)</p></dd>
+<dt>neck</dt><dd><p>neck circumference (cm)</p></dd>
+<dt>chest</dt><dd><p>chest circumference (cm)</p></dd>
+<dt>abdomen</dt><dd><p>abdomen circumference (cm)</p></dd>
+<dt>hip</dt><dd><p>hip circumference (cm)</p></dd>
+<dt>thigh</dt><dd><p>thigh circumference (cm)</p></dd>
+<dt>knee</dt><dd><p>knee circumference (cm)</p></dd>
+<dt>ankle</dt><dd><p>ankle circumference (cm)</p></dd>
+<dt>biceps</dt><dd><p>biceps circumference (cm)</p></dd>
+<dt>forearm</dt><dd><p>forearm circumference (cm)</p></dd>
+<dt>wrist</dt><dd><p>wrist circumference (cm)</p></dd>
+
+</dl>
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p>http://lib.stat.cmu.edu/datasets/bodyfat</p>
+<p>https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression.html</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
+      <li><a href="#format">Format</a></li>
+      <li><a href="#source">Source</a></li>
     </ul>
 
   </div>

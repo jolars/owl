@@ -140,7 +140,13 @@
     <p>FISTA is a first-order gradient method.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>FISTA</span>(<span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>, <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>)</pre>
+    <pre class="usage"><span class='fu'>FISTA</span>(
+  <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
+  <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>,
+  <span class='kw'>line_search</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>line_search_frequency</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -153,6 +159,18 @@
       <th>tol_infeas</th>
       <td><p>tolerance criterion for infeasibility of the
 dual objective</p></td>
+    </tr>
+    <tr>
+      <th>line_search</th>
+      <td><p>whether to perform line search</p></td>
+    </tr>
+    <tr>
+      <th>line_search_frequency</th>
+      <td><p>at which iterations to perform line search</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>ignored</p></td>
     </tr>
     </table>
 
