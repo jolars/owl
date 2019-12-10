@@ -31,9 +31,9 @@ library(owl)
 
 ### Gaussian model
 
-```{r, fig.cap = "Objective loss over time for the abalone data set (Gaussian response)."}
-fit <- owl(abalone$x, 
-           abalone$y,
+```{r, fig.cap = "Objective loss over time for the bodyfat data set (Gaussian response)."}
+fit <- owl(bodyfat$x, 
+           bodyfat$y,
            family = "gaussian",
            penalty = "slope",
            diagnostics = TRUE,
@@ -47,6 +47,19 @@ plotDiagnostics(fit)
 fit <- owl(heart$x,
            heart$y,
            family = "gaussian",
+           penalty = "slope",
+           sigma = "estimate",
+           diagnostics = TRUE)
+plotDiagnostics(fit)
+```
+
+
+### Poisson model
+
+```{r, fig.cap = "objective loss over time for the abalone data set (poisson response)."}
+fit <- owl(abalone$x,
+           abalone$y,
+           family = "poisson",
            penalty = "slope",
            sigma = "estimate",
            diagnostics = TRUE)

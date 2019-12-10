@@ -24,7 +24,7 @@
 #'   \item{wrist}{wrist circumference (cm)}
 #' }
 #' @source http://lib.stat.cmu.edu/datasets/bodyfat
-#' @soruce https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression.html
+#' @source https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression.html
 "bodyfat"
 
 #' Abalone
