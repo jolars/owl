@@ -25,7 +25,7 @@ colnames(tmp_x) <- c("siri_1956",
                      "foream",
                      "wrist")
 
-# omit the siri 1956 equation
+# use the Siri 1956 equation as response
 bodyfat <- list(x = tmp_x[, -1], y = tmp_x[, 1])
 
 usethis::use_data(bodyfat, overwrite = TRUE)
