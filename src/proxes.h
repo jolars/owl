@@ -5,10 +5,12 @@
 #include "families.h"
 #include "utils.h"
 
+using namespace arma;
+
 inline
-arma::mat
-slopeProx(const arma::mat& beta,
-          const arma::vec& lambda,
+mat
+slopeProx(const mat& beta,
+          const vec& lambda,
           const double shrinkage)
 {
   using namespace arma;

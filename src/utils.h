@@ -6,11 +6,11 @@ using namespace arma;
 
 inline
 mat
-linearPredictor(const arma::mat& x,
-                const arma::mat& beta,
+linearPredictor(const mat& x,
+                const mat& beta,
                 const rowvec& intercept,
-                const arma::vec& x_center,
-                const arma::vec& x_scale,
+                const vec& x_center,
+                const vec& x_scale,
                 const bool standardize_features)
 {
   return (x*beta).eval().each_row() + intercept;
@@ -18,11 +18,11 @@ linearPredictor(const arma::mat& x,
 
 inline
 mat
-linearPredictor(const arma::sp_mat& x,
-                const arma::mat& beta,
+linearPredictor(const sp_mat& x,
+                const mat& beta,
                 const rowvec& intercept,
-                const arma::vec& x_center,
-                const arma::vec& x_scale,
+                const vec& x_center,
+                const vec& x_scale,
                 const bool standardize_features)
 {
   uword m = beta.n_cols;
@@ -41,7 +41,7 @@ linearPredictor(const arma::sp_mat& x,
 template <typename T>
 T
 matrixSubset(const T& x,
-             const arma::uvec& active_set)
+             const uvec& active_set)
 {
   using namespace arma;
 

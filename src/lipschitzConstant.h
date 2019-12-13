@@ -5,25 +5,25 @@
 using namespace arma;
 
 double
-lipschitzConstant(const arma::mat& x,
-                  const arma::vec& x_center,
-                  const arma::vec& x_scale,
+lipschitzConstant(const mat& x,
+                  const vec& x_center,
+                  const vec& x_scale,
                   const bool standardize_features,
                   const std::string family)
 {
   if (family == "binomial" || family == "multinomial")
     return 1.0;
 
-  double out = x.n_rows >= x.n_cols ? arma::eig_sym(x.t() * x).max()
-                                    : arma::eig_sym(x * x.t()).max();
+  double out = x.n_rows >= x.n_cols ? eig_sym(x.t() * x).max()
+                                    : eig_sym(x * x.t()).max();
 
   return out;
 }
 
 double
-lipschitzConstant(const arma::sp_mat& x,
-                  const arma::vec& x_center,
-                  const arma::vec& x_scale,
+lipschitzConstant(const sp_mat& x,
+                  const vec& x_center,
+                  const vec& x_scale,
                   const bool standardize_features,
                   const std::string family)
 {

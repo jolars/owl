@@ -63,7 +63,6 @@ public:
   double
   primal(const mat& y, const mat& lin_pred)
   {
-    using namespace arma;
     return accu(log(1.0 + exp(-y % lin_pred)));
   }
 

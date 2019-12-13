@@ -11,7 +11,7 @@ using namespace arma;
 struct Results {
   rowvec intercept;
   mat beta;
-  arma::uword passes;
+  uword passes;
   std::vector<double> primals;
   std::vector<double> duals;
   std::vector<double> infeasibilities;
@@ -21,8 +21,8 @@ struct Results {
   Results() {}
 
   Results(rowvec intercept,
-          arma::mat beta,
-          arma::uword passes,
+          mat beta,
+          uword passes,
           std::vector<double> primals,
           std::vector<double> duals,
           std::vector<double> infeasibilities,
@@ -46,29 +46,29 @@ public:
   virtual
   Results
   fit(const sp_mat& x,
-      const arma::mat& y,
+      const mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
       const rowvec& intercept_init,
       const mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
-      const arma::vec& lambda,
-      const arma::vec& x_center,
-      const arma::vec& x_scale) = 0;
+      const vec& lambda,
+      const vec& x_center,
+      const vec& x_scale) = 0;
 
   virtual
   Results
-  fit(const arma::mat& x,
-      const arma::mat& y,
+  fit(const mat& x,
+      const mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
       const rowvec& intercept_init,
-      const arma::mat& beta_init,
+      const mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
-      const arma::vec& lambda,
-      const arma::vec& x_center,
-      const arma::vec& x_scale) = 0;
+      const vec& lambda,
+      const vec& x_center,
+      const vec& x_scale) = 0;
 };
 

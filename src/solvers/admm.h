@@ -11,7 +11,7 @@ private:
   const bool standardize;
   const bool is_sparse;
   const bool diagnostics;
-  const arma::uword max_passes;
+  const uword max_passes;
   const double tol_rel;
   const double tol_abs;
   const double alpha;
@@ -20,7 +20,7 @@ public:
   ADMM(const bool standardize,
        const bool is_sparse,
        const bool diagnostics,
-       const arma::uword max_passes,
+       const uword max_passes,
        const double tol_rel,
        const double tol_abs,
        const double alpha)
@@ -33,17 +33,17 @@ public:
          alpha(alpha) {}
 
   Results
-  fit(const arma::sp_mat& x,
-      const arma::mat& y,
+  fit(const sp_mat& x,
+      const mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
       const rowvec& intercept_init,
-      const arma::mat& beta_init,
+      const mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
-      const arma::vec& lambda,
-      const arma::vec& x_center,
-      const arma::vec& x_scale)
+      const vec& lambda,
+      const vec& x_center,
+      const vec& x_scale)
   {
     // not yet implemented
     Results res;
@@ -54,17 +54,17 @@ public:
   }
 
   Results
-  fit(const arma::mat& x,
-      const arma::mat& y,
+  fit(const mat& x,
+      const mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
       const rowvec& intercept_init,
-      const arma::mat& beta_init,
+      const mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
-      const arma::vec& lambda,
-      const arma::vec& x_center,
-      const arma::vec& x_scale)
+      const vec& lambda,
+      const vec& x_center,
+      const vec& x_scale)
   {
     using namespace arma;
 

@@ -67,7 +67,6 @@ public:
   double
   primal(const mat& beta, const vec& lambda)
   {
-    using namespace arma;
     return dot(lambda, sort(abs(vectorise(beta)), "descending"));
   }
 
@@ -134,8 +133,6 @@ public:
   double
   infeasibility(const mat& gradient, const vec& lambda)
   {
-    using namespace arma;
-
     vec gradient_norms(n_groups);
 
     for (uword i = 0; i < n_groups; ++i)
@@ -161,7 +158,6 @@ inline
 std::unique_ptr<Penalty>
 setupPenalty(const Rcpp::List& args, const Rcpp::List& groups)
 {
-  using namespace arma;
   using Rcpp::as;
 
   auto name = as<std::string>(args["name"]);

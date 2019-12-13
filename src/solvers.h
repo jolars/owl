@@ -4,13 +4,15 @@
 #include "solvers/fista.h"
 #include "solvers/admm.h"
 
+using namespace arma;
+
 // helper to choose solver
 std::unique_ptr<Solver>
 setupSolver(const std::string& solver_choice,
             const bool standardize_features,
             const bool is_sparse,
             const bool diagnostics,
-            const arma::uword max_passes,
+            const uword max_passes,
             const Rcpp::List& args)
 {
   using Rcpp::as;

@@ -7,14 +7,14 @@
 
 using namespace arma;
 
-arma::uvec
+uvec
 SLOPE::activeSet(const std::unique_ptr<Family>& family,
-                 const arma::mat& y,
-                 const arma::mat& gradient_prev,
-                 const arma::mat& pseudo_gradient_prev,
-                 const arma::vec& norms,
-                 const arma::vec& lambda,
-                 const arma::vec& lambda_prev,
+                 const mat& y,
+                 const mat& gradient_prev,
+                 const mat& pseudo_gradient_prev,
+                 const vec& norms,
+                 const vec& lambda,
+                 const vec& lambda_prev,
                  const std::string screening_rule)
 {
   using namespace arma;
@@ -70,16 +70,16 @@ SLOPE::activeSet(const std::unique_ptr<Family>& family,
   return find(active_set);
 }
 
-arma::uvec
+uvec
 GroupSLOPE::activeSet(const std::unique_ptr<Family>& family,
-                      const arma::mat& y,
-                      const arma::mat& gradient_prev,
-                      const arma::mat& pseudo_gradient_prev,
-                      const arma::vec& norms,
-                      const arma::vec& lambda,
-                      const arma::vec& lambda_prev,
+                      const mat& y,
+                      const mat& gradient_prev,
+                      const mat& pseudo_gradient_prev,
+                      const vec& norms,
+                      const vec& lambda,
+                      const vec& lambda_prev,
                       const std::string screening_rule)
 {
   // not implemented yet
-  return arma::regspace<arma::uvec>(0, gradient_prev.n_elem - 1);
+  return regspace<uvec>(0, gradient_prev.n_elem - 1);
 }

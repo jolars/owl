@@ -13,21 +13,21 @@ private:
   const bool standardize;
   const bool is_sparse;
   const bool diagnostics;
-  const arma::uword max_passes;
+  const uword max_passes;
   const double tol_rel_gap;
   const double tol_infeas;
   const bool line_search;
-  const arma::uword line_search_frequency;
+  const uword line_search_frequency;
 
 public:
   FISTA(const bool standardize,
         const bool is_sparse,
         const bool diagnostics,
-        const arma::uword max_passes,
+        const uword max_passes,
         const double tol_rel_gap,
         const double tol_infeas,
         const bool line_search,
-        const arma::uword line_search_frequency)
+        const uword line_search_frequency)
         : standardize(standardize),
           is_sparse(is_sparse),
           diagnostics(diagnostics),
@@ -39,7 +39,7 @@ public:
 
   virtual
   Results
-  fit(const arma::mat& x,
+  fit(const mat& x,
       const mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
@@ -47,9 +47,9 @@ public:
       const mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
-      const arma::vec& lambda,
-      const arma::vec& x_center,
-      const arma::vec& x_scale)
+      const vec& lambda,
+      const vec& x_center,
+      const vec& x_scale)
   {
     return fitImpl(x,
                    y,
@@ -66,7 +66,7 @@ public:
 
   virtual
   Results
-  fit(const arma::sp_mat& x,
+  fit(const sp_mat& x,
       const mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
@@ -74,9 +74,9 @@ public:
       const mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
-      const arma::vec& lambda,
-      const arma::vec& x_center,
-      const arma::vec& x_scale)
+      const vec& lambda,
+      const vec& x_center,
+      const vec& x_scale)
   {
     return fitImpl(x,
                    y,
@@ -101,9 +101,9 @@ public:
           const mat& beta_init,
           const bool fit_intercept,
           const double lipschitz_constant,
-          const arma::vec& lambda,
-          const arma::vec& x_center,
-          const arma::vec& x_scale)
+          const vec& lambda,
+          const vec& x_center,
+          const vec& x_scale)
   {
     using namespace arma;
 
