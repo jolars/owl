@@ -222,6 +222,12 @@ owlCpp(const T& x, const mat& y, const List control)
       bool kkt_violation = true;
 
       do {
+        if (verbosity > 0) {
+          Rcpp::Rcout << "\t active set: " << std::endl;
+          active_set.print();
+          Rcpp::Rcout << std::endl;
+        }
+
         T x_subset = matrixSubset(x, active_set);
 
         // compute Lipschitz estimate on x subset
@@ -258,8 +264,15 @@ owlCpp(const T& x, const mat& y, const List control)
         pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
         gradient_prev = x.t() * pseudo_gradient_prev;
 
-        uvec check_failures =
+        uvec possible_failures =
           penalty->kktCheck(gradient_prev, beta, lambda*sigma(k), 1e-6);
+        uvec check_failures = setDiff(possible_failures, active_set);
+
+        if (verbosity > 0) {
+          Rcpp::Rcout << "\t kkt-failures at: " << std::endl;
+          check_failures.print();
+          Rcpp::Rcout << std::endl;
+        }
 
         kkt_violation = check_failures.n_elem > 0;
         violations(k) += check_failures.n_elem;

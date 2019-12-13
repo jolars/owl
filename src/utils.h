@@ -70,6 +70,19 @@ setUnion(const uvec& a, const uvec& b)
   return conv_to<uvec>::from(out);
 }
 
+
+inline
+uvec
+setDiff(uvec& a, uvec& b)
+{
+  std::vector<int> out;
+  std::set_difference(a.begin(), a.end(),
+                      b.begin(), b.end(),
+                      std::back_inserter(out));
+
+  return conv_to<uvec>::from(out);
+}
+
 inline
 bool
 isSparse(SEXP x)
