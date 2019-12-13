@@ -34,11 +34,11 @@ public:
 
   Results
   fit(const arma::sp_mat& x,
-      const arma::vec& y,
+      const arma::mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
-      const double intercept_init,
-      const arma::vec& beta_init,
+      const rowvec& intercept_init,
+      const arma::mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
       const arma::vec& lambda,
@@ -55,11 +55,11 @@ public:
 
   Results
   fit(const arma::mat& x,
-      const arma::vec& y,
+      const arma::mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
-      const double intercept_init,
-      const arma::vec& beta_init,
+      const rowvec& intercept_init,
+      const arma::mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
       const arma::vec& lambda,
@@ -68,15 +68,16 @@ public:
   {
     using namespace arma;
 
-    uword n = y.n_elem;
+    uword n = y.n_rows;
     uword p = x.n_cols;
+    uword m = y.n_cols;
 
-    double intercept = intercept_init;
+    rowvec intercept = intercept_init;
 
-    vec beta(beta_init);
-    vec beta_hat(beta);
+    mat beta(beta_init);
+    mat beta_hat(beta);
 
-    vec linear_predictor(n);
+    mat linear_predictor(n, m);
 
     // diagnostics
     wall_clock timer;

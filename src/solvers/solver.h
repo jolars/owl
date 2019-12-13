@@ -6,9 +6,11 @@
 #include "../families.h"
 #include "../utils.h"
 
+using namespace arma;
+
 struct Results {
-  double intercept;
-  arma::vec beta;
+  rowvec intercept;
+  mat beta;
   arma::uword passes;
   std::vector<double> primals;
   std::vector<double> duals;
@@ -18,8 +20,8 @@ struct Results {
 
   Results() {}
 
-  Results(double intercept,
-          arma::vec beta,
+  Results(rowvec intercept,
+          arma::mat beta,
           arma::uword passes,
           std::vector<double> primals,
           std::vector<double> duals,
@@ -43,12 +45,12 @@ protected:
 public:
   virtual
   Results
-  fit(const arma::sp_mat& x,
-      const arma::vec& y,
+  fit(const sp_mat& x,
+      const arma::mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
-      const double intercept_init,
-      const arma::vec& beta_init,
+      const rowvec& intercept_init,
+      const mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
       const arma::vec& lambda,
@@ -58,11 +60,11 @@ public:
   virtual
   Results
   fit(const arma::mat& x,
-      const arma::vec& y,
+      const arma::mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
-      const double intercept_init,
-      const arma::vec& beta_init,
+      const rowvec& intercept_init,
+      const arma::mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
       const arma::vec& lambda,

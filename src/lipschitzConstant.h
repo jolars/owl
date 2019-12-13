@@ -2,6 +2,8 @@
 
 #include <RcppArmadillo.h>
 
+using namespace arma;
+
 double
 lipschitzConstant(const arma::mat& x,
                   const arma::vec& x_center,
@@ -9,11 +11,11 @@ lipschitzConstant(const arma::mat& x,
                   const bool standardize_features,
                   const std::string family)
 {
+  if (family == "binomial" || family == "multinomial")
+    return 1.0;
+
   double out = x.n_rows >= x.n_cols ? arma::eig_sym(x.t() * x).max()
                                     : arma::eig_sym(x * x.t()).max();
-
-  if (family == "binomial")
-    out *= 4;
 
   return out;
 }
@@ -25,7 +27,8 @@ lipschitzConstant(const arma::sp_mat& x,
                   const bool standardize_features,
                   const std::string family)
 {
-  using namespace arma;
+  if (family == "binomial" || family == "multinomial")
+    return 1.0;
 
   const uword p = x.n_cols;
   const uword n = x.n_rows;

@@ -17,6 +17,7 @@ preProcessResponse.Gaussian <- function(object, y) {
        y_center = y_center,
        y_scale = y_scale,
        n_classes = 1L,
+       n_targets = 1L,
        class_names = NA_character_)
 }
 
@@ -45,7 +46,9 @@ preProcessResponse.Binomial <- function(object, y) {
        y_center = 0,
        y_scale = 1,
        n_classes = 1L,
-       class_names = class_names)
+       n_targets = 1L,
+       class_names = class_names,
+       response_names = colnames(y))
 }
 
 preProcessResponse.Poisson <- function(object, y) {
@@ -59,6 +62,37 @@ preProcessResponse.Poisson <- function(object, y) {
        y_center = 0,
        y_scale = 1,
        n_classes = 1L,
-       class_names = NA_character_)
+       n_targets = 1L,
+       class_names = NA_character_,
+       response_names = colnames(y))
+
+}
+
+preProcessResponse.Multinomial <- function(object, y) {
+  if (NCOL(y) > 1)
+    stop("response for multinomial regression must be one-dimensional.")
+
+  y <- droplevels(as.factor(y))
+  y_table <- table(y)
+  min_class <- min(y_table)
+  class_names <- names(y_table)
+  n_classes <- length(y_table)
+
+  if (n_classes == 2)
+    stop("only two classes in response. Are you looking for family = 'binomial'?")
+
+  if (n_classes == 1)
+    stop("only one class in response")
+
+  if (min_class <= 1)
+    stop("one class only has ", min_class, " observations.")
+
+  list(y = as.numeric(y) - 1,
+       y_center = rep(0, n_classes),
+       y_scale = rep(1, n_classes),
+       n_classes = n_classes,
+       n_targets = n_classes,
+       class_names = class_names,
+       response_names = class_names)
 
 }

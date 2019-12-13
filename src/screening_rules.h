@@ -5,28 +5,13 @@
 #include "penalties.h"
 #include "families.h"
 
-// inline
-// arma::uvec
-// findInterval(const arma::vec& x,
-//              const arma::vec& breaks)
-// {
-//   using namespace arma;
-//
-//   uvec out(x.n_elem);
-//
-//   for (uword i = 0; i < x.n_elem; ++i) {
-//     auto pos = std::upper_bound(breaks.begin(), breaks.end(), x(i));
-//     out[i] = std::distance(breaks.begin(), pos);
-//   }
-//
-//   return out;
-// }
+using namespace arma;
 
 arma::uvec
 SLOPE::activeSet(const std::unique_ptr<Family>& family,
-                 const arma::vec& y,
-                 const arma::vec& gradient_prev,
-                 const arma::vec& pseudo_gradient_prev,
+                 const arma::mat& y,
+                 const arma::mat& gradient_prev,
+                 const arma::mat& pseudo_gradient_prev,
                  const arma::vec& norms,
                  const arma::vec& lambda,
                  const arma::vec& lambda_prev,
@@ -87,9 +72,9 @@ SLOPE::activeSet(const std::unique_ptr<Family>& family,
 
 arma::uvec
 GroupSLOPE::activeSet(const std::unique_ptr<Family>& family,
-                      const arma::vec& y,
-                      const arma::vec& gradient_prev,
-                      const arma::vec& pseudo_gradient_prev,
+                      const arma::mat& y,
+                      const arma::mat& gradient_prev,
+                      const arma::mat& pseudo_gradient_prev,
                       const arma::vec& norms,
                       const arma::vec& lambda,
                       const arma::vec& lambda_prev,

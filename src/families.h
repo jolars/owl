@@ -10,108 +10,194 @@ class Family {
 public:
   virtual
   double
-  primal(const arma::vec& y, const arma::vec& lin_pred) = 0;
+  primal(const mat& y, const mat& lin_pred) = 0;
 
   virtual
   double
-  dual(const arma::vec& y, const arma::vec& lin_pred) = 0;
+  dual(const mat& y, const mat& lin_pred) = 0;
 
   // this is not really the true gradient, and needs to multiplied by X'
   virtual
-  arma::vec
-  pseudoGradient(const arma::vec& y, const arma::vec& lin_pred) = 0;
+  mat
+  pseudoGradient(const mat& y, const mat& lin_pred) = 0;
 
   virtual
-  double
-  fitNullModel(const arma::vec& y) = 0;
+  rowvec
+  fitNullModel(const mat& y, const uword n_classes) = 0;
+
+  std::string name = "none";
 };
 
 class Gaussian : public Family {
 public:
   double
-  primal(const arma::vec& y, const arma::vec& lin_pred)
+  primal(const mat& y, const mat& lin_pred)
   {
-    return 0.5*std::pow(arma::norm(y - lin_pred), 2);
+    return 0.5*pow(norm(y - lin_pred), 2);
   }
 
   double
-  dual(const arma::vec& y, const arma::vec& lin_pred)
+  dual(const mat& y, const mat& lin_pred)
   {
-    using namespace arma;
     using namespace std;
     return 0.5*pow(norm(y, 2), 2) - 0.5*pow(norm(lin_pred, 2), 2);
   }
 
-  arma::vec
-  pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
+  mat
+  pseudoGradient(const mat& y, const mat& lin_pred)
   {
     return -(y - lin_pred);
   }
 
-  double
-  fitNullModel(const arma::vec& y)
+  rowvec
+  fitNullModel(const mat& y, const uword n_classes)
   {
-    return arma::mean(y);
+    return mean(y);
   }
+
+  std::string name = "gaussian";
 };
 
 class Binomial : public Family {
 public:
   double
-  primal(const arma::vec& y, const arma::vec& lin_pred)
+  primal(const mat& y, const mat& lin_pred)
   {
     using namespace arma;
     return accu(log(1.0 + exp(-y % lin_pred)));
   }
 
   double
-  dual(const arma::vec& y, const arma::vec& lin_pred)
+  dual(const mat& y, const mat& lin_pred)
   {
-    using namespace arma;
-    const arma::vec r = 1.0/(1.0 + arma::exp(y % lin_pred));
-    return arma::as_scalar((r - 1.0).t()*log(1.0 - r) - r.t()*log(r));
+    const vec r = 1.0/(1.0 + exp(y % lin_pred));
+    return as_scalar((r - 1.0).t()*log(1.0 - r) - r.t()*log(r));
   }
 
-  arma::vec
-  pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
+  mat
+  pseudoGradient(const mat& y, const mat& lin_pred)
   {
-    return -y / (1.0 + arma::exp(y % lin_pred));
+    return -y / (1.0 + exp(y % lin_pred));
   }
 
-  double
-  fitNullModel(const arma::vec& y)
+  rowvec
+  fitNullModel(const mat& y, const uword n_classes)
   {
-    using namespace arma;
+    double pmin = 1e-9;
+    double pmax = 1 - pmin;
 
-    return std::log(mean(y*0.5 + 0.5)/(1 - mean(y*0.5 + 0.5)));
+    vec mu = clamp(mean(0.5*y + 0.5), pmin, pmax);
+
+    return log(mu/(1 - mu));
   }
+
+  std::string name = "binomial";
 };
 
 class Poisson : public Family {
 public:
   double
-  primal(const arma::vec& y, const arma::vec& lin_pred)
+  primal(const mat& y, const mat& lin_pred)
   {
     return -accu(y % lin_pred - trunc_exp(lin_pred) - lgamma(y + 1));
   }
 
   double
-  dual(const arma::vec& y, const arma::vec& lin_pred)
+  dual(const mat& y, const mat& lin_pred)
   {
     return -accu(trunc_exp(lin_pred) % (lin_pred - 1) - lgamma(y + 1));
   }
 
-  arma::vec
-  pseudoGradient(const arma::vec& y, const arma::vec& lin_pred)
+  mat
+  pseudoGradient(const mat& y, const mat& lin_pred)
   {
-    return arma::trunc_exp(lin_pred) - y;
+    return trunc_exp(lin_pred) - y;
+  }
+
+  rowvec
+  fitNullModel(const mat& y, const uword n_classes)
+  {
+    return log(mean(y));
+  }
+
+  std::string name = "poisson";
+};
+
+class Multinomial : public Family {
+public:
+
+  double
+  primal(const mat& y, const mat& lin_pred)
+  {
+    const uword m = lin_pred.n_cols;
+    const uvec y_class = conv_to<uvec>::from(y + 0.1);
+
+    // logsumexp bit
+    vec lp_max = max(lin_pred, 1);
+    double primal =
+      accu(trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max);
+
+    for (uword k = 0; k < m; ++k) {
+      // NOTE(JL): use colptr instead?
+      vec lin_pred_k = lin_pred.col(k);
+      primal -= accu(lin_pred_k(find(y_class == k)));
+    }
+
+    return primal;
   }
 
   double
-  fitNullModel(const arma::vec& y)
+  dual(const mat& y, const mat& lin_pred)
   {
-    return std::log(arma::mean(y));
+    uvec y_class = conv_to<uvec>::from(y + 0.1);
+
+    vec lp_max = max(lin_pred, 1);
+    vec lse =
+      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+
+    double dual = accu(lse);
+
+    dual += accu(-lin_pred % trunc_exp(lin_pred.each_col() - lse));
+
+    return dual;
   }
+
+  mat
+  pseudoGradient(const mat& y, const mat& lin_pred)
+  {
+    const uword m = lin_pred.n_cols;
+
+    uvec y_class = conv_to<uvec>::from(y + 0.1);
+
+    vec lp_max = max(lin_pred, 1);
+    vec lse =
+      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+
+    mat gradient = trunc_exp(lin_pred.each_col() - lse);
+
+    for (uword k = 0; k < m; ++k)
+      gradient.col(k) -= conv_to<vec>::from(y_class == k); // indicator fun
+
+    return gradient;
+  }
+
+  rowvec
+  fitNullModel(const mat& y, const uword n_classes)
+  {
+    rowvec intercept(n_classes);
+    auto n = y.n_rows;
+
+    for (uword i = 0; i < n; ++i) {
+      auto c = static_cast<uword>(y(i) + 0.1);
+      intercept(c) += 1/n;
+    }
+
+    intercept = trunc_log(intercept) - accu(trunc_log(intercept))/n_classes;
+
+    return intercept;
+  }
+
+  std::string name = "multinomial";
 };
 
 // helper to choose family
@@ -123,6 +209,8 @@ setupFamily(const std::string& family_choice)
     return std::unique_ptr<Binomial>(new Binomial);
   else if (family_choice == "poisson")
     return std::unique_ptr<Poisson>(new Poisson);
+  else if (family_choice == "multinomial")
+    return std::unique_ptr<Multinomial>(new Multinomial);
   else
     return std::unique_ptr<Gaussian>(new Gaussian);
 }

@@ -25,11 +25,15 @@ colNormsDense <- function(x, norm_type = 2L) {
     .Call(`_owl_colNormsDense`, x, norm_type)
 }
 
-lambdaMax <- function(x, y, x_center, x_scale, y_scale, family, standardize_features) {
-    .Call(`_owl_lambdaMax`, x, y, x_center, x_scale, y_scale, family, standardize_features)
+lambdaMax <- function(x, y, x_center, x_scale, y_scale, n_targets, family, standardize_features) {
+    .Call(`_owl_lambdaMax`, x, y, x_center, x_scale, y_scale, n_targets, family, standardize_features)
 }
 
 standardize <- function(x) {
     .Call(`_owl_standardize`, x)
+}
+
+tester <- function(y, lin_pred) {
+    .Call(`_owl_tester`, y, lin_pred)
 }
 

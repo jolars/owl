@@ -6,6 +6,8 @@
 #include "../penalties.h"
 #include "solver.h"
 
+using namespace arma;
+
 class FISTA : public Solver {
 private:
   const bool standardize;
@@ -38,11 +40,11 @@ public:
   virtual
   Results
   fit(const arma::mat& x,
-      const arma::vec& y,
+      const mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
-      const double intercept_init,
-      const arma::vec& beta_init,
+      const rowvec& intercept_init,
+      const mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
       const arma::vec& lambda,
@@ -65,11 +67,11 @@ public:
   virtual
   Results
   fit(const arma::sp_mat& x,
-      const arma::vec& y,
+      const mat& y,
       const std::unique_ptr<Family>& family,
       const std::unique_ptr<Penalty>& penalty,
-      const double intercept_init,
-      const arma::vec& beta_init,
+      const rowvec& intercept_init,
+      const mat& beta_init,
       const bool fit_intercept,
       const double lipschitz_constant,
       const arma::vec& lambda,
@@ -92,11 +94,11 @@ public:
   template <typename T>
   Results
   fitImpl(const T& x,
-          const arma::vec& y,
+          const mat& y,
           const std::unique_ptr<Family>& family,
           const std::unique_ptr<Penalty>& penalty,
-          const double intercept_init,
-          const arma::vec& beta_init,
+          const rowvec& intercept_init,
+          const mat& beta_init,
           const bool fit_intercept,
           const double lipschitz_constant,
           const arma::vec& lambda,
@@ -105,22 +107,23 @@ public:
   {
     using namespace arma;
 
-    uword n = y.n_elem;
+    uword n = y.n_rows;
     uword p = x.n_cols;
+    uword m = beta_init.n_cols;
 
-    double intercept = intercept_init;
-    double intercept_tilde = intercept;
-    double intercept_tilde_old = intercept_tilde;
+    rowvec intercept(intercept_init);
+    rowvec intercept_tilde(intercept_init);
+    rowvec intercept_tilde_old(intercept_init);
 
-    vec beta(beta_init);
-    vec beta_tilde(beta);
-    vec beta_tilde_old(beta_tilde);
+    mat beta(beta_init);
+    mat beta_tilde(beta_init);
+    mat beta_tilde_old(beta_init);
 
-    vec lin_pred(n);
+    mat lin_pred(n, m);
 
-    vec gradient(p, fill::zeros);
-    vec pseudo_gradient(n, fill::zeros);
-    double gradient_intercept = 0.0;
+    mat gradient(p, m, fill::zeros);
+    mat pseudo_gradient(n, m, fill::zeros);
+    rowvec gradient_intercept(m, fill::zeros);
 
     double learning_rate = 1.0/lipschitz_constant;
 
@@ -129,9 +132,6 @@ public:
 
     // FISTA parameters
     double t = 1;
-
-    uword passes = 0;
-    bool accepted = false;
 
     // diagnostics
     wall_clock timer;
@@ -158,11 +158,14 @@ public:
                                standardize);
 
     // main loop
-    while (!accepted && passes < max_passes) {
+    uword passes = 0;
+    while (passes < max_passes) {
       ++passes;
       // gradient
       double f = family->primal(y, lin_pred);
+
       pseudo_gradient = family->pseudoGradient(y, lin_pred);
+
       gradient = x.t()*pseudo_gradient;
 
       // adjust gradient if sparse and standardizing
@@ -180,8 +183,9 @@ public:
 
       double small = std::sqrt(datum::eps);
 
-      accepted = (std::abs(primal - dual)/std::max(small, primal) < tol_rel_gap)
-                  && (infeasibility <= std::max(small, lambda(0)*tol_infeas));
+      bool accepted =
+        (std::abs(primal - dual)/std::max(small, primal) < tol_rel_gap)
+        && (infeasibility <= std::max(small, lambda(0)*tol_infeas));
 
       if (diagnostics) {
         time.push_back(timer.toc());
@@ -216,7 +220,12 @@ public:
                                      lambda,
                                      learning_rate);
 
-          vec d = beta_tilde - beta;
+          if (family->name == "multinomial") {
+            beta_tilde.each_col() - median(beta_tilde);
+            intercept -= mean(intercept);
+          }
+
+          vec d = vectorise(beta_tilde - beta);
 
           if (fit_intercept)
             intercept_tilde = intercept - learning_rate*gradient_intercept;
@@ -229,8 +238,9 @@ public:
                                      standardize);
 
           f = family->primal(y, lin_pred);
-          double q =
-            f_old + dot(d, gradient) + (1.0/(2*learning_rate))*accu(square(d));
+          double q = f_old
+            + dot(d, vectorise(gradient))
+            + (1.0/(2*learning_rate))*accu(square(d));
 
           if (q >= f*(1 - 1e-12)) {
             break;
@@ -245,6 +255,11 @@ public:
         beta_tilde = penalty->eval(beta - learning_rate*gradient,
                                    lambda,
                                    learning_rate);
+
+        if (family->name == "multinomial") {
+          beta_tilde.each_col() - median(beta_tilde);
+          intercept -= mean(intercept);
+        }
 
         if (fit_intercept)
           intercept_tilde = intercept - learning_rate*gradient_intercept;
@@ -263,6 +278,11 @@ public:
       // FISTA step
       t = 0.5*(1.0 + std::sqrt(1.0 + 4.0*t_old*t_old));
       beta = beta_tilde + (t_old - 1.0)/t * (beta_tilde - beta_tilde_old);
+
+      if (family->name == "multinomial") {
+        beta.each_col() - median(beta);
+        intercept -= mean(intercept);
+      }
 
       if (fit_intercept)
         intercept = intercept_tilde

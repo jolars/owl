@@ -9,7 +9,8 @@ Slope <- function(x,
                   lambda_min_ratio = NULL,
                   n_sigma = 100,
                   fdr = 0.2,
-                  family) {
+                  family,
+                  n_targets) {
 
   n <- NROW(x)
   p <- NCOL(x)
@@ -29,17 +30,19 @@ Slope <- function(x,
     sigma_type <- "user"
   }
 
+  n_lambda <- p*n_targets
+
   # regularization strength
   if (is.character(lambda)) {
     lambda_type <- match.arg(lambda)
 
     if (lambda_type %in% c("bhq", "gaussian")) {
-      q <- 1:p * fdr/(2*p)
+      q <- 1:n_lambda * fdr/(2*n_lambda)
       lambda <- stats::qnorm(1 - q)
 
-      if (lambda_type == "gaussian" && p > 1) {
+      if (lambda_type == "gaussian" && n_lambda > 1) {
         sum_sq <- 0
-        for (i in 2:p) {
+        for (i in 2:n_lambda) {
           sum_sq <- sum_sq + lambda[i - 1]^2
           w <- max(1, n - i)
           lambda[i] <- lambda[i]*sqrt(1 + sum_sq/w)
@@ -47,13 +50,13 @@ Slope <- function(x,
       }
 
       # ensure non-increasing lambdas
-      lambda[which.min(lambda):p] <- min(lambda)
+      lambda[which.min(lambda):n_lambda] <- min(lambda)
 
     }
   } else {
     lambda <- as.double(lambda)
 
-    if (length(lambda) != p)
+    if (length(lambda) != n_lambda)
       stop("lambda sequence must be as long as there are variables")
 
     if (is.unsorted(rev(lambda)))
@@ -69,6 +72,7 @@ Slope <- function(x,
                             x_center,
                             x_scale,
                             y_scale,
+                            n_targets,
                             family$name,
                             standardize_features)
 
@@ -79,7 +83,7 @@ Slope <- function(x,
                      length.out = n_sigma))
   }
 
-  lambda <- matrix(lambda, p, 1)
+  lambda <- matrix(lambda, n_lambda, 1)
   sigma  <- sigma
 
   structure(list(name = "slope",
@@ -102,7 +106,8 @@ GroupSlope <- function(x,
                        lambda_min_ratio = NULL,
                        n_sigma = 100,
                        fdr = 0.2,
-                       family) {
+                       family,
+                       n_targets) {
 
   group_id <- groups$group_id
   ortho_group_id <- groups$ortho_group_id
@@ -185,6 +190,7 @@ GroupSlope <- function(x,
                             x_center,
                             x_scale,
                             y_scale,
+                            n_targets,
                             family$name,
                             standardize_features)
 

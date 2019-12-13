@@ -2,61 +2,40 @@
 
 #include <RcppArmadillo.h>
 
-inline
-arma::vec
-sigmoid(const arma::vec& x)
-{
-  return 1.0/(1.0 + arma::exp(-x));
-}
+using namespace arma;
 
 inline
-double
-sigmoid(const double x)
-{
-  return 1.0/(1.0 + std::exp(-x));
-}
-
-//' Clamp a value to [min, max]
-//' @param x value to clamp
-//' @param min min
-//' @param max max
-//' @noRd
-template <typename T>
-inline
-T
-clamp(const T& x, const T& min, const T& max)
-{
-  return x > max ? max : (x < min ? min : x);
-}
-
-
-inline
-arma::vec
+mat
 linearPredictor(const arma::mat& x,
-                const arma::vec& beta,
-                const double intercept,
+                const arma::mat& beta,
+                const rowvec& intercept,
                 const arma::vec& x_center,
                 const arma::vec& x_scale,
                 const bool standardize_features)
 {
-  return x*beta + intercept;
+  return (x*beta).eval().each_row() + intercept;
 }
 
 inline
-arma::vec
+mat
 linearPredictor(const arma::sp_mat& x,
-                const arma::vec& beta,
-                const double intercept,
+                const arma::mat& beta,
+                const rowvec& intercept,
                 const arma::vec& x_center,
                 const arma::vec& x_scale,
                 const bool standardize_features)
 {
-  using namespace arma;
+  uword m = beta.n_cols;
 
-  if (standardize_features)
-    return x*beta + intercept - dot(x_center/x_scale, beta);
-  else
-    return x*beta + intercept;
+  mat lin_pred = x*beta;
+
+  for (uword k = 0; k < m; ++k) {
+    lin_pred.col(k) += intercept(k);
+    if (standardize_features)
+      lin_pred.col(k) -= dot(x_center/x_scale, beta.col(k));
+  }
+
+  return lin_pred;
 }
 
 template <typename T>
@@ -80,12 +59,9 @@ matrixSubset(const T& x,
 }
 
 inline
-arma::uvec
-setUnion(const arma::uvec& a,
-         const arma::uvec& b)
+uvec
+setUnion(const uvec& a, const uvec& b)
 {
-  using namespace arma;
-
   std::vector<unsigned> out;
   std::set_union(a.begin(), a.end(),
                  b.begin(), b.end(),
@@ -106,3 +82,4 @@ isSparse(SEXP x)
 
   return is_sparse;
 }
+
