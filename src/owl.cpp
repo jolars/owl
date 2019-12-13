@@ -269,7 +269,7 @@ owlCpp(const T& x, const mat& y, const List control)
         uvec check_failures = setDiff(possible_failures, active_set);
 
         if (verbosity > 0) {
-          Rcpp::Rcout << "\t kkt-failures at: " << std::endl;
+          Rcpp::Rcout << "\t kkt-failures at: ";
           check_failures.print();
           Rcpp::Rcout << std::endl;
         }
