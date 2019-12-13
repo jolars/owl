@@ -99,19 +99,6 @@ owlCpp(const T& x, const mat& y, const List control)
                             max_passes,
                             solver_args);
 
-  vec x_colnorms(p);
-
-  if (screening_rule == "safe") {
-    if (standardize_features && is_sparse) {
-      for (uword j = 0; j < p; ++j)
-        x_colnorms(j) = norm(x.col(j) - x_center(j), 2);
-
-    } else {
-      for (uword j = 0; j < p; ++j)
-        x_colnorms(j) = norm(x.col(j), 2);
-    }
-  }
-
   std::vector<double> lipschitz_constants;
   double lipschitz_constant{1};
 
@@ -163,8 +150,6 @@ owlCpp(const T& x, const mat& y, const List control)
         active_set = penalty->activeSet(family,
                                         y,
                                         gradient_prev,
-                                        pseudo_gradient_prev,
-                                        x_colnorms,
                                         lambda*sigma(k),
                                         lambda*sigma(k-1),
                                         screening_rule);

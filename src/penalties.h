@@ -27,8 +27,6 @@ public:
   activeSet(const std::unique_ptr<Family>& family,
             const mat& y,
             const mat& gradient_prev,
-            const mat& pseudo_gradient_prev,
-            const vec& norms,
             const vec& lambda,
             const vec& lambda_prev,
             const std::string screening_rule) = 0;
@@ -81,8 +79,6 @@ public:
   activeSet(const std::unique_ptr<Family>& family,
             const mat& y,
             const mat& gradient_prev,
-            const mat& pseudo_gradient_prev,
-            const vec& norms,
             const vec& lambda,
             const vec& lambda_prev,
             const std::string screening_rule);
@@ -146,8 +142,6 @@ public:
   activeSet(const std::unique_ptr<Family>& family,
             const mat& y,
             const mat& gradient_prev,
-            const mat& pseudo_gradient_prev,
-            const vec& norms,
             const vec& lambda,
             const vec& lambda_prev,
             const std::string screening_rule);
