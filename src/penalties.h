@@ -46,11 +46,11 @@ public:
 
     double rh = std::max(std::sqrt(datum::eps), tol*lambda(0));
 
-    uvec out = cumsum(abs_gradient_sorted - lambda) <= rh;
+    uvec out = cumsum(abs_gradient_sorted - lambda) > rh;
     out(ord) = out;
-    out(nonzeros).ones();
+    out(nonzeros).zeros();
 
-    return find(out == 0);
+    return find(out);
   }
 };
 
