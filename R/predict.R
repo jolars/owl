@@ -1,3 +1,40 @@
+#' Softmax-based prediction
+#'
+#' @param x linear predictors
+#'
+#' @author Jerome Friedman, Trevor Hastie, Rob Tibshirani, and Noah Simon
+#'
+#' @return Class predictions.
+#' @keywords internal
+#' @noRd
+softmax <- function(x) {
+  d <- dim(x)
+  nas <- apply(is.na(x), 1, any)
+  if (any(nas)) {
+    pclass <- rep(NA, d[1])
+    if (sum(nas) < d[1]) {
+      pclass2 <- softmax(x[!nas, ])
+      pclass[!nas] <- pclass2
+      if (is.factor(pclass2))
+        pclass <- factor(pclass, levels = seq(d[2]), labels = levels(pclass2))
+    }
+  } else {
+    maxdist <- x[, 1]
+    pclass <- rep(1, d[1])
+    for (i in seq(2, d[2])) {
+      l <- x[, i] > maxdist
+      pclass[l] <- i
+      maxdist[l] <- x[l, i]
+    }
+    dd <- dimnames(x)[[2]]
+    pclass <- if (is.null(dd) || !length(dd))
+      pclass
+    else
+      factor(pclass, levels = seq(d[2]), labels = dd)
+  }
+  pclass
+}
+
 #' Generate predictions from owl models
 #'
 #' Return predictions from models fit by [owl()].
@@ -36,7 +73,6 @@ predict.Owl <- function(object,
                         lambda = NULL,
                         sigma = NULL,
                         type = "link",
-                        exact = FALSE,
                         simplify = TRUE,
                         ...) {
   # This method (the base method) only generates linear predictors
@@ -49,7 +85,9 @@ predict.Owl <- function(object,
 
   beta <- stats::coef(object, lambda = lambda, sigma = sigma, simplify = FALSE)
 
-  if (names(beta[, , 1])[1] == "(Intercept)")
+  intercept <- "(Intercept)" %in% dimnames(beta)[[1]]
+
+  if (intercept)
     x <- methods::cbind2(1, x)
 
   n <- NROW(x)
@@ -77,7 +115,6 @@ predict.OwlGaussian <- function(object,
                                 lambda = NULL,
                                 sigma = NULL,
                                 type = c("link", "response"),
-                                exact = FALSE,
                                 simplify = TRUE,
                                 ...) {
   type <- match.arg(type)
@@ -97,7 +134,6 @@ predict.OwlBinomial <- function(object,
                                 lambda = NULL,
                                 sigma = NULL,
                                 type = c("link", "response", "class"),
-                                exact = FALSE,
                                 simplify = TRUE,
                                 ...) {
 
@@ -152,5 +188,30 @@ predict.OwlPoisson <- function(object,
   out
 }
 
+#' @export
+#' @rdname predict.Owl
+predict.OwlMultinomial <- function(object,
+                                   x,
+                                   sigma = NULL,
+                                   type = c("link", "response", "class"),
+                                   exact = FALSE,
+                                   simplify = TRUE,
+                                   ...) {
+  type <- match.arg(type)
 
+  lin_pred <- NextMethod(object, type = type)
+
+  out <- switch(
+    type,
+    response = aperm(apply(lin_pred, c(1, 3), function(x) exp(x)/sum(exp(x))),
+                     c(2, 1, 3)),
+    link = lin_pred,
+    class = apply(lin_pred, 3, softmax)
+  )
+
+  if (simplify)
+    out <- drop(out)
+
+  out
+}
 

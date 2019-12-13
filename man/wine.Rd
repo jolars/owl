@@ -5,7 +5,7 @@
 \alias{wine}
 \title{Wine Cultivars}
 \format{178 observations from 13 variables represented as a list consisting
-of a binary factor response vector \code{y}
+of a categorical response vector \code{y}
 with three levels: \emph{A}, \emph{B}, and \emph{C} representing different
 cultivars of wine as well as \code{x}: a sparse feature matrix of class
 'dgCMatrix' with the following variables:

@@ -8,6 +8,11 @@ Binomial <- function() {
             class = c("Binomial", "Family"))
 }
 
+Multinomial <- function() {
+  structure(list(name = "multinomial"),
+            class = c("Multinomial", "Family"))
+}
+
 Poisson <- function() {
   structure(list(name = "poisson"),
             class = c("Poisson", "Family"))

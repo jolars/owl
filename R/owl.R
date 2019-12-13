@@ -39,6 +39,18 @@
 #'   -\sum (y_i(x_i^T\beta + \alpha) - exp(x_i^T\beta + \alpha))
 #' }
 #'
+#'
+#' **Multinomial**
+#'
+#' In multinomial regression, we use the following objective.
+#'
+#' \deqn{
+#'   -\sum_{i=1}^n\left( \sum_{k=1}^m y_{ik}(x_i^T\beta_k + \alpha_k)
+#'                      - \log\sum_{k=1}^m \exp(x_i^T\beta_k + \alpha_k) \right)
+#' }{
+#'   -\sum(y_ik(x_i^T\beta_k + \alpha_k) - log(\sum exp(x_i^T\beta_k + \alpha_k)))
+#' }
+#'
 #' @section Penalties:
 #' Models fit by [owl()] can be regularized via several
 #' penalties.
@@ -66,14 +78,6 @@
 #' }{
 #'   J_\lambda(\beta) = \sum \lambda_j |W||\beta||_{I,X}|_(j)
 #' }
-#'
-#' @section Solvers:
-#' There is currently a single solver available for [owl()].
-#'
-#' **FISTA**
-#'
-#' FISTA (Fast Iterative Shrinking-Tresholding Algorithm) is an extension
-#' of the classical gradient algorithm.
 #'
 #' @param x the feature matrix, which can be either a dense
 #'   matrix of the standard *matrix* class, or a sparse matrix
@@ -105,14 +109,47 @@
 #'   primal and dual objectives, and infeasibility)
 #' @param screening_rule type of screening rule to use
 #' @param ... arguments passed on to the solver (see [FISTA()], and [ADMM()])
+#' @param verbosity level of verbosity for displaying output from the
+#'   program. Setting this to 1 displays information on the path level,
+#'   while setting it to 2 displays information also from inside the solver.
 #'
 #' @return An object of class `"Owl"` with the following slots:
-#' \item{coefficients}{a three-dimensional array of the coefficients from the
-#'                     model fit, including the intercept if it was fit.
-#'                     There is one row for each coefficient, one column
-#'                     for each target (dependent variable), and
-#'                     one slice for each penalty.}
-#' \item{nonzeros}{a numeric}
+#' \item{coefficients}{
+#'   a three-dimensional array of the coefficients from the
+#'   model fit, including the intercept if it was fit.
+#'   There is one row for each coefficient, one column
+#'   for each target (dependent variable), and
+#'   one slice for each penalty.
+#' }
+#' \item{nonzeros}{
+#'   a three-dimensional boolean array indicating whether a
+#'   coefficient was zero or not
+#' }
+#' \item{lambda}{
+#'   the lambda vector that when multiplied by a value in `sigma`
+#'   gives the penalty vector at that point along the regularization
+#'   path
+#' }
+#' \item{sigma}{the vector of sigma, indicating the scale of the lambda vector}
+#' \item{class_names}{
+#'   a character vector giving the names of the classes for binomial and
+#'   multinomial families
+#' }
+#' \item{passes}{the number of passes the solver took at each path}
+#' \item{violations}{the number of violations of the screening rule}
+#' \item{active_sets}{
+#'   a list where each element indicates the indices of the
+#'   coefficients that were active at that point in the regularization path
+#' }
+#' \item{lipschitz_constants}{
+#'   the computed Lipschitz constants along the path
+#' }
+#' \item{diagnostics}{
+#'   a `data.frame` of objective values for the primal and dual problems, as
+#'   well as a measure of the infeasibility, time, and iteration. Only
+#'   available if `diagnostics = TRUE` in the call to [owl()].
+#' }
+#' \item{call}{the call used for fitting the model}
 #' @export
 #'
 #' @seealso [plot.Owl()], [plotDiagnostics()], [score()], [predict.Owl()],
@@ -120,14 +157,22 @@
 #'
 #' @examples
 #'
-#' # Gaussian response, slope penalty (default) --------------------------------
+#' # Gaussian response
 #'
 #' fit <- owl(abalone$x, abalone$y)
+#'
+#' # Binomial response
+#'
+#' fit <- owl(heart$x, heart$y, family = "binomial")
+#'
+#' # Poisson response
+#'
+#' fit <- owl(abalone$x, abalone$y, family = "poisson")
 #'
 owl <- function(x,
                 y,
                 groups = NULL,
-                family = c("gaussian", "binomial", "poisson"),
+                family = c("gaussian", "binomial", "multinomial", "poisson"),
                 penalty = c("slope", "group_slope"),
                 solver = c("fista", "admm"),
                 intercept = TRUE,
@@ -141,6 +186,7 @@ owl <- function(x,
                 screening_rule = c("none", "strong", "safe"),
                 max_passes = 1e6,
                 diagnostics = FALSE,
+                verbosity = 0,
                 ...) {
 
   ocall <- match.call()
@@ -184,7 +230,6 @@ owl <- function(x,
 
   n <- NROW(x)
   p <- NCOL(x)
-  m <- NCOL(y)
 
   # convert sparse x to dgCMatrix class from package Matrix.
   is_sparse <- inherits(x, "sparseMatrix")
@@ -233,36 +278,39 @@ owl <- function(x,
   if (identical(solver_options$line_search, FALSE) && penalty == "group_slope")
     stop("line search must be enabled for group slope")
 
+  if (penalty == "group_slope" && family == "multinomial")
+    stop("cannot use group slope penalty with multinomial response")
+
   if (is_sparse) {
     x <- methods::as(x, "dgCMatrix")
   } else {
     x <- as.matrix(x)
   }
 
-  # collect response and variable names (if they are given) and otherwise
-  # make new
-  response_names <- colnames(y)
+  # setup response
+  family <- switch(family,
+                   gaussian = Gaussian(),
+                   binomial = Binomial(),
+                   multinomial = Multinomial(),
+                   poisson = Poisson())
+
+  res <- preProcessResponse(family, y)
+  y <- as.matrix(res$y)
+  y_center <- res$y_center
+  y_scale <- res$y_scale
+  class_names <- res$class_names
+  m <- n_targets <- res$n_targets
+  response_names <- res$response_names
   variable_names <- colnames(x)
 
   if (is.null(variable_names))
     variable_names <- paste0("V", seq_len(p))
   if (is.null(response_names))
-    response_names <- paste0("y", seq_len(m))
+    response_names <- paste0("y", seq_len(NCOL(y)))
 
+  # prepare responses
   intercept_init <- double(m)
   beta_init <- matrix(0, p, m)
-
-  # setup response
-  family <- switch(family,
-                   gaussian = Gaussian(),
-                   binomial = Binomial(),
-                   poisson = Poisson())
-
-  res <- preProcessResponse(family, y)
-  y <- res$y
-  y_center <- res$y_center
-  y_scale <- res$y_scale
-  class_names <- res$class_names
 
   # setup feature matrix
   if (standardize_features) {
@@ -290,14 +338,14 @@ owl <- function(x,
   }
 
   if (group_penalty) {
-    weights <- groups$wt_per_coef
+    weights <- groups$wt_per_coef[1:p]
 
     for (j in seq_len(p))
       x[, j] <- x[, j]/weights[j]
 
     x_center <- x_center/weights
   } else {
-    weights <- rep(1, NCOL(x))
+    weights <- rep(1, p)
   }
 
   if (is_sparse)
@@ -318,7 +366,8 @@ owl <- function(x,
                   lambda_min_ratio = lambda_min_ratio,
                   n_sigma = n_sigma,
                   fdr = fdr,
-                  family = family),
+                  family = family,
+                  n_targets = n_targets),
 
     group_slope = GroupSlope(x = x,
                              y = y,
@@ -332,7 +381,8 @@ owl <- function(x,
                              lambda_min_ratio = lambda_min_ratio,
                              n_sigma = n_sigma,
                              fdr = fdr,
-                             family = family)
+                             family = family,
+                             n_targets)
   )
 
   sigma <- penalty$sigma
@@ -362,12 +412,14 @@ owl <- function(x,
                   x_center = x_center,
                   x_scale = x_scale,
                   n_sigma = n_sigma,
+                  n_targets = n_targets,
                   sigma_type = sigma_type,
                   screening_rule = screening_rule,
                   sigma = sigma,
                   lambda = lambda,
                   max_passes = max_passes,
-                  diagnostics = diagnostics)
+                  diagnostics = diagnostics,
+                  verbosity = verbosity)
 
   owlFit <- if (is_sparse) owlSparse else owlDense
 
@@ -411,6 +463,9 @@ owl <- function(x,
     } else if (inherits(family, "Poisson")) {
       control$sigma <- penalty$sigma <- sigma <- 1
       fit <- owlFit(x, y, control)
+    } else if (inherits(family, "Multinomial")) {
+      control$sigma <- penalty$sigma <- sigma <- 0.5
+      fit <- owlFit(x, y, control)
     }
   } else {
     fit <- owlFit(x, y, control)
@@ -449,6 +504,10 @@ owl <- function(x,
   intercept <- res$intercepts
   beta <- res$betas
   nonzeros <- res$nonzeros
+
+  # make sure intercepts sum to zero in multinomial model
+  if (family$name == "multinomial")
+    intercept <- sweep(intercept, 3, apply(intercept, 3, mean), "-")
 
   n_sigma <- dim(beta)[3]
 

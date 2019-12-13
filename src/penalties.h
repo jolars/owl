@@ -6,42 +6,40 @@
 #include "utils.h"
 #include "proxes.h"
 
+using namespace arma;
+
 class Penalty {
 public:
   virtual
-  arma::vec
-  eval(const arma::vec& beta,
-       const arma::vec& lambda,
-       const double shrinkage) = 0;
+  mat
+  eval(const mat& beta, const vec& lambda, const double shrinkage) = 0;
 
   virtual
   double
-  primal(const arma::vec& beta, const arma::vec& lambda) = 0;
+  primal(const mat& beta, const vec& lambda) = 0;
 
   virtual
   double
-  infeasibility(const arma::vec& gradient, const arma::vec& lambda) = 0;
+  infeasibility(const mat& gradient, const vec& lambda) = 0;
 
   virtual
-  arma::uvec
+  uvec
   activeSet(const std::unique_ptr<Family>& family,
-            const arma::vec& y,
-            const arma::vec& gradient_prev,
-            const arma::vec& pseudo_gradient_prev,
-            const arma::vec& norms,
-            const arma::vec& lambda,
-            const arma::vec& lambda_prev,
+            const mat& y,
+            const mat& gradient_prev,
+            const mat& pseudo_gradient_prev,
+            const vec& norms,
+            const vec& lambda,
+            const vec& lambda_prev,
             const std::string screening_rule) = 0;
 
   // returns the indices of coefficients for which the kkt test fails
-  arma::uvec
-  kktCheck(const arma::vec& gradient,
-           const arma::vec& beta,
-           const arma::vec& lambda,
+  uvec
+  kktCheck(const mat&   gradient,
+           const mat&   beta,
+           const vec&   lambda,
            const double tol = 1e-6)
   {
-    using namespace arma;
-
     uvec nonzeros = find(beta != 0);
     uvec ord = sort_index(abs(gradient), "descend");
     vec abs_gradient_sorted = abs(gradient(ord));
@@ -58,60 +56,53 @@ public:
 
 class SLOPE : public Penalty {
 public:
-  arma::vec
-  eval(const arma::vec& beta,
-       const arma::vec& lambda,
-       const double shrinkage)
+  mat
+  eval(const mat& beta, const vec& lambda, const double shrinkage)
   {
-    return slopeProx(beta, lambda, shrinkage);
+    mat out = slopeProx(vectorise(beta), lambda, shrinkage);
+
+    return reshape(out, size(beta));
   };
 
   double
-  primal(const arma::vec& beta, const arma::vec& lambda)
+  primal(const mat& beta, const vec& lambda)
   {
     using namespace arma;
-    return dot(lambda, sort(abs(beta), "descending"));
+    return dot(lambda, sort(abs(vectorise(beta)), "descending"));
   }
 
   double
-  infeasibility(const arma::vec& gradient,
-                const arma::vec& lambda)
+  infeasibility(const mat& gradient, const vec& lambda)
   {
-    using namespace arma;
-
-    vec abs_gradient_sorted = sort(abs(gradient), "descending");
+    vec abs_gradient_sorted = sort(abs(vectorise(gradient)), "descending");
     return std::max(cumsum(abs_gradient_sorted - lambda).max(), 0.0);
   }
 
-  arma::uvec
+  uvec
   activeSet(const std::unique_ptr<Family>& family,
-            const arma::vec& y,
-            const arma::vec& gradient_prev,
-            const arma::vec& pseudo_gradient_prev,
-            const arma::vec& norms,
-            const arma::vec& lambda,
-            const arma::vec& lambda_prev,
+            const mat& y,
+            const mat& gradient_prev,
+            const mat& pseudo_gradient_prev,
+            const vec& norms,
+            const vec& lambda,
+            const vec& lambda_prev,
             const std::string screening_rule);
-
-
 };
 
 class GroupSLOPE : public Penalty {
 public:
-  const arma::field<arma::uvec> group_id;
-  const arma::uword n_groups;
+  const field<uvec> group_id;
+  const uword n_groups;
 
-  GroupSLOPE(const arma::field<arma::uvec>& group_id)
+  GroupSLOPE(const field<uvec>& group_id)
              : group_id(group_id),
                n_groups(group_id.n_elem) {}
 
-  arma::vec
-  eval(const arma::vec& beta,
-       const arma::vec& lambda,
+  mat
+  eval(const mat& beta,
+       const vec& lambda,
        const double shrinkage)
   {
-    using namespace arma;
-
     vec group_norms(n_groups);
 
     for (uword i = 0; i < n_groups; ++i)
@@ -119,21 +110,19 @@ public:
 
     auto prox_norms = slopeProx(group_norms, lambda, shrinkage);
 
-    vec prox_solution(size(beta));
+    mat prox_solution(beta.n_rows*beta.n_cols, 1);
 
     for (uword i = 0; i < n_groups; ++i) {
       uvec idx = group_id(i);
       prox_solution(idx) = beta(idx) * (prox_norms(i)/group_norms(i));
     }
 
-    return prox_solution;
+    return reshape(prox_solution, size(beta));
   };
 
   double
-  primal(const arma::vec& beta, const arma::vec& lambda)
+  primal(const mat& beta, const vec& lambda)
   {
-    using namespace arma;
-
     vec beta_norms(n_groups);
 
     for (uword i = 0; i < n_groups; ++i)
@@ -143,7 +132,7 @@ public:
   }
 
   double
-  infeasibility(const arma::vec& gradient, const arma::vec& lambda)
+  infeasibility(const mat& gradient, const vec& lambda)
   {
     using namespace arma;
 
@@ -156,14 +145,14 @@ public:
     return std::max(cumsum(gradient_norms_sorted - lambda).max(), 0.0);
   }
 
-  arma::uvec
+  uvec
   activeSet(const std::unique_ptr<Family>& family,
-            const arma::vec& y,
-            const arma::vec& gradient_prev,
-            const arma::vec& pseudo_gradient_prev,
-            const arma::vec& norms,
-            const arma::vec& lambda,
-            const arma::vec& lambda_prev,
+            const mat& y,
+            const mat& gradient_prev,
+            const mat& pseudo_gradient_prev,
+            const vec& norms,
+            const vec& lambda,
+            const vec& lambda_prev,
             const std::string screening_rule);
 };
 

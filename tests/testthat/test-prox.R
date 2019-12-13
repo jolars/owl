@@ -20,7 +20,7 @@ test_that("prox_sorted_L1 agrees with isotone package", {
 
   n <- 20
   mu <- 1.5*(n:1)
-  y <- sort(abs(rnorm(n, mean = mu)), decreasing = TRUE)
+  y <- as.matrix(sort(abs(rnorm(n, mean = mu)), decreasing = TRUE))
   lambda <- n:1
 
   args <- list(lambda = lambda, n = n, p = n, fdr = 0.2, sigma = 1,

@@ -8,7 +8,7 @@ owl(
   x,
   y,
   groups = NULL,
-  family = c("gaussian", "binomial", "poisson"),
+  family = c("gaussian", "binomial", "multinomial", "poisson"),
   penalty = c("slope", "group_slope"),
   solver = c("fista", "admm"),
   intercept = TRUE,
@@ -22,6 +22,7 @@ owl(
   screening_rule = c("none", "strong", "safe"),
   max_passes = 1e+06,
   diagnostics = FALSE,
+  verbosity = 0,
   ...
 )
 }
@@ -72,16 +73,50 @@ Group SLOPE)}
 \item{diagnostics}{should diagnostics be saved for the model fit (timings,
 primal and dual objectives, and infeasibility)}
 
+\item{verbosity}{level of verbosity for displaying output from the
+program. Setting this to 1 displays information on the path level,
+while setting it to 2 displays information also from inside the solver.}
+
 \item{...}{arguments passed on to the solver (see \code{\link[=FISTA]{FISTA()}}, and \code{\link[=ADMM]{ADMM()}})}
 }
 \value{
 An object of class \code{"Owl"} with the following slots:
-\item{coefficients}{a three-dimensional array of the coefficients from the
+\item{coefficients}{
+a three-dimensional array of the coefficients from the
 model fit, including the intercept if it was fit.
 There is one row for each coefficient, one column
 for each target (dependent variable), and
-one slice for each penalty.}
-\item{nonzeros}{a numeric}
+one slice for each penalty.
+}
+\item{nonzeros}{
+a three-dimensional boolean array indicating whether a
+coefficient was zero or not
+}
+\item{lambda}{
+the lambda vector that when multiplied by a value in \code{sigma}
+gives the penalty vector at that point along the regularization
+path
+}
+\item{sigma}{the vector of sigma, indicating the scale of the lambda vector}
+\item{class_names}{
+a character vector giving the names of the classes for binomial and
+multinomial families
+}
+\item{passes}{the number of passes the solver took at each path}
+\item{violations}{the number of violations of the screening rule}
+\item{active_sets}{
+a list where each element indicates the indices of the
+coefficients that were active at that point in the regularization path
+}
+\item{lipschitz_constants}{
+the computed Lipschitz constants along the path
+}
+\item{diagnostics}{
+a \code{data.frame} of objective values for the primal and dual problems, as
+well as a measure of the infeasibility, time, and iteration. Only
+available if \code{diagnostics = TRUE} in the call to \code{\link[=owl]{owl()}}.
+}
+\item{call}{the call used for fitting the model}
 }
 \description{
 This functions fits a generalized linear model (GLM) using efficient
@@ -124,6 +159,17 @@ In poisson regression, we use the following objective.
 }{
   -\sum (y_i(x_i^T\beta + \alpha) - exp(x_i^T\beta + \alpha))
 }
+
+\strong{Multinomial}
+
+In multinomial regression, we use the following objective.
+
+\deqn{
+  -\sum_{i=1}^n\left( \sum_{k=1}^m y_{ik}(x_i^T\beta_k + \alpha_k)
+                     - \log\sum_{k=1}^m \exp(x_i^T\beta_k + \alpha_k) \right)
+}{
+  -\sum(y_ik(x_i^T\beta_k + \alpha_k) - log(\sum exp(x_i^T\beta_k + \alpha_k)))
+}
 }
 
 \section{Penalties}{
@@ -156,21 +202,19 @@ penalty
 }
 }
 
-\section{Solvers}{
-
-There is currently a single solver available for \code{\link[=owl]{owl()}}.
-
-\strong{FISTA}
-
-FISTA (Fast Iterative Shrinking-Tresholding Algorithm) is an extension
-of the classical gradient algorithm.
-}
-
 \examples{
 
-# Gaussian response, slope penalty (default) --------------------------------
+# Gaussian response
 
 fit <- owl(abalone$x, abalone$y)
+
+# Binomial response
+
+fit <- owl(heart$x, heart$y, family = "binomial")
+
+# Poisson response
+
+fit <- owl(abalone$x, abalone$y, family = "poisson")
 
 }
 \seealso{

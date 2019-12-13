@@ -10,14 +10,12 @@ using namespace Rcpp;
 using namespace arma;
 
 template <typename T>
-Rcpp::List
-owlCpp(const T& x,
-       const arma::vec& y,
-       const Rcpp::List control)
+List
+owlCpp(const T& x, const mat& y, const List control)
 {
-  // auto n = x.n_rows;
   auto p = x.n_cols;
   auto n = x.n_rows;
+  auto m = as<uword>(control["n_targets"]);
 
   // parameter packs for penalty and solver
   auto penalty_args = as<List>(control["penalty"]);
@@ -25,6 +23,7 @@ owlCpp(const T& x,
 
   auto max_passes = as<uword>(control["max_passes"]);
   auto diagnostics = as<bool>(control["diagnostics"]);
+  auto verbosity = as<int>(control["verbosity"]);
 
   auto groups = as<List>(control["groups"]);
 
@@ -48,21 +47,31 @@ owlCpp(const T& x,
   auto family_choice = as<std::string>(family_args["name"]);
 
   // setup family and penalty
+  if (verbosity >= 1)
+    Rcpp::Rcout << "setting up family" << std::endl;
+
   auto family = setupFamily(family_choice);
+
+  if (verbosity >= 1)
+    Rcpp::Rcout << "setting up penalty" << std::endl;
+
   auto penalty = setupPenalty(penalty_args, groups);
 
-  cube betas(p, 1, n_sigma, fill::zeros);
-  cube intercepts(1, 1, n_sigma);
+  cube betas(p, m, n_sigma, fill::zeros);
+  cube intercepts(1, m, n_sigma);
 
   // initialize estimates
-  auto intercept = as<double>(control["intercept_init"]);
-  auto beta      = as<vec>(control["beta_init"]);
+  auto intercept = as<rowvec>(control["intercept_init"]);
+  auto beta      = as<mat>(control["beta_init"]);
+
+  if (verbosity >= 1)
+    Rcpp::Rcout << "fitting intercept for null model" << std::endl;
 
   if (fit_intercept)
-    intercept = family->fitNullModel(y);
+    intercept = family->fitNullModel(y, m);
 
-  double intercept_prev = intercept;
-  vec beta_prev(p, fill::zeros);
+  rowvec intercept_prev(m, fill::zeros);
+  mat beta_prev(p, m, fill::zeros);
 
   uvec passes(n_sigma);
   std::vector<std::vector<double>> primals;
@@ -72,13 +81,16 @@ owlCpp(const T& x,
   std::vector<std::vector<unsigned>> line_searches;
   uvec violations(n_sigma, fill::zeros);
 
-  vec linear_predictor_prev(n);
-  vec gradient_prev(p);
-  vec pseudo_gradient_prev(n);
+  mat linear_predictor_prev(n, m);
+  mat gradient_prev(p, m);
+  mat pseudo_gradient_prev(n, m);
 
   // sets of active predictors
   field<uvec> active_sets(n_sigma);
   uvec active_set;
+
+  if (verbosity >= 1)
+    Rcpp::Rcout << "setting up solver" << std::endl;
 
   auto solver = setupSolver(as<std::string>(solver_args["name"]),
                             standardize_features,
@@ -103,6 +115,9 @@ owlCpp(const T& x,
   std::vector<double> lipschitz_constants;
   double lipschitz_constant{1};
 
+  if (verbosity >= 1)
+    Rcpp::Rcout << "computing lipschitz estimate" << std::endl;
+
   if (screening_rule == "none") {
     lipschitz_constant = lipschitzConstant(x,
                                            x_center,
@@ -114,6 +129,9 @@ owlCpp(const T& x,
   Results res;
 
   for (uword k = 0; k < n_sigma; ++k) {
+
+    if (verbosity >= 1)
+      Rcpp::Rcout << "penalty: " << k + 1 << std::endl;
 
     if (screening_rule == "none") {
 
@@ -157,7 +175,7 @@ owlCpp(const T& x,
       // null (intercept only) model
 
       if (fit_intercept)
-        intercept = family->fitNullModel(y);
+        intercept = family->fitNullModel(y, m);
 
       beta.zeros();
 
@@ -292,7 +310,7 @@ owlCpp(const T& x,
 // [[Rcpp::export]]
 Rcpp::List
 owlSparse(const arma::sp_mat& x,
-          const arma::vec& y,
+          const arma::mat& y,
           const Rcpp::List control)
 {
   return owlCpp(x, y, control);
@@ -301,7 +319,7 @@ owlSparse(const arma::sp_mat& x,
 // [[Rcpp::export]]
 Rcpp::List
 owlDense(const arma::mat& x,
-         const arma::vec& y,
+         const arma::mat& y,
          const Rcpp::List control)
 {
   return owlCpp(x, y, control);

@@ -7,7 +7,7 @@ using namespace arma;
 
 // [[Rcpp::export]]
 arma::vec
-prox_slope_cpp(const arma::vec& y, const Rcpp::List& args)
+prox_slope_cpp(const arma::mat& y, const Rcpp::List& args)
 {
   auto sigma = Rcpp::as<arma::vec>(args["sigma"]);
   auto lambda = Rcpp::as<arma::vec>(args["lambda"]);
@@ -67,16 +67,17 @@ colNormsDense(const arma::mat& x, const arma::uword norm_type = 2)
 template <typename T>
 arma::vec
 lambdaMax(const T& x,
-          const arma::vec& y,
+          const arma::mat& y,
           const arma::vec& x_center,
           const arma::vec& x_scale,
           const arma::vec& y_scale,
+          const uword n_targets,
           const std::string& family,
           const bool standardize_features,
           const bool is_sparse)
 {
   const uword p = x_center.n_elem;
-  vec lambda_max(p);
+  mat lambda_max(p, n_targets);
 
   if (family == "binomial") {
     vec y_new = (y + 1)/2;
@@ -92,6 +93,36 @@ lambdaMax(const T& x,
         lambda_max(j) -= accu(y_new * x_center(j)/x_scale(j));
     }
 
+  } else if (family == "multinomial") {
+
+    uword n = y.n_rows;
+
+    uvec y_classes = conv_to<uvec>::from(y + 0.1);
+    mat y_map(n, n_targets);
+
+    // for (uword i = 0; i < n; ++i) {
+    //   auto c = static_cast<uword>(y(i) + 0.1);
+    //   y_map(i, c) = 1.0;
+    // }
+
+    for (uword k = 0; k < n_targets; ++k) {
+      y_map.col(k) = conv_to<vec>::from(y_classes == k);
+    }
+
+    rowvec y_bar = mean(y_map);
+    rowvec y_std = stddev(y_map, 1);
+
+    for (uword k = 0; k < n_targets; ++k) {
+      y_map.col(k) -= y_bar(k);
+      y_map.col(k) /= y_std(k);
+    }
+
+    lambda_max = x.t() * y_map;
+
+    for (uword k = 0; k < n_targets; ++k) {
+      lambda_max.col(k) *= y_std(k);
+    }
+
   } else {
 
     lambda_max = x.t() * y;
@@ -102,16 +133,17 @@ lambdaMax(const T& x,
     }
   }
 
-  return abs(lambda_max);
+  return abs(vectorise(lambda_max));
 }
 
 // [[Rcpp::export]]
 arma::vec
 lambdaMax(SEXP x,
-          const arma::vec& y,
+          const arma::mat& y,
           const arma::vec& x_center,
           const arma::vec& x_scale,
           const arma::vec& y_scale,
+          const arma::uword n_targets,
           const std::string& family,
           const bool standardize_features)
 {
@@ -124,6 +156,7 @@ lambdaMax(SEXP x,
                      x_center,
                      x_scale,
                      y_scale,
+                     n_targets,
                      family,
                      standardize_features,
                      is_sparse);
@@ -133,6 +166,7 @@ lambdaMax(SEXP x,
                      x_center,
                      x_scale,
                      y_scale,
+                     n_targets,
                      family,
                      standardize_features,
                      is_sparse);
@@ -289,4 +323,14 @@ standardize(SEXP x)
     return standardizeSparse(Rcpp::as<sp_mat>(x));
   else
     return standardizeDense(Rcpp::as<mat>(x));
+}
+
+// [[Rcpp::export]]
+arma::mat
+tester(arma::uvec y, arma::mat lin_pred)
+{
+
+  mat bla = lin_pred.each_row([](const rowvec& a) {return log(accu(exp(a - a.max()))) + a.max();});
+
+  return bla;
 }

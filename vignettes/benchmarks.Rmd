@@ -66,4 +66,14 @@ fit <- owl(abalone$x,
 plotDiagnostics(fit)
 ```
 
+### Multinomial model
 
+```{r, fig.cap = "objective loss over time for the abalone data set (poisson response)."}
+fit <- owl(wine$x,
+           wine$y,
+           family = "multinomial",
+           penalty = "slope",
+           sigma = "estimate",
+           diagnostics = TRUE)
+plotDiagnostics(fit)
+```

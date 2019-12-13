@@ -1,8 +1,12 @@
 test_that("predictions work for all models", {
   set.seed(1)
 
-  for (family in c("gaussian", "binomial", "poisson")) {
+  for (family in c("gaussian", "binomial", "poisson", "multinomial")) {
     for (penalty in c("slope", "group_slope")) {
+
+      if (penalty == "group_slope" && family == "multinomial")
+        next
+
       xy <- owl:::randomProblem(100, 10, response = family, n_groups = 3)
       x <- xy$x
       y <- xy$y

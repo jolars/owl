@@ -5,6 +5,7 @@
 \alias{predict.OwlGaussian}
 \alias{predict.OwlBinomial}
 \alias{predict.OwlPoisson}
+\alias{predict.OwlMultinomial}
 \title{Generate predictions from owl models}
 \usage{
 \method{predict}{Owl}(
@@ -13,7 +14,6 @@
   lambda = NULL,
   sigma = NULL,
   type = "link",
-  exact = FALSE,
   simplify = TRUE,
   ...
 )
@@ -24,7 +24,6 @@
   lambda = NULL,
   sigma = NULL,
   type = c("link", "response"),
-  exact = FALSE,
   simplify = TRUE,
   ...
 )
@@ -35,7 +34,6 @@
   lambda = NULL,
   sigma = NULL,
   type = c("link", "response", "class"),
-  exact = FALSE,
   simplify = TRUE,
   ...
 )
@@ -45,6 +43,16 @@
   x,
   sigma = NULL,
   type = c("link", "response"),
+  exact = FALSE,
+  simplify = TRUE,
+  ...
+)
+
+\method{predict}{OwlMultinomial}(
+  object,
+  x,
+  sigma = NULL,
+  type = c("link", "response", "class"),
   exact = FALSE,
   simplify = TRUE,
   ...
@@ -66,16 +74,16 @@ values used in the original fit will be used}
 \code{"response"} returns the result of applying the link function,
 and \code{"class"} returns class predictions.}
 
+\item{simplify}{if \code{TRUE}, \code{\link[base:drop]{base::drop()}} will be called before returning
+the coefficients to drop extraneous dimensions}
+
+\item{...}{ignored and only here for method consistency}
+
 \item{exact}{if \code{TRUE} and the given parameter values differ from those in
 the original fit, the model will be refit by calling \code{\link[stats:update]{stats::update()}} on
 the object with the new parameters. If \code{FALSE}, the predicted values
 will be based on interpolated coefficients from the original
 penalty path.}
-
-\item{simplify}{if \code{TRUE}, \code{\link[base:drop]{base::drop()}} will be called before returning
-the coefficients to drop extraneous dimensions}
-
-\item{...}{ignored and only here for method consistency}
 }
 \value{
 Predictions from the model with scale determined by \code{type}.

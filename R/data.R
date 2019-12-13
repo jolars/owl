@@ -104,7 +104,7 @@
 #' from three different cultivars.
 #'
 #' @format 178 observations from 13 variables represented as a list consisting
-#'  of a binary factor response vector `y`
+#' of a categorical response vector `y`
 #' with three levels: *A*, *B*, and *C* representing different
 #' cultivars of wine as well as `x`: a sparse feature matrix of class
 #' 'dgCMatrix' with the following variables:
