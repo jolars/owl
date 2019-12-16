@@ -91,7 +91,7 @@ preProcessResponse.Multinomial <- function(object, y) {
        y_center = rep(0, n_classes),
        y_scale = rep(1, n_classes),
        n_classes = n_classes,
-       n_targets = n_classes,
+       n_targets = n_classes - 1,
        class_names = class_names,
        response_names = class_names)
 

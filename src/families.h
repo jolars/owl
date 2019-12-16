@@ -133,8 +133,7 @@ public:
 
     // logsumexp bit
     vec lp_max = max(lin_pred, 1);
-    double primal =
-      accu(trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max);
+    double primal = accu(trunc_log(trunc_exp(-lp_max) + sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max);
 
     for (uword k = 0; k < m; ++k) {
       // NOTE(JL): use colptr instead?
@@ -148,11 +147,8 @@ public:
   double
   dual(const mat& y, const mat& lin_pred)
   {
-    uvec y_class = conv_to<uvec>::from(y + 0.1);
-
     vec lp_max = max(lin_pred, 1);
-    vec lse =
-      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+    vec lse = trunc_log(trunc_exp(-lp_max) + sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
     double dual = accu(lse);
 
@@ -169,8 +165,7 @@ public:
     uvec y_class = conv_to<uvec>::from(y + 0.1);
 
     vec lp_max = max(lin_pred, 1);
-    vec lse =
-      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+    vec lse = trunc_log(trunc_exp(-lp_max) + sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
     mat gradient = trunc_exp(lin_pred.each_col() - lse);
 
@@ -186,12 +181,13 @@ public:
     rowvec intercept(n_classes);
     auto n = y.n_rows;
 
-    for (uword i = 0; i < n; ++i) {
-      auto c = static_cast<uword>(y(i) + 0.1);
-      intercept(c) += 1/n;
+    uvec y_class = conv_to<uvec>::from(y + 0.1);
+
+    for (uword k = 0; k < n_classes; ++k) {
+      intercept(k) = accu(find(y_class == k))/n;
     }
 
-    intercept = trunc_log(intercept) - accu(trunc_log(intercept))/n_classes;
+    intercept = trunc_log(intercept) - accu(trunc_log(intercept))/(n_classes + 1);
 
     return intercept;
   }

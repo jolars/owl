@@ -506,8 +506,8 @@ owl <- function(x,
   nonzeros <- res$nonzeros
 
   # make sure intercepts sum to zero in multinomial model
-  if (family$name == "multinomial")
-    intercept <- sweep(intercept, 3, apply(intercept, 3, mean), "-")
+  # if (family$name == "multinomial")
+  #   intercept <- sweep(intercept, 3, apply(intercept, 3, mean), "-")
 
   n_sigma <- dim(beta)[3]
 
@@ -519,12 +519,12 @@ owl <- function(x,
       coefficients[-1, , i] <- beta[, , i]
     }
     dimnames(coefficients) <- list(c("(Intercept)", variable_names),
-                                   response_names,
+                                   response_names[1:n_targets],
                                    paste0("p", seq_len(n_sigma)))
   } else {
     coefficients <- beta
     dimnames(coefficients) <- list(variable_names,
-                                   response_names,
+                                   response_names[1:n_targets],
                                    paste0("p", seq_len(n_sigma)))
   }
 
