@@ -15,6 +15,7 @@ private:
   const double tol_rel;
   const double tol_abs;
   const double alpha;
+  const uword verbosity;
 
 public:
   ADMM(const bool standardize,
@@ -23,14 +24,16 @@ public:
        const uword max_passes,
        const double tol_rel,
        const double tol_abs,
-       const double alpha)
+       const double alpha,
+       const uword verbosity)
        : standardize(standardize),
          is_sparse(is_sparse),
          diagnostics(diagnostics),
          max_passes(max_passes),
          tol_rel(tol_rel),
          tol_abs(tol_abs),
-         alpha(alpha) {}
+         alpha(alpha),
+         verbosity(verbosity) {}
 
   Results
   fit(const sp_mat& x,

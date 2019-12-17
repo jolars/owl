@@ -13,6 +13,7 @@ setupSolver(const std::string& solver_choice,
             const bool is_sparse,
             const bool diagnostics,
             const uword max_passes,
+            const uword verbosity,
             const Rcpp::List& args)
 {
   using Rcpp::as;
@@ -33,7 +34,8 @@ setupSolver(const std::string& solver_choice,
                                             tol_rel_gap,
                                             tol_infeas,
                                             line_search,
-                                            line_search_frequency});
+                                            line_search_frequency,
+                                            verbosity});
 
   } else {
 
@@ -47,6 +49,7 @@ setupSolver(const std::string& solver_choice,
                                           max_passes,
                                           tol_rel,
                                           tol_abs,
-                                          alpha});
+                                          alpha,
+                                          verbosity});
   }
 }

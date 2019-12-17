@@ -95,22 +95,10 @@ lambdaMax(const T& x,
 
   } else if (family == "multinomial") {
 
-    uword n = y.n_rows;
+    rowvec y_bar = mean(y);
+    rowvec y_std = stddev(y, 1);
 
-    uvec y_classes = conv_to<uvec>::from(y + 0.1);
-    mat y_map(n, n_targets);
-
-    // for (uword i = 0; i < n; ++i) {
-    //   auto c = static_cast<uword>(y(i) + 0.1);
-    //   y_map(i, c) = 1.0;
-    // }
-
-    for (uword k = 0; k < n_targets; ++k) {
-      y_map.col(k) = conv_to<vec>::from(y_classes == k);
-    }
-
-    rowvec y_bar = mean(y_map);
-    rowvec y_std = stddev(y_map, 1);
+    mat y_map = y;
 
     for (uword k = 0; k < n_targets; ++k) {
       y_map.col(k) -= y_bar(k);

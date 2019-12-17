@@ -77,6 +77,13 @@ preProcessResponse.Multinomial <- function(object, y) {
   min_class <- min(y_table)
   class_names <- names(y_table)
   n_classes <- length(y_table)
+  n_targets <- n_classes - 1
+
+  Y <- matrix(NA, NROW(y), n_targets)
+
+  for (k in 1:n_targets) {
+    Y[, k] <- as.integer(y == names(y_table)[k])
+  }
 
   if (n_classes == 2)
     stop("only two classes in response. Are you looking for family = 'binomial'?")
@@ -87,11 +94,11 @@ preProcessResponse.Multinomial <- function(object, y) {
   if (min_class <= 1)
     stop("one class only has ", min_class, " observations.")
 
-  list(y = as.numeric(y) - 1,
-       y_center = rep(0, n_classes),
-       y_scale = rep(1, n_classes),
+  list(y = Y,
+       y_center = rep(0, n_targets),
+       y_scale = rep(1, n_targets),
        n_classes = n_classes,
-       n_targets = n_classes,
+       n_targets = n_targets,
        class_names = class_names,
        response_names = class_names)
 

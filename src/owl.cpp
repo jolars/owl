@@ -97,6 +97,7 @@ owlCpp(const T& x, const mat& y, const List control)
                             is_sparse,
                             diagnostics,
                             max_passes,
+                            verbosity,
                             solver_args);
 
   std::vector<double> lipschitz_constants;

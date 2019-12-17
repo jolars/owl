@@ -13,8 +13,6 @@ slopeProx(const mat& beta,
           const vec& lambda,
           const double shrinkage)
 {
-  using namespace arma;
-
   uword p = beta.n_rows;
 
   // collect sign of beta and work with sorted absolutes

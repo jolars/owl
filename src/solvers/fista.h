@@ -7,6 +7,7 @@
 #include "solver.h"
 
 using namespace arma;
+using namespace Rcpp;
 
 class FISTA : public Solver {
 private:
@@ -18,6 +19,7 @@ private:
   const double tol_infeas;
   const bool line_search;
   const uword line_search_frequency;
+  const uword verbosity;
 
 public:
   FISTA(const bool standardize,
@@ -27,7 +29,8 @@ public:
         const double tol_rel_gap,
         const double tol_infeas,
         const bool line_search,
-        const uword line_search_frequency)
+        const uword line_search_frequency,
+        const uword verbosity)
         : standardize(standardize),
           is_sparse(is_sparse),
           diagnostics(diagnostics),
@@ -35,7 +38,8 @@ public:
           tol_rel_gap(tol_rel_gap),
           tol_infeas(tol_infeas),
           line_search(line_search),
-          line_search_frequency(line_search_frequency) {}
+          line_search_frequency(line_search_frequency),
+          verbosity(verbosity) {}
 
   virtual
   Results
@@ -160,12 +164,13 @@ public:
     // main loop
     uword passes = 0;
     while (passes < max_passes) {
+      if (verbosity >= 3)
+        Rcout << "pass: " << passes << std::endl;
+
       ++passes;
-      // gradient
+
       double f = family->primal(y, lin_pred);
-
       pseudo_gradient = family->pseudoGradient(y, lin_pred);
-
       gradient = x.t()*pseudo_gradient;
 
       // adjust gradient if sparse and standardizing
@@ -177,9 +182,25 @@ public:
       if (fit_intercept)
         gradient_intercept = mean(pseudo_gradient);
 
+      if (verbosity >= 3) {
+        Rcout << "coefficients:" << std::endl;
+        beta.print();
+        Rcout << std::endl;
+
+        Rcout << "gradient:" << std::endl;
+        gradient.print();
+        Rcout << std::endl;
+      }
+
       double primal = f + penalty->primal(beta, lambda);
       double dual = family->dual(y, lin_pred);
       double infeasibility = penalty->infeasibility(gradient, lambda);
+
+      if (verbosity >= 2) {
+        Rcout << "primal: " << primal << "\t"
+              << "dual: "   << dual << "\t"
+              << "infeas: " << infeasibility << std::endl;
+      }
 
       double small = std::sqrt(datum::eps);
 
@@ -212,6 +233,7 @@ public:
 
       // Backtracking line search
       if (line_search && passes % line_search_frequency == 0) {
+
         while (true) {
           current_line_searches++;
 
@@ -224,11 +246,6 @@ public:
 
           if (fit_intercept)
             intercept_tilde = intercept - learning_rate*gradient_intercept;
-
-          if (family->name == "multinomial") {
-            beta_tilde.each_col() -= median(beta_tilde);
-            intercept_tilde -= mean(intercept_tilde);
-          }
 
           lin_pred = linearPredictor(x,
                                      beta_tilde,
@@ -259,11 +276,6 @@ public:
         if (fit_intercept)
           intercept_tilde = intercept - learning_rate*gradient_intercept;
 
-        if (family->name == "multinomial") {
-          beta_tilde.each_col() -= median(beta_tilde);
-          intercept_tilde -= mean(intercept_tilde);
-        }
-
         lin_pred = linearPredictor(x,
                                    beta_tilde,
                                    intercept_tilde,
@@ -282,11 +294,6 @@ public:
       if (fit_intercept)
         intercept = intercept_tilde
                     + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
-
-      if (family->name == "multinomial") {
-        beta.each_col() -= median(beta);
-        intercept -= mean(intercept);
-      }
 
       lin_pred = linearPredictor(x,
                                  beta,
