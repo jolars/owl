@@ -128,85 +128,32 @@ public:
   double
   primal(const mat& y, const mat& lin_pred)
   {
-    const uword m = lin_pred.n_cols;
-
     // logsumexp bit
     vec lp_max = max(lin_pred, 1);
-    double primal = accu(log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max);
+    vec lse =
+      log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
-    primal -= accu(y % lin_pred);
-
-    // for (uword k = 0; k < m; ++k) {
-    //   // NOTE(JL): use colptr instead?
-    //   primal -= dot(lin_pred.col(k), y.col(k));
-    //   // vec lin_pred_k = lin_pred.col(k);
-    //   // primal -= accu(lin_pred_k(find(y_class == k)));
-    // }
-
-    return primal;
+    return accu(lse) - accu(y % lin_pred);
   }
 
   double
   dual(const mat& y, const mat& lin_pred)
   {
-<<<<<<< HEAD
-    uword n = y.n_rows;
-    uword m = lin_pred.n_cols;
-
-    uvec y_class = conv_to<uvec>::from(y + 0.1);
-
     vec lp_max = max(lin_pred, 1);
     vec lse =
-      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+      log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
-    // double dual = accu(lse);
-    //
-    // dual += accu(-lin_pred % trunc_exp(lin_pred.each_col() - lse));
-
-    double dual = 0.0;
-
-    for (uword i = 0; i < n; ++i) {
-      dual += lse(i);
-      for (uword k = 0; k < m; ++k) {
-        dual -= lin_pred(i, k)*exp(lin_pred(i, k) - lse(i));
-      }
-    }
-=======
-    // const uword n = y.n_rows;
-    // const uword m = lin_pred.n_cols;
-
-    vec lp_max = max(lin_pred, 1);
-    vec lse = log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
-
-    double dual =
-      accu(lse) - accu(lin_pred % trunc_exp(lin_pred.each_col() - lse));
-
-    // uvec y_class = conv_to<uvec>::from(y + 0.1);
-    //
-    // double dual = 0.0;
-    //
-    // for (uword i = 0; i < n; ++i) {
-    //   dual += lse(i);
-    //   for (uword k = 0; k < m; ++k) {
-    //     dual -= lin_pred(i, k)*trunc_exp(lin_pred(i, k) - lse(i));
-    //   }
-    // }
->>>>>>> 6a9d1f2a3bf6f9b4343c8e471d89a90da2ced4d6
-
-    return dual;
+    return accu(lse) - accu(lin_pred % trunc_exp(lin_pred.each_col() - lse));
   }
 
   mat
   pseudoGradient(const mat& y, const mat& lin_pred)
   {
-    const uword m = lin_pred.n_cols;
-
     vec lp_max = max(lin_pred, 1);
-    vec lse = log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+    vec lse =
+      log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
-    mat gradient = exp(lin_pred.each_col() - lse) - y;
-
-    return gradient;
+    return exp(lin_pred.each_col() - lse) - y;
   }
 
   rowvec
@@ -214,9 +161,7 @@ public:
   {
     rowvec intercept = mean(y);
 
-    intercept = log(intercept) - accu(trunc_log(intercept))/(n_classes + 1);
-
-    return intercept;
+    return trunc_log(intercept) - accu(trunc_log(intercept))/(n_classes + 1);
   }
 
   std::string name = "multinomial";
