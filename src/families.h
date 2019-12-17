@@ -129,17 +129,19 @@ public:
   primal(const mat& y, const mat& lin_pred)
   {
     const uword m = lin_pred.n_cols;
-    const uvec y_class = conv_to<uvec>::from(y + 0.1);
 
     // logsumexp bit
     vec lp_max = max(lin_pred, 1);
     double primal = accu(log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max);
 
-    for (uword k = 0; k < m; ++k) {
-      // NOTE(JL): use colptr instead?
-      vec lin_pred_k = lin_pred.col(k);
-      primal -= accu(lin_pred_k(find(y_class == k)));
-    }
+    primal -= accu(y % lin_pred);
+
+    // for (uword k = 0; k < m; ++k) {
+    //   // NOTE(JL): use colptr instead?
+    //   primal -= dot(lin_pred.col(k), y.col(k));
+    //   // vec lin_pred_k = lin_pred.col(k);
+    //   // primal -= accu(lin_pred_k(find(y_class == k)));
+    // }
 
     return primal;
   }
@@ -147,27 +149,25 @@ public:
   double
   dual(const mat& y, const mat& lin_pred)
   {
-    const uword n = y.n_rows;
-    const uword m = lin_pred.n_cols;
+    // const uword n = y.n_rows;
+    // const uword m = lin_pred.n_cols;
 
     vec lp_max = max(lin_pred, 1);
     vec lse = log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
-    // double dual = accu(lse);
+    double dual =
+      accu(lse) - accu(lin_pred % trunc_exp(lin_pred.each_col() - lse));
 
-    // dual += accu(-lin_pred % trunc_exp(lin_pred.each_col() - lse));
-
-    uvec y_class = conv_to<uvec>::from(y + 0.1);
-
-    double dual = 0.0;
-
-    for (uword i = 0; i < n; ++i) {
-      uword k = y_class(i);
-      double lp = 0;
-      if (k < m)
-        lp = lin_pred(i, k);
-      dual += lse(i) - lp*exp(lp - lse(i));
-    }
+    // uvec y_class = conv_to<uvec>::from(y + 0.1);
+    //
+    // double dual = 0.0;
+    //
+    // for (uword i = 0; i < n; ++i) {
+    //   dual += lse(i);
+    //   for (uword k = 0; k < m; ++k) {
+    //     dual -= lin_pred(i, k)*trunc_exp(lin_pred(i, k) - lse(i));
+    //   }
+    // }
 
     return dual;
   }
@@ -177,15 +177,10 @@ public:
   {
     const uword m = lin_pred.n_cols;
 
-    uvec y_class = conv_to<uvec>::from(vectorise(y) + 0.1);
-
     vec lp_max = max(lin_pred, 1);
     vec lse = log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
-    mat gradient = exp(lin_pred.each_col() - lse);
-
-    for (uword k = 0; k < m; ++k)
-      gradient.col(k) -= conv_to<vec>::from(y_class == k); // indicator fun
+    mat gradient = exp(lin_pred.each_col() - lse) - y;
 
     return gradient;
   }
@@ -193,16 +188,9 @@ public:
   rowvec
   fitNullModel(const mat& y, const uword n_classes)
   {
-    rowvec intercept(n_classes);
-    auto n = y.n_rows;
+    rowvec intercept = mean(y);
 
-    uvec y_class = conv_to<uvec>::from(y + 0.1);
-
-    for (uword k = 0; k < n_classes; ++k) {
-      intercept(k) = accu(find(y_class == k))/n;
-    }
-
-    intercept = log(intercept) - accu(log(intercept))/(n_classes + 1);
+    intercept = log(intercept) - accu(trunc_log(intercept))/(n_classes + 1);
 
     return intercept;
   }

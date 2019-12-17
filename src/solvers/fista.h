@@ -233,6 +233,7 @@ public:
 
       // Backtracking line search
       if (line_search && passes % line_search_frequency == 0) {
+
         while (true) {
           current_line_searches++;
 
