@@ -246,11 +246,6 @@ public:
           if (fit_intercept)
             intercept_tilde = intercept - learning_rate*gradient_intercept;
 
-          if (family->name == "multinomial") {
-            beta_tilde.each_col() -= median(beta_tilde);
-            intercept_tilde -= mean(intercept_tilde);
-          }
-
           lin_pred = linearPredictor(x,
                                      beta_tilde,
                                      intercept_tilde,
@@ -280,11 +275,6 @@ public:
         if (fit_intercept)
           intercept_tilde = intercept - learning_rate*gradient_intercept;
 
-        if (family->name == "multinomial") {
-          beta_tilde.each_col() -= median(beta_tilde);
-          intercept_tilde -= mean(intercept_tilde);
-        }
-
         lin_pred = linearPredictor(x,
                                    beta_tilde,
                                    intercept_tilde,
@@ -303,11 +293,6 @@ public:
       if (fit_intercept)
         intercept = intercept_tilde
                     + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
-
-      if (family->name == "multinomial") {
-        beta.each_col() -= median(beta);
-        intercept -= mean(intercept);
-      }
 
       lin_pred = linearPredictor(x,
                                  beta,

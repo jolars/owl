@@ -98,19 +98,19 @@ public:
   double
   primal(const mat& y, const mat& lin_pred)
   {
-    return -accu(y % lin_pred - trunc_exp(lin_pred) - lgamma(y + 1));
+    return -accu(y % lin_pred - exp(lin_pred) - lgamma(y + 1));
   }
 
   double
   dual(const mat& y, const mat& lin_pred)
   {
-    return -accu(trunc_exp(lin_pred) % (lin_pred - 1) - lgamma(y + 1));
+    return -accu(exp(lin_pred) % (lin_pred - 1) - lgamma(y + 1));
   }
 
   mat
   pseudoGradient(const mat& y, const mat& lin_pred)
   {
-    return trunc_exp(lin_pred) - y;
+    return exp(lin_pred) - y;
   }
 
   rowvec
@@ -133,7 +133,7 @@ public:
 
     // logsumexp bit
     vec lp_max = max(lin_pred, 1);
-    double primal = accu(trunc_log(trunc_exp(-lp_max) + sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max);
+    double primal = accu(log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max);
 
     for (uword k = 0; k < m; ++k) {
       // NOTE(JL): use colptr instead?
@@ -147,12 +147,27 @@ public:
   double
   dual(const mat& y, const mat& lin_pred)
   {
+    const uword n = y.n_rows;
+    const uword m = lin_pred.n_cols;
+
     vec lp_max = max(lin_pred, 1);
-    vec lse = trunc_log(trunc_exp(-lp_max) + sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+    vec lse = log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
-    double dual = accu(lse);
+    // double dual = accu(lse);
 
-    dual += accu(-lin_pred % trunc_exp(lin_pred.each_col() - lse));
+    // dual += accu(-lin_pred % trunc_exp(lin_pred.each_col() - lse));
+
+    uvec y_class = conv_to<uvec>::from(y + 0.1);
+
+    double dual = 0.0;
+
+    for (uword i = 0; i < n; ++i) {
+      uword k = y_class(i);
+      double lp = 0;
+      if (k < m)
+        lp = lin_pred(i, k);
+      dual += lse(i) - lp*exp(lp - lse(i));
+    }
 
     return dual;
   }
@@ -162,12 +177,12 @@ public:
   {
     const uword m = lin_pred.n_cols;
 
-    uvec y_class = conv_to<uvec>::from(y + 0.1);
+    uvec y_class = conv_to<uvec>::from(vectorise(y) + 0.1);
 
     vec lp_max = max(lin_pred, 1);
-    vec lse = trunc_log(trunc_exp(-lp_max) + sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+    vec lse = log(exp(-lp_max) + sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
-    mat gradient = trunc_exp(lin_pred.each_col() - lse);
+    mat gradient = exp(lin_pred.each_col() - lse);
 
     for (uword k = 0; k < m; ++k)
       gradient.col(k) -= conv_to<vec>::from(y_class == k); // indicator fun
@@ -187,7 +202,7 @@ public:
       intercept(k) = accu(find(y_class == k))/n;
     }
 
-    intercept = trunc_log(intercept) - accu(trunc_log(intercept))/(n_classes + 1);
+    intercept = log(intercept) - accu(log(intercept))/(n_classes + 1);
 
     return intercept;
   }
