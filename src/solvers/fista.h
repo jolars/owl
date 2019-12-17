@@ -17,8 +17,6 @@ private:
   const uword max_passes;
   const double tol_rel_gap;
   const double tol_infeas;
-  const bool line_search;
-  const uword line_search_frequency;
   const uword verbosity;
 
 public:
@@ -28,8 +26,6 @@ public:
         const uword max_passes,
         const double tol_rel_gap,
         const double tol_infeas,
-        const bool line_search,
-        const uword line_search_frequency,
         const uword verbosity)
         : standardize(standardize),
           is_sparse(is_sparse),
@@ -37,8 +33,6 @@ public:
           max_passes(max_passes),
           tol_rel_gap(tol_rel_gap),
           tol_infeas(tol_infeas),
-          line_search(line_search),
-          line_search_frequency(line_search_frequency),
           verbosity(verbosity) {}
 
   virtual
@@ -50,7 +44,6 @@ public:
       const rowvec& intercept_init,
       const mat& beta_init,
       const bool fit_intercept,
-      const double lipschitz_constant,
       const vec& lambda,
       const vec& x_center,
       const vec& x_scale)
@@ -62,7 +55,6 @@ public:
                    intercept_init,
                    beta_init,
                    fit_intercept,
-                   lipschitz_constant,
                    lambda,
                    x_center,
                    x_scale);
@@ -77,7 +69,6 @@ public:
       const rowvec& intercept_init,
       const mat& beta_init,
       const bool fit_intercept,
-      const double lipschitz_constant,
       const vec& lambda,
       const vec& x_center,
       const vec& x_scale)
@@ -89,7 +80,6 @@ public:
                    intercept_init,
                    beta_init,
                    fit_intercept,
-                   lipschitz_constant,
                    lambda,
                    x_center,
                    x_scale);
@@ -104,7 +94,6 @@ public:
           const rowvec& intercept_init,
           const mat& beta_init,
           const bool fit_intercept,
-          const double lipschitz_constant,
           const vec& lambda,
           const vec& x_center,
           const vec& x_scale)
@@ -129,7 +118,7 @@ public:
     mat pseudo_gradient(n, m, fill::zeros);
     rowvec gradient_intercept(m, fill::zeros);
 
-    double learning_rate = 1.0/lipschitz_constant;
+    double learning_rate = 1.0;
 
     // line search parameters
     double eta = 0.5;
@@ -232,46 +221,15 @@ public:
       unsigned current_line_searches = 0;
 
       // Backtracking line search
-      if (line_search && passes % line_search_frequency == 0) {
+      while (true) {
+        current_line_searches++;
 
-        while (true) {
-          current_line_searches++;
-
-          // Update beta and intercept
-          beta_tilde = penalty->eval(beta - learning_rate*gradient,
-                                     lambda,
-                                     learning_rate);
-
-          vec d = vectorise(beta_tilde - beta);
-
-          if (fit_intercept)
-            intercept_tilde = intercept - learning_rate*gradient_intercept;
-
-          lin_pred = linearPredictor(x,
-                                     beta_tilde,
-                                     intercept_tilde,
-                                     x_center,
-                                     x_scale,
-                                     standardize);
-
-          f = family->primal(y, lin_pred);
-          double q = f_old
-            + dot(d, vectorise(gradient))
-            + (1.0/(2*learning_rate))*accu(square(d));
-
-          if (q >= f*(1 - 1e-12)) {
-            break;
-          } else {
-            learning_rate *= eta;
-          }
-
-          Rcpp::checkUserInterrupt();
-        }
-      } else {
         // Update beta and intercept
         beta_tilde = penalty->eval(beta - learning_rate*gradient,
                                    lambda,
                                    learning_rate);
+
+        vec d = vectorise(beta_tilde - beta);
 
         if (fit_intercept)
           intercept_tilde = intercept - learning_rate*gradient_intercept;
@@ -282,6 +240,19 @@ public:
                                    x_center,
                                    x_scale,
                                    standardize);
+
+        f = family->primal(y, lin_pred);
+        double q = f_old
+          + dot(d, vectorise(gradient))
+          + (1.0/(2*learning_rate))*accu(square(d));
+
+        if (q >= f*(1 - 1e-12)) {
+          break;
+        } else {
+          learning_rate *= eta;
+        }
+
+        Rcpp::checkUserInterrupt();
       }
 
       if (diagnostics)

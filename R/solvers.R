@@ -13,7 +13,6 @@
 #' @export
 FISTA <- function(tol_rel_gap = 1e-5,
                   tol_infeas = 1e-4,
-                  line_search = FALSE,
                   line_search_frequency = 1,
                   ...) {
 
@@ -28,7 +27,6 @@ FISTA <- function(tol_rel_gap = 1e-5,
   structure(list(name = "fista",
                  tol_rel_gap = tol_rel_gap,
                  tol_infeas = tol_infeas,
-                 line_search = line_search,
                  line_search_frequency = line_search_frequency),
             class = c("FISTA", "Solver"))
 }
