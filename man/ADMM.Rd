@@ -16,7 +16,7 @@ ADMM(tol_rel = 1e-05, tol_abs = 1e-04, alpha = 1.6, ...)
 \item{...}{ignored}
 }
 \value{
-An object of class \verb{c("ADMM", "Solver"}
+An object of class \code{c("ADMM", "Solver")}
 }
 \description{
 ADMM (Alternating Direction Method of Multipliers)

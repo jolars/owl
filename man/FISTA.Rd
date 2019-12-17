@@ -4,7 +4,7 @@
 \alias{FISTA}
 \title{FISTA (Fast Iterative Shrinking--Thresholding Algorithm)}
 \usage{
-FISTA(tol_rel_gap = 1e-05, tol_infeas = 1e-04, line_search_frequency = 1, ...)
+FISTA(tol_rel_gap = 1e-05, tol_infeas = 1e-04, ...)
 }
 \arguments{
 \item{tol_rel_gap}{relative tolerance criterion for the duality gap}
@@ -12,11 +12,7 @@ FISTA(tol_rel_gap = 1e-05, tol_infeas = 1e-04, line_search_frequency = 1, ...)
 \item{tol_infeas}{tolerance criterion for infeasibility of the
 dual objective}
 
-\item{line_search_frequency}{at which iterations to perform line search}
-
 \item{...}{ignored}
-
-\item{line_search}{whether to perform line search}
 }
 \value{
 An object of class \code{c("Fista", "Solver")}

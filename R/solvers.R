@@ -5,8 +5,6 @@
 #' @param tol_rel_gap relative tolerance criterion for the duality gap
 #' @param tol_infeas tolerance criterion for infeasibility of the
 #'   dual objective
-#' @param line_search whether to perform line search
-#' @param line_search_frequency at which iterations to perform line search
 #' @param ... ignored
 #'
 #' @return An object of class `c("Fista", "Solver")`
@@ -33,7 +31,7 @@ FISTA <- function(tol_rel_gap = 1e-5,
 #' @param alpha over-regularization parameter, must be in `(1.0, 1.8`)
 #' @param ... ignored
 #'
-#' @return An object of class `c("ADMM", "Solver"`
+#' @return An object of class `c("ADMM", "Solver")`
 #' @export
 ADMM <- function(tol_rel = 1e-5,
                  tol_abs = 1e-4,
