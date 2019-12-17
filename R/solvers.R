@@ -13,23 +13,16 @@
 #' @export
 FISTA <- function(tol_rel_gap = 1e-5,
                   tol_infeas = 1e-4,
-                  line_search = FALSE,
-                  line_search_frequency = 1,
                   ...) {
 
   stopifnot(tol_rel_gap >= 0,
             tol_infeas >= 0,
-            is.logical(line_search),
-            line_search_frequency >= 1,
             is.finite(tol_rel_gap),
-            is.finite(tol_infeas),
-            is.finite(line_search_frequency))
+            is.finite(tol_infeas))
 
   structure(list(name = "fista",
                  tol_rel_gap = tol_rel_gap,
-                 tol_infeas = tol_infeas,
-                 line_search = line_search,
-                 line_search_frequency = line_search_frequency),
+                 tol_infeas = tol_infeas),
             class = c("FISTA", "Solver"))
 }
 

@@ -23,9 +23,6 @@ setupSolver(const std::string& solver_choice,
 
     const double tol_rel_gap          = as<double>(args["tol_rel_gap"]);
     const double tol_infeas           = as<double>(args["tol_infeas"]);
-    const bool line_search            = as<bool>(args["line_search"]);
-    const uword line_search_frequency =
-      as<uword>(args["line_search_frequency"]);
 
     return std::unique_ptr<FISTA>(new FISTA{standardize_features,
                                             is_sparse,
@@ -33,8 +30,6 @@ setupSolver(const std::string& solver_choice,
                                             max_passes,
                                             tol_rel_gap,
                                             tol_infeas,
-                                            line_search,
-                                            line_search_frequency,
                                             verbosity});
 
   } else {

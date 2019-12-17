@@ -141,9 +141,6 @@
 #'   a list where each element indicates the indices of the
 #'   coefficients that were active at that point in the regularization path
 #' }
-#' \item{lipschitz_constants}{
-#'   the computed Lipschitz constants along the path
-#' }
 #' \item{diagnostics}{
 #'   a `data.frame` of objective values for the primal and dual problems, as
 #'   well as a measure of the infeasibility, time, and iteration. Only
@@ -272,12 +269,6 @@ owl <- function(x,
     stop("orthogonalization is currently not implemented for sparse data ",
          "when standardization is required")
 
-  if (identical(solver_options$line_search, FALSE) && family == "poisson")
-    stop("line search must be enabled for poisson models")
-
-  if (identical(solver_options$line_search, FALSE) && penalty == "group_slope")
-    stop("line search must be enabled for group slope")
-
   if (penalty == "group_slope" && family == "multinomial")
     stop("cannot use group slope penalty with multinomial response")
 
@@ -388,11 +379,6 @@ owl <- function(x,
   sigma <- penalty$sigma
   lambda <- penalty$lambda
   n_sigma <- length(penalty$sigma)
-
-  if (family == "gaussian" && !(inherits(penalty, "GroupSlope")))
-    solver_options$line_search <- FALSE
-  else
-    solver_options$line_search <- TRUE
 
   # setup solver settings
   solver <- switch(solver,

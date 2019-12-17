@@ -43,7 +43,6 @@ public:
       const rowvec& intercept_init,
       const mat& beta_init,
       const bool fit_intercept,
-      const double lipschitz_constant,
       const vec& lambda,
       const vec& x_center,
       const vec& x_scale)
@@ -64,7 +63,6 @@ public:
       const rowvec& intercept_init,
       const mat& beta_init,
       const bool fit_intercept,
-      const double lipschitz_constant,
       const vec& lambda,
       const vec& x_center,
       const vec& x_scale)

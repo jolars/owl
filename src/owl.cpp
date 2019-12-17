@@ -4,7 +4,6 @@
 #include "penalties.h"
 #include "families.h"
 #include "screening_rules.h"
-#include "lipschitzConstant.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -100,20 +99,6 @@ owlCpp(const T& x, const mat& y, const List control)
                             verbosity,
                             solver_args);
 
-  std::vector<double> lipschitz_constants;
-  double lipschitz_constant{1};
-
-  if (verbosity >= 1)
-    Rcpp::Rcout << "computing lipschitz estimate" << std::endl;
-
-  if (screening_rule == "none") {
-    lipschitz_constant = lipschitzConstant(x,
-                                           x_center,
-                                           x_scale,
-                                           standardize_features,
-                                           family_choice);
-  }
-
   Results res;
 
   for (uword k = 0; k < n_sigma; ++k) {
@@ -185,7 +170,6 @@ owlCpp(const T& x, const mat& y, const List control)
                         intercept,
                         beta,
                         fit_intercept,
-                        lipschitz_constant,
                         lambda*sigma(k),
                         x_center,
                         x_scale);
@@ -200,7 +184,6 @@ owlCpp(const T& x, const mat& y, const List control)
         infeasibilities.push_back(res.infeasibilities);
         timings.push_back(res.time);
         line_searches.emplace_back(res.line_searches);
-        lipschitz_constants.emplace_back(lipschitz_constant);
       }
 
     } else {
@@ -216,14 +199,6 @@ owlCpp(const T& x, const mat& y, const List control)
 
         T x_subset = matrixSubset(x, active_set);
 
-        // compute Lipschitz estimate on x subset
-        // NOTE(JL): is it worth it to do this each time?
-        lipschitz_constant = lipschitzConstant(x_subset,
-                                               x_center(active_set),
-                                               x_scale(active_set),
-                                               standardize_features,
-                                               family_choice);
-
         res = solver->fit(x_subset,
                           y,
                           family,
@@ -231,7 +206,6 @@ owlCpp(const T& x, const mat& y, const List control)
                           intercept,
                           beta(active_set),
                           fit_intercept,
-                          lipschitz_constant,
                           lambda.head(active_set.n_elem)*sigma(k),
                           x_center(active_set),
                           x_scale(active_set));
@@ -275,7 +249,6 @@ owlCpp(const T& x, const mat& y, const List control)
         infeasibilities.push_back(res.infeasibilities);
         timings.push_back(res.time);
         line_searches.push_back(res.line_searches);
-        lipschitz_constants.emplace_back(lipschitz_constant);
       }
     }
 
@@ -300,8 +273,7 @@ owlCpp(const T& x, const mat& y, const List control)
     Named("infeasibilities")     = wrap(infeasibilities),
     Named("time")                = wrap(timings),
     Named("line_searches")       = wrap(line_searches),
-    Named("violations")          = wrap(violations),
-    Named("lipschitz_constants") = wrap(lipschitz_constants)
+    Named("violations")          = wrap(violations)
   );
 }
 

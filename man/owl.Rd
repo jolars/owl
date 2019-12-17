@@ -19,7 +19,7 @@ owl(
   lambda_min_ratio = if (NROW(x) < NCOL(x)) 0.01 else 1e-04,
   n_sigma = 100,
   fdr = 0.2,
-  screening_rule = c("none", "strong", "safe"),
+  screening_rule = c("none", "strong"),
   max_passes = 1e+06,
   diagnostics = FALSE,
   verbosity = 0,
@@ -107,9 +107,6 @@ multinomial families
 \item{active_sets}{
 a list where each element indicates the indices of the
 coefficients that were active at that point in the regularization path
-}
-\item{lipschitz_constants}{
-the computed Lipschitz constants along the path
 }
 \item{diagnostics}{
 a \code{data.frame} of objective values for the primal and dual problems, as
