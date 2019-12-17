@@ -148,15 +148,27 @@ public:
   double
   dual(const mat& y, const mat& lin_pred)
   {
+    uword n = y.n_rows;
+    uword m = lin_pred.n_cols;
+
     uvec y_class = conv_to<uvec>::from(y + 0.1);
 
     vec lp_max = max(lin_pred, 1);
     vec lse =
       trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
-    double dual = accu(lse);
+    // double dual = accu(lse);
+    //
+    // dual += accu(-lin_pred % trunc_exp(lin_pred.each_col() - lse));
 
-    dual += accu(-lin_pred % trunc_exp(lin_pred.each_col() - lse));
+    double dual = 0.0;
+
+    for (uword i = 0; i < n; ++i) {
+      dual += lse(i);
+      for (uword k = 0; k < m; ++k) {
+        dual -= lin_pred(i, k)*exp(lin_pred(i, k) - lse(i));
+      }
+    }
 
     return dual;
   }
