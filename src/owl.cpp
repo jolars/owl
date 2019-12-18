@@ -221,13 +221,13 @@ owlCpp(const T& x, const mat& y, const List control)
                           family,
                           penalty,
                           intercept,
-                          beta(active_set),
+                          beta.rows(active_set),
                           fit_intercept,
-                          lambda.head(active_set.n_elem)*sigma(k),
+                          lambda.head(active_set.n_elem*m)*sigma(k),
                           x_center(active_set),
                           x_scale(active_set));
 
-        beta(active_set) = res.beta;
+        beta.rows(active_set) = res.beta;
         intercept = res.intercept;
         passes(k) = res.passes;
 

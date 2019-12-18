@@ -77,7 +77,7 @@ preProcessResponse.Multinomial <- function(object, y) {
   min_class <- min(y_table)
   class_names <- names(y_table)
   n_classes <- length(y_table)
-  n_targets <- n_classes - 1
+  n_targets <- n_classes
 
   Y <- matrix(NA, NROW(y), n_targets)
 
