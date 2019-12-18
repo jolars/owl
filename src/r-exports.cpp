@@ -6,8 +6,7 @@ using namespace Rcpp;
 using namespace arma;
 
 // [[Rcpp::export]]
-arma::vec
-prox_slope_cpp(const arma::mat& y, const Rcpp::List& args)
+arma::vec prox_slope_cpp(const arma::mat& y, const Rcpp::List& args)
 {
   auto sigma = Rcpp::as<arma::vec>(args["sigma"]);
   auto lambda = Rcpp::as<arma::vec>(args["lambda"]);
@@ -19,8 +18,7 @@ prox_slope_cpp(const arma::mat& y, const Rcpp::List& args)
 
 
 // [[Rcpp::export]]
-arma::vec
-standardizedSparseColNorms(const arma::sp_mat& x,
+arma::vec standardizedSparseColNorms(const arma::sp_mat& x,
                            const arma::vec& x_center)
 {
   using namespace arma;
@@ -35,8 +33,7 @@ standardizedSparseColNorms(const arma::sp_mat& x,
 }
 
 template <typename T>
-arma::vec
-colNorms(const T& x, const arma::uword norm_type = 2)
+arma::vec colNorms(const T& x, const arma::uword norm_type = 2)
 {
   using namespace arma;
 
@@ -51,30 +48,27 @@ colNorms(const T& x, const arma::uword norm_type = 2)
 }
 
 // [[Rcpp::export]]
-arma::vec
-colNormsSparse(const arma::sp_mat& x, const arma::uword norm_type = 2)
+arma::vec colNormsSparse(const arma::sp_mat& x, const arma::uword norm_type = 2)
 {
   return colNorms(x, norm_type);
 }
 
 // [[Rcpp::export]]
-arma::vec
-colNormsDense(const arma::mat& x, const arma::uword norm_type = 2)
+arma::vec colNormsDense(const arma::mat& x, const arma::uword norm_type = 2)
 {
   return colNorms(x, norm_type);
 }
 
 template <typename T>
-arma::vec
-lambdaMax(const T& x,
-          const arma::mat& y,
-          const arma::vec& x_center,
-          const arma::vec& x_scale,
-          const arma::vec& y_scale,
-          const uword n_targets,
-          const std::string& family,
-          const bool standardize_features,
-          const bool is_sparse)
+arma::vec lambdaMax(const T& x,
+                    const arma::mat& y,
+                    const arma::vec& x_center,
+                    const arma::vec& x_scale,
+                    const arma::vec& y_scale,
+                    const uword n_targets,
+                    const std::string& family,
+                    const bool standardize_features,
+                    const bool is_sparse)
 {
   const uword p = x_center.n_elem;
   mat lambda_max(p, n_targets);
@@ -109,6 +103,15 @@ lambdaMax(const T& x,
 
     for (uword k = 0; k < n_targets; ++k) {
       lambda_max.col(k) *= y_std(k);
+    }
+
+  } else if (family == "poisson") {
+
+    lambda_max = x.t() * (1 - y);
+
+    if (is_sparse && standardize_features) {
+      for (uword j = 0; j < p; ++j)
+        lambda_max(j) -= accu((1 - y) * x_center(j)/x_scale(j));
     }
 
   } else {
@@ -250,13 +253,13 @@ standardizeDense(arma::mat x)
   const uword p = x.n_cols;
   const uword n = x.n_rows;
 
-  vec x_center(p);
-  vec x_scale(p);
+  rowvec x_center = mean(x);
+  rowvec x_scale = stddev(x);
 
-  for (uword j = 0; j < p; ++j) {
-    x_center(j) = accu(x.col(j))/n;
-    x_scale(j) = norm(x.col(j) - x_center(j), 2);
-  }
+  // for (uword j = 0; j < p; ++j) {
+  //   x_center(j) = accu(x.col(j))/n;
+  //   x_scale(j) = norm(x.col(j) - x_center(j), 2);
+  // }
 
   // don't scale zero-variance predictors
   x_scale.replace(0, 1);
@@ -279,20 +282,19 @@ standardizeSparse(arma::sp_mat x)
   const uword p = x.n_cols;
   const uword n = x.n_rows;
 
-  vec x_center(p);
-  vec x_scale(p);
+  rowvec x_center(p);
+  rowvec x_scale(p);
 
   for (uword j = 0; j < p; ++j) {
     x_center(j) = accu(x.col(j))/n;
-    x_scale(j) = norm(x.col(j) - x_center(j), 2);
+    x_scale(j) = norm(x.col(j) - x_center(j), 2)/sqrt(n-1);
   }
 
   // don't scale zero-variance predictors
   x_scale.replace(0, 1);
 
-  for (uword j = 0; j < p; ++j) {
+  for (uword j = 0; j < p; ++j)
     x.col(j) /= x_scale(j);
-  }
 
   return List::create(
     Named("x") = wrap(x),
