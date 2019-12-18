@@ -10,7 +10,7 @@ test_that("lasso and slope fits are equivalent if all lambda are equal", {
   lasso <- glmnet(x, y, standardize = FALSE)
   lambda <- lasso$lambda*nrow(x)
 
-  slope <- owl(x, y, penalty = "slope",
+  slope <- owl(x, y,
                standardize_features = FALSE,
                lambda = rep(lambda[1], ncol(x)),
                sigma = exp(seq(log(1), log(1e-4), length.out = 100)))

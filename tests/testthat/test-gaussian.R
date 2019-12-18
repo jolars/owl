@@ -7,8 +7,7 @@ test_that("unregularized gaussian models work as expected", {
   g <- owl(x,
            y,
            family = "gaussian",
-           sigma = 1e-4,
-           penalty = "slope")
+           sigma = 1e-4)
 
   expect_equivalent(coef(lm_fit),
                     coef(g),

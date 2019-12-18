@@ -35,8 +35,8 @@ plotDiagnostics <- function(object,
   yvar <- match.arg(yvar)
 
   if (is.null(object$diagnostics))
-    stop("no diagnostics found in", enquote(substitute(object)),
-         "; did you call owl() with diagnostics = TRUE?")
+    stop("no diagnostics found in fit;",
+         "did you call owl() with diagnostics = TRUE?")
 
   d <- object$diagnostics
 

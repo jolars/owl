@@ -1,17 +1,3 @@
-# Compute the usual unbiased estimate of the variance in a linear model.
-estimate_noise <- function(x, y, intercept = TRUE) {
-  n <- NROW(x)
-
-  if (intercept)
-    x <- cbind(rep(1, n), x)
-
-  p <- NCOL(x)
-  stopifnot(n > p)
-
-  fit <- stats::lm.fit(x, y)
-  sqrt(sum(fit$residuals^2) / (n - p))
-}
-
 firstUpper <- function(x) {
   substr(x, 1, 1) <- toupper(substr(x, 1, 1))
   x
@@ -30,35 +16,12 @@ logSeq <- function(from, to, length.out) {
   exp(seq(log(from), log(to), length.out = length.out))
 }
 
-groupID <- function(group) {
-  group <- as.integer(group)
-  id <- unique(group)
-
-  members <- lapply(id, function(id_i) which(group %in% id_i))
-  names(members) <- id
-
-  members
-}
-
-NSLICE <- function(x) {
-  d <- dim(x)
-  n_slices <- if (length(d) == 3) d[3] else 1
-  n_slices
-}
-
 colNorms <- function(x, norm_type = 2) {
   if (inherits(x, "sparseMatrix"))
     colNormsSparse(x, norm_type)
   else
     colNormsDense(x, norm_type)
 }
-
-# rowNorms <- function(x, norm_type = 2) {
-#   if (inherits(x, "sparseMatrix"))
-#     rowNormsSparse(x, norm_type)
-#   else
-#     rowNormsDense(x, norm_type)
-# }
 
 randomProblem <-
   function(n = 1000,

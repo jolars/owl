@@ -47,7 +47,6 @@ set.seed(123)
 tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
                    mtcars$hp,
                    fdr = c(0.1, 0.2),
-                   penalty = "slope",
                    number = 10)
 plot(tune, ci_col = "salmon", col = "black")
 }

@@ -37,7 +37,6 @@ caretSlopeOwl <- function() {
       fit <- owl::owl(x,
                       y,
                       family = fam,
-                      penalty = "slope",
                       n_sigma = len + 2,
                       standardize_features = FALSE)
 

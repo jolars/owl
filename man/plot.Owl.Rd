@@ -22,7 +22,7 @@ current device unless stored in a variable.
 Plot the model's coefficient along the regularization path.
 }
 \examples{
-fit <- owl(heart$x, heart$y, penalty = "slope")
+fit <- owl(heart$x, heart$y)
 plot(fit)
 }
 \seealso{

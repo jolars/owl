@@ -8,7 +8,7 @@ test_that("intepolating coefficients works properly", {
   expect_silent(coef(fit, sigma = c(0.001, 0.04)))
 
   # check for lasso
-  fit <- owl(xy$x, xy$y, penalty = "slope")
+  fit <- owl(xy$x, xy$y)
 
   expect_silent(coef(fit))
   expect_silent(coef(fit, lambda = c(0.2, 20)))
@@ -21,7 +21,7 @@ test_that("simplify argument in coef() works as expected", {
   xy <- owl:::randomProblem(100, 10)
 
   # check for slope
-  fit <- owl(xy$x, xy$y, penalty = "slope")
+  fit <- owl(xy$x, xy$y)
 
   # check simplify
   coefs <- coef(fit, simplify = TRUE)

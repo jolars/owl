@@ -31,8 +31,6 @@ owlCpp(const T& x, const mat& y, const List control)
   auto tol_rel_gap = as<double>(control["tol_rel_gap"]);
   auto tol_infeas = as<double>(control["tol_infeas"]);
 
-  auto groups = as<List>(control["groups"]);
-
   auto family_args = as<List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
   auto screening = as<bool>(control["screening"]);
@@ -61,7 +59,7 @@ owlCpp(const T& x, const mat& y, const List control)
   if (verbosity >= 1)
     Rcpp::Rcout << "setting up penalty" << std::endl;
 
-  auto penalty = setupPenalty(penalty_args, groups);
+  auto penalty = setupPenalty(penalty_args);
 
   cube betas(p, m, n_sigma, fill::zeros);
   cube intercepts(1, m, n_sigma);

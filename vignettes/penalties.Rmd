@@ -47,7 +47,6 @@ for (i in seq_along(q)) {
   
   fit <- owl(x,
              y,
-             penalty = "slope", 
              lambda = "gaussian", 
              sigma = sigma,
              intercept = FALSE)

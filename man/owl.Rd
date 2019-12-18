@@ -2,18 +2,16 @@
 % Please edit documentation in R/owl.R
 \name{owl}
 \alias{owl}
-\title{Regularized Generalized Linear Models}
+\title{Generalized Linear Models Penalized with the SLOPE (OWL) Norm}
 \usage{
 owl(
   x,
   y,
-  groups = NULL,
   family = c("gaussian", "binomial", "multinomial", "poisson"),
-  penalty = c("slope", "group_slope"),
   intercept = TRUE,
   standardize_features = TRUE,
   orthogonalize = TRUE,
-  sigma = c("sequence", "estimate"),
+  sigma = NULL,
   lambda = NULL,
   lambda_min_ratio = if (NROW(x) < NCOL(x)) 0.01 else 1e-04,
   n_sigma = 100,
@@ -38,23 +36,13 @@ be converted to matrices internally.}
 \item{y}{the response. For Gaussian models this must be numeric; for
 binomial models, it can be a factor.}
 
-\item{groups}{a vector of integers giving the group membership of each
-feature (only applies to Group SLOPE)}
-
 \item{family}{response type. See \strong{Families} for details.}
-
-\item{penalty}{the regularization penalty to use. See \strong{Penalties} for
-details.}
 
 \item{intercept}{whether to fit an intercept}
 
 \item{standardize_features}{whether to standardize features (predictors)}
 
-\item{orthogonalize}{whether \code{x} should be orthogonalized. Note that
-setting this to TRUE when \code{x} is sparse will through an error. (only
-applies to Group SLOPE)}
-
-\item{sigma}{noise estimate (only applies to SLOPE and Group SLOPE)}
+\item{sigma}{scale of lambda sequence}
 
 \item{lambda}{either a character vector indicating the method used
 to construct the lambda path or the a vector or matrix}
@@ -64,8 +52,7 @@ to construct the lambda path or the a vector or matrix}
 
 \item{n_sigma}{length of regularization path}
 
-\item{fdr}{target false discovery rate (only applies to SLOPE and
-Group SLOPE)}
+\item{fdr}{shape of lambda sequence}
 
 \item{screening}{whether the strong rule for SLOPE be used to screen
 variables for inclusion}
@@ -131,10 +118,18 @@ available if \code{diagnostics = TRUE} in the call to \code{\link[=owl]{owl()}}.
 \item{call}{the call used for fitting the model}
 }
 \description{
-This functions fits a generalized linear model (GLM) using efficient
-optimization routines suitable to big data problems.
+SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
+Unlike the latter, however, SLOPE uses a non-increasing
+sequence of \eqn{\lambda}---one
+for each coefficient. The penalty term looks like
 }
 \details{
+\deqn{
+  \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
+}{
+  \sigma \sum \lambda |\beta|(j)
+}
+
 The objective for each model is simply the loss function for
 each family plus a penalty term.
 }
@@ -184,36 +179,6 @@ In multinomial regression, we use the following objective.
 }
 }
 
-\section{Penalties}{
-
-Models fit by \code{\link[=owl]{owl()}} can be regularized via several
-penalties.
-
-\strong{SLOPE}
-
-SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
-Unlike the latter, however, SLOPE uses a non-increasing
-sequence of \eqn{\lambda}---one
-for each coefficient. The penalty term looks like
-
-\deqn{
-  \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
-}{
-  \sigma \sum \lambda |\beta|(j)
-}
-
-\strong{Group SLOPE}
-
-Group SLOPE is an extension of Group LASSO. It applies the following
-penalty
-
-\deqn{
-  J_\lambda(\beta) = \sum_{j=1}^p \lambda_j |W||\beta||_{I,X}|_{(j)}
-}{
-  J_\lambda(\beta) = \sum \lambda_j |W||\beta||_{I,X}|_(j)
-}
-}
-
 \examples{
 
 # Gaussian response
@@ -227,6 +192,10 @@ fit <- owl(heart$x, heart$y, family = "binomial")
 # Poisson response
 
 fit <- owl(abalone$x, abalone$y, family = "poisson")
+
+# Multinomial response
+
+fit <- owl(wine$x, wine$y, family = "multinomial")
 
 }
 \seealso{

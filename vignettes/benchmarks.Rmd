@@ -35,7 +35,6 @@ library(owl)
 fit <- owl(bodyfat$x, 
            bodyfat$y,
            family = "gaussian",
-           penalty = "slope",
            diagnostics = TRUE,
            sigma = "estimate")
 plotDiagnostics(fit)
@@ -47,7 +46,6 @@ plotDiagnostics(fit)
 fit <- owl(heart$x,
            heart$y,
            family = "gaussian",
-           penalty = "slope",
            sigma = "estimate",
            diagnostics = TRUE)
 plotDiagnostics(fit)
@@ -60,7 +58,6 @@ plotDiagnostics(fit)
 fit <- owl(abalone$x,
            abalone$y,
            family = "poisson",
-           penalty = "slope",
            sigma = "estimate",
            diagnostics = TRUE)
 plotDiagnostics(fit)
@@ -72,7 +69,6 @@ plotDiagnostics(fit)
 fit <- owl(wine$x,
            wine$y,
            family = "multinomial",
-           penalty = "slope",
            sigma = "estimate",
            diagnostics = TRUE)
 plotDiagnostics(fit)

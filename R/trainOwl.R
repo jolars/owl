@@ -39,12 +39,10 @@
 #' tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
 #'                    mtcars$hp,
 #'                    fdr = c(0.1, 0.2),
-#'                    penalty = "slope",
 #'                    number = 8,
 #'                    repeats = 5)
 trainOwl <- function(x,
                      y,
-                     groups = NULL,
                      fdr = 0.2,
                      method = "cv",
                      number = 10,
@@ -70,7 +68,7 @@ trainOwl <- function(x,
             repeats >= 1)
 
   # get initial penalty sequence
-  fit <- owl(x, y, groups = groups, ...)
+  fit <- owl(x, y, ...)
 
   # match measure against accepted measure for the given family
   family <- if (inherits(fit, "OwlGaussian"))
@@ -129,8 +127,7 @@ trainOwl <- function(x,
 
       args <- utils::modifyList(list(x = x_train,
                                      y = y_train,
-                                     sigma = sigma,
-                                     groups = groups), list(...))
+                                     sigma = sigma), list(...))
 
       for (k in seq_len(d[3])) {
 

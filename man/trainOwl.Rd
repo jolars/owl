@@ -7,7 +7,6 @@
 trainOwl(
   x,
   y,
-  groups = NULL,
   fdr = 0.2,
   method = "cv",
   number = 10,
@@ -26,11 +25,7 @@ be converted to matrices internally.}
 \item{y}{the response. For Gaussian models this must be numeric; for
 binomial models, it can be a factor.}
 
-\item{groups}{a vector of integers giving the group membership of each
-feature (only applies to Group SLOPE)}
-
-\item{fdr}{target false discovery rate (only applies to SLOPE and
-Group SLOPE)}
+\item{fdr}{shape of lambda sequence}
 
 \item{method}{type of model tuning method}
 
@@ -74,7 +69,6 @@ to \code{\link[=plot.TrainedOwl]{plot.TrainedOwl()}}.
 tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
                    mtcars$hp,
                    fdr = c(0.1, 0.2),
-                   penalty = "slope",
                    number = 8,
                    repeats = 5)
 }

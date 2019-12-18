@@ -5,7 +5,7 @@ Slope <- function(x,
                   y_scale,
                   standardize_features,
                   lambda = c("gaussian", "bhq"),
-                  sigma = c("sequence", "estimate"),
+                  sigma = NULL,
                   lambda_min_ratio = NULL,
                   n_sigma = 100,
                   fdr = 0.2,
@@ -20,15 +20,6 @@ Slope <- function(x,
 
   if (is.null(lambda))
     lambda <- "gaussian"
-
-  # noise estimate
-  if (is.character(sigma)) {
-    sigma_type <- match.arg(sigma)
-    sigma <- NA
-  } else {
-    stopifnot(length(sigma) > 0, sigma >= 0, is.finite(sigma))
-    sigma_type <- "user"
-  }
 
   n_lambda <- p*n_targets
 
@@ -66,7 +57,7 @@ Slope <- function(x,
       stop("lambda sequence cannot contain negative values")
   }
 
-  if (sigma_type == "sequence") {
+  if (is.null(sigma)) {
     lambda_max <- lambdaMax(x,
                             y,
                             x_center,
@@ -83,139 +74,10 @@ Slope <- function(x,
                      length.out = n_sigma))
   }
 
-  lambda <- matrix(lambda, n_lambda, 1)
-  sigma  <- sigma
-
   structure(list(name = "slope",
                  tuning_parameters = c("sigma", "fdr"),
                  sigma = sigma,
                  fdr = fdr,
                  lambda = lambda),
             class = c("Slope", "Penalty"))
-}
-
-GroupSlope <- function(x,
-                       y,
-                       x_center,
-                       x_scale,
-                       y_scale,
-                       standardize_features,
-                       groups,
-                       lambda = c("corrected", "mean", "max"),
-                       sigma = c("sequence", "estimate"),
-                       lambda_min_ratio = NULL,
-                       n_sigma = 100,
-                       fdr = 0.2,
-                       family,
-                       n_targets) {
-
-  group_id <- groups$group_id
-  ortho_group_id <- groups$ortho_group_id
-  orthogonalize <- groups$orthogonalize
-  wt <- groups$wt
-
-  n <- NROW(x)
-  p <- NCOL(x)
-
-  n_groups <- length(group_id)
-
-  if (is.null(lambda))
-    lambda <- "corrected"
-
-  if (is.null(lambda_min_ratio))
-    lambda_min_ratio <- if (n < p) 0.01 else 0.0001
-
-  group_sizes <- if (orthogonalize)
-    lengths(ortho_group_id)
-  else
-    lengths(group_id)
-
-  # noise estimate
-  if (is.character(sigma)) {
-    sigma_type <- match.arg(sigma)
-    sigma <- NA_real_
-  } else {
-    stopifnot(length(sigma) > 0, sigma >= 0, is.finite(sigma))
-    sigma_type <- "user"
-  }
-
-  # regularization strength
-  if (is.character(lambda)) {
-    lambda_type <- match.arg(lambda)
-
-    if (lambda_type %in% c("max", "mean")) {
-
-      lambda <- lambdaChiOrtho(fdr = fdr,
-                               n.group = n_groups,
-                               wt = wt,
-                               group.sizes = group_sizes,
-                               method = lambda_type)
-
-    } else if (lambda_type == "corrected") {
-
-      # Check for equal group sizes and equal weights
-      if ((length(unique(group_sizes)) == 1) & (length(unique(wt)) == 1)) {
-        # lambdas of Procedure 6 in Brzyski et. al. (2016)
-        m <- unique(group_sizes)
-        w <- unique(wt)
-
-        lambda <- lambdaChiEqual(fdr = fdr,
-                                 n.obs = n,
-                                 n.group = n_groups,
-                                 m = m,
-                                 w = w)
-      } else {
-        # lambdas of Procedure 1 in Brzyski et. al. (2016)
-        lambda <- lambdaChiMean(fdr = fdr,
-                                n.obs = n,
-                                n.group = n_groups,
-                                group.sizes = group_sizes,
-                                wt = wt)
-      }
-    }
-  } else {
-    lambda_type <- "user"
-    lambda <- as.double(lambda)
-
-    if (is.unsorted(rev(lambda)))
-      stop("lambda sequence must be non-increasing")
-
-    if (any(lambda < 0))
-      stop("lambda sequence cannot contain negative values")
-  }
-
-  if (sigma_type == "sequence") {
-    lambda_max <- lambdaMax(x,
-                            y,
-                            x_center,
-                            x_scale,
-                            y_scale,
-                            n_targets,
-                            family$name,
-                            standardize_features)
-
-    new_lambda_max <- double(length(lambda))
-
-    group_id <- groups$group_id
-
-    for (i in seq_along(lambda)) {
-      new_lambda_max <- norm(as.matrix(lambda_max[group_id[[i]]]), "F")
-    }
-
-    start <- max(sort(new_lambda_max, decreasing = TRUE)/lambda)
-
-    sigma <- exp(seq(log(start),
-                     log(start*lambda_min_ratio),
-                     length.out = n_sigma))
-  }
-
-  lambda <- matrix(lambda, n_groups, 1)
-  sigma <- sigma
-
-  structure(list(name = "group_slope",
-                 tuning_parameters = c("sigma", "fdr"),
-                 sigma = sigma,
-                 fdr = fdr,
-                 lambda = lambda),
-            class = c("GroupSlope", "Penalty"))
 }
