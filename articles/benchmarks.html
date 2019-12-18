@@ -95,7 +95,7 @@
       <h1>Benchmarks</h1>
                         <h4 class="author">Johan Larsson</h4>
             
-            <h4 class="date">2019-12-10</h4>
+            <h4 class="date">2019-12-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jolars/owl/blob/master/vignettes/benchmarks.Rmd"><code>vignettes/benchmarks.Rmd</code></a></small>
       <div class="hidden name"><code>benchmarks.Rmd</code></div>
@@ -155,6 +155,22 @@ Objective loss over time for the heart data set (binomial response).
 <a class="sourceLine" id="cb4-7" data-line-number="7"><span class="kw"><a href="../reference/plotDiagnostics.html">plotDiagnostics</a></span>(fit)</a></code></pre></div>
 <div class="figure">
 <img src="benchmarks_files/figure-html/unnamed-chunk-4-1.png" alt="objective loss over time for the abalone data set (poisson response)." width="700"><p class="caption">
+objective loss over time for the abalone data set (poisson response).
+</p>
+</div>
+</div>
+<div id="multinomial-model" class="section level3">
+<h3 class="hasAnchor">
+<a href="#multinomial-model" class="anchor"></a>Multinomial model</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/owl.html">owl</a></span>(wine<span class="op">$</span>x,</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">           wine<span class="op">$</span>y,</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">           <span class="dt">family =</span> <span class="st">"multinomial"</span>,</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">           <span class="dt">penalty =</span> <span class="st">"slope"</span>,</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">           <span class="dt">sigma =</span> <span class="st">"estimate"</span>,</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6">           <span class="dt">diagnostics =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="kw"><a href="../reference/plotDiagnostics.html">plotDiagnostics</a></span>(fit)</a></code></pre></div>
+<div class="figure">
+<img src="benchmarks_files/figure-html/unnamed-chunk-5-1.png" alt="objective loss over time for the abalone data set (poisson response)." width="700"><p class="caption">
 objective loss over time for the abalone data set (poisson response).
 </p>
 </div>

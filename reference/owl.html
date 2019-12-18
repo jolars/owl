@@ -146,7 +146,7 @@ optimization routines suitable to big data problems.</p>
   <span class='no'>x</span>,
   <span class='no'>y</span>,
   <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>, <span class='st'>"poisson"</span>),
+  <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>, <span class='st'>"multinomial"</span>, <span class='st'>"poisson"</span>),
   <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"slope"</span>, <span class='st'>"group_slope"</span>),
   <span class='kw'>solver</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"fista"</span>, <span class='st'>"admm"</span>),
   <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
@@ -157,9 +157,13 @@ optimization routines suitable to big data problems.</p>
   <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='kw'>if</span> (<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NROW</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NCOL</a></span>(<span class='no'>x</span>)) <span class='fl'>0.01</span> <span class='kw'>else</span> <span class='fl'>1e-04</span>,
   <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>100</span>,
   <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
-  <span class='kw'>screening_rule</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"none"</span>, <span class='st'>"strong"</span>, <span class='st'>"safe"</span>),
+  <span class='kw'>screening</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>tol_dev_change</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
+  <span class='kw'>tol_dev_ratio</span> <span class='kw'>=</span> <span class='fl'>0.999</span>,
+  <span class='kw'>max_variables</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NCOL</a></span>(<span class='no'>x</span>) + <span class='no'>intercept</span>,
   <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>1e+06</span>,
   <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>verbosity</span> <span class='kw'>=</span> <span class='fl'>0</span>,
   <span class='no'>...</span>
 )</pre>
 
@@ -234,8 +238,26 @@ to construct the lambda path or the a vector or matrix</p></td>
 Group SLOPE)</p></td>
     </tr>
     <tr>
-      <th>screening_rule</th>
-      <td><p>type of screening rule to use</p></td>
+      <th>screening</th>
+      <td><p>whether the strong rule for SLOPE be used to screen
+variables for inclusion</p></td>
+    </tr>
+    <tr>
+      <th>tol_dev_change</th>
+      <td><p>the regularization path is stopped if the
+fractional change in deviance falls below this value. Note that this is
+automatically set to 0 if a sigma is manually entered</p></td>
+    </tr>
+    <tr>
+      <th>tol_dev_ratio</th>
+      <td><p>the regularization path is stopped if the
+deviance ratio
+\(1 - \mathrm{deviance}/\mathrm{(null-deviance)}\)
+is above this threshold</p></td>
+    </tr>
+    <tr>
+      <th>max_variables</th>
+      <td><p>maximum number of nonzero coefficients in model. The path is</p></td>
     </tr>
     <tr>
       <th>max_passes</th>
@@ -245,6 +267,12 @@ Group SLOPE)</p></td>
       <th>diagnostics</th>
       <td><p>should diagnostics be saved for the model fit (timings,
 primal and dual objectives, and infeasibility)</p></td>
+    </tr>
+    <tr>
+      <th>verbosity</th>
+      <td><p>level of verbosity for displaying output from the
+program. Setting this to 1 displays information on the path level,
+while setting it to 2 displays information also from inside the solver.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -260,7 +288,22 @@ model fit, including the intercept if it was fit.
 There is one row for each coefficient, one column
 for each target (dependent variable), and
 one slice for each penalty.</p></dd>
-<dt>nonzeros</dt><dd><p>a numeric</p></dd>
+<dt>nonzeros</dt><dd><p>a three-dimensional boolean array indicating whether a
+coefficient was zero or not</p></dd>
+<dt>lambda</dt><dd><p>the lambda vector that when multiplied by a value in <code>sigma</code>
+gives the penalty vector at that point along the regularization
+path</p></dd>
+<dt>sigma</dt><dd><p>the vector of sigma, indicating the scale of the lambda vector</p></dd>
+<dt>class_names</dt><dd><p>a character vector giving the names of the classes for binomial and
+multinomial families</p></dd>
+<dt>passes</dt><dd><p>the number of passes the solver took at each path</p></dd>
+<dt>violations</dt><dd><p>the number of violations of the screening rule</p></dd>
+<dt>active_sets</dt><dd><p>a list where each element indicates the indices of the
+coefficients that were active at that point in the regularization path</p></dd>
+<dt>diagnostics</dt><dd><p>a <code>data.frame</code> of objective values for the primal and dual problems, as
+well as a measure of the infeasibility, time, and iteration. Only
+available if <code>diagnostics = TRUE</code> in the call to <code>owl()</code>.</p></dd>
+<dt>call</dt><dd><p>the call used for fitting the model</p></dd>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -287,6 +330,12 @@ $$</p>
 <p>$$
   -\sum_{i=1}^n \left(y_i\left(x_i^T\beta + \alpha\right) - \exp\left(x_i^T\beta + \alpha\right)\right)
 $$</p>
+<p><strong>Multinomial</strong></p>
+<p>In multinomial regression, we use the following objective.</p>
+<p>$$
+  -\sum_{i=1}^n\left( \sum_{k=1}^m y_{ik}(x_i^T\beta_k + \alpha_k)
+                     - \log\sum_{k=1}^m \exp(x_i^T\beta_k + \alpha_k) \right)
+$$</p>
     <h2 class="hasAnchor" id="penalties"><a class="anchor" href="#penalties"></a>Penalties</h2>
 
     
@@ -307,14 +356,6 @@ penalty</p>
 <p>$$
   J_\lambda(\beta) = \sum_{j=1}^p \lambda_j |W||\beta||_{I,X}|_{(j)}
 $$</p>
-    <h2 class="hasAnchor" id="solvers"><a class="anchor" href="#solvers"></a>Solvers</h2>
-
-    
-
-<p>There is currently a single solver available for <code>owl()</code>.</p>
-<p><strong>FISTA</strong></p>
-<p>FISTA (Fast Iterative Shrinking-Tresholding Algorithm) is an extension
-of the classical gradient algorithm.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='plot.Owl.html'>plot.Owl()</a></code>, <code><a href='plotDiagnostics.html'>plotDiagnostics()</a></code>, <code><a href='score.html'>score()</a></code>, <code><a href='predict.Owl.html'>predict.Owl()</a></code>,
@@ -322,9 +363,17 @@ of the classical gradient algorithm.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='co'># Gaussian response, slope penalty (default) --------------------------------</span>
+<span class='co'># Gaussian response</span>
 
-<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>owl</span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>)</div></pre>
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>owl</span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>)
+
+<span class='co'># Binomial response</span>
+
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>owl</span>(<span class='no'>heart</span>$<span class='no'>x</span>, <span class='no'>heart</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>)
+
+<span class='co'># Poisson response</span>
+
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>owl</span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"poisson"</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -334,7 +383,6 @@ of the classical gradient algorithm.</p>
       <li><a href="#details">Details</a></li>
       <li><a href="#families">Families</a></li>
       <li><a href="#penalties">Penalties</a></li>
-      <li><a href="#solvers">Solvers</a></li>
       <li><a href="#see-also">See also</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
