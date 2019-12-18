@@ -35,7 +35,9 @@ public:
     out(ord) = out;
     out(nonzeros).zeros();
 
-    return find(out);
+    umat out_mat = reshape(out, size(gradient));
+
+    return find(any(out_mat, 1));
   }
 };
 
