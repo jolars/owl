@@ -18,14 +18,18 @@ owlCpp(const T& x, const mat& y, const List control)
 
   // parameter packs for penalty and solver
   auto penalty_args = as<List>(control["penalty"]);
-  auto solver_args = as<List>(control["solver"]);
 
   auto tol_dev_ratio = as<double>(control["tol_dev_ratio"]);
   auto tol_dev_change = as<double>(control["tol_dev_change"]);
   auto max_variables = as<uword>(control["max_variables"]);
-  auto max_passes = as<uword>(control["max_passes"]);
+
   auto diagnostics = as<bool>(control["diagnostics"]);
   auto verbosity = as<int>(control["verbosity"]);
+
+  // solver arguments
+  auto max_passes = as<uword>(control["max_passes"]);
+  auto tol_rel_gap = as<double>(control["tol_rel_gap"]);
+  auto tol_infeas = as<double>(control["tol_infeas"]);
 
   auto groups = as<List>(control["groups"]);
 
@@ -106,13 +110,14 @@ owlCpp(const T& x, const mat& y, const List control)
   if (verbosity >= 1)
     Rcpp::Rcout << "setting up solver" << std::endl;
 
-  auto solver = setupSolver(as<std::string>(solver_args["name"]),
+  auto solver = setupSolver("fista",
                             standardize_features,
                             is_sparse,
                             diagnostics,
                             max_passes,
-                            verbosity,
-                            solver_args);
+                            tol_rel_gap,
+                            tol_infeas,
+                            verbosity);
 
   Results res;
 

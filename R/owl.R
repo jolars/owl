@@ -90,7 +90,6 @@
 #' @param family response type. See **Families** for details.
 #' @param penalty the regularization penalty to use. See **Penalties** for
 #'   details.
-#' @param solver the numerical solver to use. See **Solvers** for details.
 #' @param intercept whether to fit an intercept
 #' @param standardize_features whether to standardize features (predictors)
 #' @param orthogonalize whether `x` should be orthogonalized. Note that
@@ -109,7 +108,6 @@
 #'   primal and dual objectives, and infeasibility)
 #' @param screening whether the strong rule for SLOPE be used to screen
 #'   variables for inclusion
-#' @param ... arguments passed on to the solver (see [FISTA()], and [ADMM()])
 #' @param verbosity level of verbosity for displaying output from the
 #'   program. Setting this to 1 displays information on the path level,
 #'   while setting it to 2 displays information also from inside the solver.
@@ -121,6 +119,8 @@
 #'   \eqn{1 - \mathrm{deviance}/\mathrm{(null-deviance)}}{1 - deviance/(null deviance)}
 #'   is above this threshold
 #' @param max_variables maximum number of nonzero coefficients in model. The path is
+#' @param tol_rel_gap stopping criterion for the duality gap
+#' @param tol_infeas stopping criterion for the level of infeasibility
 #'
 #' @return An object of class `"Owl"` with the following slots:
 #' \item{coefficients}{
@@ -180,7 +180,6 @@ owl <- function(x,
                 groups = NULL,
                 family = c("gaussian", "binomial", "multinomial", "poisson"),
                 penalty = c("slope", "group_slope"),
-                solver = c("fista", "admm"),
                 intercept = TRUE,
                 standardize_features = TRUE,
                 orthogonalize = TRUE,
@@ -194,16 +193,15 @@ owl <- function(x,
                 tol_dev_ratio = 0.999,
                 max_variables = NCOL(x) + intercept,
                 max_passes = 1e6,
+                tol_rel_gap = 1e-5,
+                tol_infeas = 1e-4,
                 diagnostics = FALSE,
-                verbosity = 0,
-                ...) {
+                verbosity = 0) {
 
   ocall <- match.call()
-  solver_options <- list(...)
 
   family <- match.arg(family)
   penalty <- match.arg(penalty)
-  solver <- match.arg(solver)
 
   if (is.character(sigma)) {
     sigma <- match.arg(sigma)
@@ -233,7 +231,9 @@ owl <- function(x,
     is.logical(diagnostics),
     is.logical(intercept),
     is.logical(standardize_features),
-    is.logical(orthogonalize)
+    is.logical(orthogonalize),
+    tol_rel_gap >= 0,
+    tol_infeas >= 0
   )
 
   fit_intercept <- intercept
@@ -263,19 +263,6 @@ owl <- function(x,
 
   if (anyNA(groups))
     stop("NA values are not allowed in 'groups'")
-
-  if (!standardize_features && intercept && solver == "admm")
-    stop("'standardize_features' must be set to true when using ADMM")
-
-  if (family != "gaussian" && solver == "admm")
-    stop("the ADMM solver currently only works with Gaussian responses")
-
-  if (is_sparse && standardize_features && solver == "admm")
-    stop("the ADMM solver does not (yet) work with sparse features",
-         "and standardization")
-
-  if (is_sparse && solver == "admm")
-    stop("the ADMM solver does not (yet) work with sparse features")
 
   if (penalty == "group_slope" &&
       standardize_features &&
@@ -395,16 +382,10 @@ owl <- function(x,
   lambda <- penalty$lambda
   n_sigma <- length(penalty$sigma)
 
-  # setup solver settings
-  solver <- switch(solver,
-                   fista = do.call(FISTA, solver_options),
-                   admm = do.call(ADMM, solver_options))
-
   control <- list(intercept_init = intercept_init,
                   beta_init = beta_init,
                   family = family,
                   penalty = penalty,
-                  solver = solver,
                   groups = groups,
                   fit_intercept = fit_intercept,
                   is_sparse = is_sparse,
@@ -423,7 +404,9 @@ owl <- function(x,
                   verbosity = verbosity,
                   tol_dev_change = tol_dev_change,
                   tol_dev_ratio = tol_dev_ratio,
-                  max_variables = max_variables)
+                  max_variables = max_variables,
+                  tol_rel_gap = tol_rel_gap,
+                  tol_infeas = tol_infeas)
 
   owlFit <- if (is_sparse) owlSparse else owlDense
 

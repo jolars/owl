@@ -10,7 +10,6 @@ owl(
   groups = NULL,
   family = c("gaussian", "binomial", "multinomial", "poisson"),
   penalty = c("slope", "group_slope"),
-  solver = c("fista", "admm"),
   intercept = TRUE,
   standardize_features = TRUE,
   orthogonalize = TRUE,
@@ -24,9 +23,10 @@ owl(
   tol_dev_ratio = 0.999,
   max_variables = NCOL(x) + intercept,
   max_passes = 1e+06,
+  tol_rel_gap = 1e-05,
+  tol_infeas = 1e-04,
   diagnostics = FALSE,
-  verbosity = 0,
-  ...
+  verbosity = 0
 )
 }
 \arguments{
@@ -45,8 +45,6 @@ feature (only applies to Group SLOPE)}
 
 \item{penalty}{the regularization penalty to use. See \strong{Penalties} for
 details.}
-
-\item{solver}{the numerical solver to use. See \strong{Solvers} for details.}
 
 \item{intercept}{whether to fit an intercept}
 
@@ -85,14 +83,16 @@ is above this threshold}
 
 \item{max_passes}{maximum number of passes for optimizer}
 
+\item{tol_rel_gap}{stopping criterion for the duality gap}
+
+\item{tol_infeas}{stopping criterion for the level of infeasibility}
+
 \item{diagnostics}{should diagnostics be saved for the model fit (timings,
 primal and dual objectives, and infeasibility)}
 
 \item{verbosity}{level of verbosity for displaying output from the
 program. Setting this to 1 displays information on the path level,
 while setting it to 2 displays information also from inside the solver.}
-
-\item{...}{arguments passed on to the solver (see \code{\link[=FISTA]{FISTA()}}, and \code{\link[=ADMM]{ADMM()}})}
 }
 \value{
 An object of class \code{"Owl"} with the following slots:
