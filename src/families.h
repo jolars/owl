@@ -87,22 +87,22 @@ class Poisson : public Family {
 public:
   double primal(const mat& y, const mat& lin_pred)
   {
-    return -accu(y % lin_pred - exp(lin_pred) - lgamma(y + 1));
+    return -accu(y % lin_pred - trunc_exp(lin_pred) - lgamma(y + 1));
   }
 
   double dual(const mat& y, const mat& lin_pred)
   {
-    return -accu(exp(lin_pred) % (lin_pred - 1) - lgamma(y + 1));
+    return -accu(trunc_exp(lin_pred) % (lin_pred - 1) - lgamma(y + 1));
   }
 
   mat pseudoGradient(const mat& y, const mat& lin_pred)
   {
-    return exp(lin_pred) - y;
+    return trunc_exp(lin_pred) - y;
   }
 
   rowvec fitNullModel(const mat& y, const uword n_classes)
   {
-    return log(mean(y));
+    return trunc_log(mean(y));
   }
 
   std::string name()
