@@ -35,9 +35,8 @@ library(owl)
 fit <- owl(bodyfat$x, 
            bodyfat$y,
            family = "gaussian",
-           diagnostics = TRUE,
-           sigma = "estimate")
-plotDiagnostics(fit)
+           diagnostics = TRUE)
+plotDiagnostics(fit, ind = 50)
 ```
 
 ### Binomial model
@@ -46,9 +45,8 @@ plotDiagnostics(fit)
 fit <- owl(heart$x,
            heart$y,
            family = "gaussian",
-           sigma = "estimate",
            diagnostics = TRUE)
-plotDiagnostics(fit)
+plotDiagnostics(fit, ind = 50)
 ```
 
 
@@ -58,9 +56,8 @@ plotDiagnostics(fit)
 fit <- owl(abalone$x,
            abalone$y,
            family = "poisson",
-           sigma = "estimate",
            diagnostics = TRUE)
-plotDiagnostics(fit)
+plotDiagnostics(fit, ind = 50)
 ```
 
 ### Multinomial model
@@ -69,7 +66,6 @@ plotDiagnostics(fit)
 fit <- owl(wine$x,
            wine$y,
            family = "multinomial",
-           sigma = "estimate",
            diagnostics = TRUE)
-plotDiagnostics(fit)
+plotDiagnostics(fit, ind = 50)
 ```
