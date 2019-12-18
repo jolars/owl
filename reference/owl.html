@@ -148,7 +148,6 @@ optimization routines suitable to big data problems.</p>
   <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>, <span class='st'>"multinomial"</span>, <span class='st'>"poisson"</span>),
   <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"slope"</span>, <span class='st'>"group_slope"</span>),
-  <span class='kw'>solver</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"fista"</span>, <span class='st'>"admm"</span>),
   <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
@@ -162,9 +161,10 @@ optimization routines suitable to big data problems.</p>
   <span class='kw'>tol_dev_ratio</span> <span class='kw'>=</span> <span class='fl'>0.999</span>,
   <span class='kw'>max_variables</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NCOL</a></span>(<span class='no'>x</span>) + <span class='no'>intercept</span>,
   <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>1e+06</span>,
+  <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
+  <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>,
   <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>verbosity</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='no'>...</span>
+  <span class='kw'>verbosity</span> <span class='kw'>=</span> <span class='fl'>0</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -195,10 +195,6 @@ feature (only applies to Group SLOPE)</p></td>
       <th>penalty</th>
       <td><p>the regularization penalty to use. See <strong>Penalties</strong> for
 details.</p></td>
-    </tr>
-    <tr>
-      <th>solver</th>
-      <td><p>the numerical solver to use. See <strong>Solvers</strong> for details.</p></td>
     </tr>
     <tr>
       <th>intercept</th>
@@ -264,6 +260,14 @@ is above this threshold</p></td>
       <td><p>maximum number of passes for optimizer</p></td>
     </tr>
     <tr>
+      <th>tol_rel_gap</th>
+      <td><p>stopping criterion for the duality gap</p></td>
+    </tr>
+    <tr>
+      <th>tol_infeas</th>
+      <td><p>stopping criterion for the level of infeasibility</p></td>
+    </tr>
+    <tr>
       <th>diagnostics</th>
       <td><p>should diagnostics be saved for the model fit (timings,
 primal and dual objectives, and infeasibility)</p></td>
@@ -273,10 +277,6 @@ primal and dual objectives, and infeasibility)</p></td>
       <td><p>level of verbosity for displaying output from the
 program. Setting this to 1 displays information on the path level,
 while setting it to 2 displays information also from inside the solver.</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>arguments passed on to the solver (see <code><a href='FISTA.html'>FISTA()</a></code>, and <code><a href='ADMM.html'>ADMM()</a></code>)</p></td>
     </tr>
     </table>
 
