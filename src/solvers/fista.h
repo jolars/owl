@@ -277,6 +277,8 @@ public:
         Rcpp::checkUserInterrupt();
     }
 
+    double deviance = 2*family->primal(y, lin_pred);
+
     Results res{intercept,
                 beta,
                 passes,
@@ -284,7 +286,8 @@ public:
                 duals,
                 infeasibilities,
                 time,
-                line_searches};
+                line_searches,
+                deviance};
 
     return res;
   }

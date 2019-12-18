@@ -18,5 +18,6 @@ test_that("lasso and slope fits are equivalent if all lambda are equal", {
   lasso_coef <- coef(lasso)
   slope_coef <- coef(slope)
 
-  expect_equivalent(as.matrix(lasso_coef), as.matrix(slope_coef), tol = 1e-3)
+  expect_equivalent(as.matrix(lasso_coef)[, 1:75],
+                    as.matrix(slope_coef)[, 1:75], tol = 1e-3)
 })

@@ -20,6 +20,9 @@ owlCpp(const T& x, const mat& y, const List control)
   auto penalty_args = as<List>(control["penalty"]);
   auto solver_args = as<List>(control["solver"]);
 
+  auto tol_dev_ratio = as<double>(control["tol_dev_ratio"]);
+  auto tol_dev_change = as<double>(control["tol_dev_change"]);
+  auto max_variables = as<uword>(control["max_variables"]);
   auto max_passes = as<uword>(control["max_passes"]);
   auto diagnostics = as<bool>(control["diagnostics"]);
   auto verbosity = as<int>(control["verbosity"]);
@@ -59,15 +62,27 @@ owlCpp(const T& x, const mat& y, const List control)
   cube betas(p, m, n_sigma, fill::zeros);
   cube intercepts(1, m, n_sigma);
 
-  // initialize estimates
-  auto intercept = as<rowvec>(control["intercept_init"]);
-  auto beta      = as<mat>(control["beta_init"]);
+  rowvec intercept(m, fill::zeros);
+  mat beta(p, m, fill::zeros);
+
+  uword n_variables = static_cast<uword>(fit_intercept);
 
   if (verbosity >= 1)
     Rcpp::Rcout << "fitting intercept for null model" << std::endl;
 
   if (fit_intercept)
     intercept = family->fitNullModel(y, m);
+
+  mat linear_predictor = linearPredictor(x,
+                                         beta,
+                                         intercept,
+                                         x_center,
+                                         x_scale,
+                                         standardize_features);
+
+  double null_deviance = 2*family->primal(y, linear_predictor);
+  std::vector<double> deviances;
+  std::vector<double> deviance_ratios;
 
   rowvec intercept_prev(m, fill::zeros);
   mat beta_prev(p, m, fill::zeros);
@@ -101,7 +116,9 @@ owlCpp(const T& x, const mat& y, const List control)
 
   Results res;
 
-  for (uword k = 0; k < n_sigma; ++k) {
+  uword k = 0;
+
+  while (k < n_sigma) {
 
     if (verbosity >= 1)
       Rcpp::Rcout << "penalty: " << k + 1 << std::endl;
@@ -149,7 +166,6 @@ owlCpp(const T& x, const mat& y, const List control)
         intercept = family->fitNullModel(y, m);
 
       beta.zeros();
-
       passes(k) = 0;
 
       if (diagnostics) {
@@ -228,7 +244,7 @@ owlCpp(const T& x, const mat& y, const List control)
           penalty->kktCheck(gradient_prev, beta, lambda*sigma(k), 1e-6);
         uvec check_failures = setDiff(possible_failures, active_set);
 
-        if (verbosity > 0) {
+        if (verbosity >= 1) {
           Rcpp::Rcout << "\t kkt-failures at: ";
           check_failures.print();
           Rcpp::Rcout << std::endl;
@@ -253,6 +269,11 @@ owlCpp(const T& x, const mat& y, const List control)
     }
 
     // store coefficients and intercept
+    double deviance = res.deviance;
+    double deviance_ratio = 1.0 - deviance/null_deviance;
+
+    deviances.push_back(deviance);
+    deviance_ratios.push_back(deviance_ratio);
     betas.slice(k) = beta;
     intercepts.slice(k) = intercept;
     intercept_prev = intercept;
@@ -260,20 +281,57 @@ owlCpp(const T& x, const mat& y, const List control)
 
     active_sets(k) = active_set;
 
+    if (verbosity >= 1)
+      Rcout << "deviance: " << deviance << "\t"
+            << "deviance ratio: " << deviance_ratio << std::endl;
+
+    if (k > 0) {
+      // stop path if fractional deviance change is small
+      double deviance_change =
+        std::abs((deviances[k-1] - deviances[k])/deviances[k-1]);
+
+      if (verbosity >= 1)
+        Rcout << "deviance change: " << deviance_change << std::endl;
+
+      if (deviance_change < tol_dev_change || deviance_ratio > tol_dev_ratio) {
+        k++;
+        break;
+      }
+    }
+
+    n_variables = static_cast<uword>(fit_intercept) + accu(any(beta != 0, 1));
+
+    if (verbosity >= 1)
+      Rcout << "number of variables: " << n_variables << std::endl;
+
+    if (n_variables > max_variables) {
+      break;
+    }
+
+    k++;
+
     checkUserInterrupt();
   }
+
+  intercepts.set_size(1, m, k);
+  betas.set_size(p, m, k);
+  active_sets.set_size(k);
+  violations.set_size(k);
 
   return List::create(
     Named("intercept")           = wrap(intercepts),
     Named("beta")                = wrap(betas),
     Named("active_sets")         = wrap(active_sets),
-    Named("passes")              = passes,
+    Named("passes")              = wrap(passes),
     Named("primals")             = wrap(primals),
     Named("duals")               = wrap(duals),
     Named("infeasibilities")     = wrap(infeasibilities),
     Named("time")                = wrap(timings),
     Named("line_searches")       = wrap(line_searches),
-    Named("violations")          = wrap(violations)
+    Named("violations")          = wrap(violations),
+    Named("deviance_ratio")      = wrap(deviance_ratios),
+    Named("null_deviance")       = wrap(null_deviance),
+    Named("path_length")         = k
   );
 }
 

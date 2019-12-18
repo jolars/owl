@@ -101,7 +101,9 @@ caretSlopeOwl <- function() {
       dots$x <- x
       dots$y <- y
       dots$fdr <- param$fdr
-      dots$standardize_features = FALSE
+      dots$standardize_features <- FALSE
+      dots$tol_dev_change <- 0
+      dots$tol_dev_ratio <- 1
 
       out <- do.call(owl::owl, dots)
 
@@ -191,7 +193,7 @@ caretSlopeOwl <- function() {
                         },
                         lev = modelFit$obsLevels)
         } else tmp <- apply(tmp, 3, function(x) data.frame(x))
-        probs <- if(is.list(tmp)) c(list(probs), tmp) else list(probs, tmp)
+        probs <- if (is.list(tmp)) c(list(probs), tmp) else list(probs, tmp)
       }
       probs
 
@@ -237,7 +239,7 @@ caretSlopeOwl <- function() {
       beta <- stats::coef(object, sigma = sigma, simplify = TRUE)
       beta <- as.data.frame(beta)
       out <- as.data.frame(Overall = beta[, 1])
-      out <- abs(out[rownames(out) != "(Intercept)",,drop = FALSE])
+      out <- abs(out[rownames(out) != "(Intercept)", , drop = FALSE])
       out
     },
 

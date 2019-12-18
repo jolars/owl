@@ -163,6 +163,8 @@ public:
 			}
 		}
 
+		double deviance = 2*family->primal(y, linear_predictor);
+
     Results res{intercept,
                 z,
                 i,
@@ -170,7 +172,8 @@ public:
                 duals,
                 infeasibilities,
                 time,
-                line_searches};
+                line_searches,
+                deviance};
 
     return res;
   }

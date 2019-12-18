@@ -129,6 +129,7 @@ trainOwl <- function(x,
 
       args <- utils::modifyList(list(x = x_train,
                                      y = y_train,
+                                     sigma = sigma,
                                      groups = groups), list(...))
 
       for (k in seq_len(d[3])) {

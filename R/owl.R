@@ -112,6 +112,14 @@
 #' @param verbosity level of verbosity for displaying output from the
 #'   program. Setting this to 1 displays information on the path level,
 #'   while setting it to 2 displays information also from inside the solver.
+#' @param tol_dev_change the regularization path is stopped if the
+#'   fractional change in deviance falls below this value. Note that this is
+#'   automatically set to 0 if a sigma is manually entered
+#' @param tol_dev_ratio the regularization path is stopped if the
+#'   deviance ratio
+#'   \eqn{1 - \mathrm{deviance}/\mathrm{(null-deviance)}}{1 - deviance/(null deviance)}
+#'   is above this threshold
+#' @param max_variables maximum number of nonzero coefficients in model. The path is
 #'
 #' @return An object of class `"Owl"` with the following slots:
 #' \item{coefficients}{
@@ -181,6 +189,9 @@ owl <- function(x,
                 n_sigma = 100,
                 fdr = 0.2,
                 screening_rule = c("none", "strong"),
+                tol_dev_change = 1e-5,
+                tol_dev_ratio = 0.999,
+                max_variables = NCOL(x) + intercept,
                 max_passes = 1e6,
                 diagnostics = FALSE,
                 verbosity = 0,
@@ -200,6 +211,10 @@ owl <- function(x,
   } else {
     sigma <- as.double(sigma)
     sigma_type <- "user"
+
+    # do not stop path early if user requests specific sigma
+    tol_dev_change <- 0
+    tol_dev_ratio <- 1
   }
 
   stopifnot(
@@ -405,7 +420,10 @@ owl <- function(x,
                   lambda = lambda,
                   max_passes = max_passes,
                   diagnostics = diagnostics,
-                  verbosity = verbosity)
+                  verbosity = verbosity,
+                  tol_dev_change = tol_dev_change,
+                  tol_dev_ratio = tol_dev_ratio,
+                  max_variables = max_variables)
 
   owlFit <- if (is_sparse) owlSparse else owlDense
 
@@ -456,6 +474,9 @@ owl <- function(x,
   } else {
     fit <- owlFit(x, y, control)
   }
+
+  n_sigma <- fit$path_length
+  sigma <- sigma[seq_len(n_sigma)]
 
   # c++ to R indexing
   active_sets <- lapply(drop(fit$active_sets),
@@ -524,7 +545,8 @@ owl <- function(x,
                  passes = fit$passes,
                  violations = fit$violations,
                  active_sets = active_sets,
-                 lipschitz_constants = fit$lipschitz_constants,
+                 deviance_ratio = as.vector(fit$deviance_ratio),
+                 null_deviance = fit$null_deviance,
                  diagnostics = diagnostics,
                  call = ocall),
             class = c(paste0("Owl", camelCase(family$name)),

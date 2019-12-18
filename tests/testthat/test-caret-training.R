@@ -4,11 +4,10 @@ test_that("model training with caret works", {
   library(caret)
   library(owl)
 
-  xy <- owl:::randomProblem(1000, 10, q = 0.5)
+  xy <- owl:::randomProblem(1000, 2, q = 1)
 
   ctrl <- trainControl(method = "cv", number = 3)
 
-  set.seed(849)
   train <- train(xy$x,
                  xy$y,
                  method = caretSlopeOwl(),

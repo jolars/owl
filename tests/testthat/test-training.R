@@ -32,7 +32,7 @@ test_that("erroneous input throws errors in plot.trainOwl", {
   expect_s3_class(p, "trellis")
   expect_silent(dont_plot(p))
 
-  fit <- trainOwl(x, y, fdr = c(0.1, 0.2))
+  fit <- trainOwl(x, y, fdr = c(0.1, 0.2), number = 2)
 
   p <- plot(fit)
   expect_s3_class(p, "trellis")

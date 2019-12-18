@@ -20,6 +20,8 @@ owl(
   n_sigma = 100,
   fdr = 0.2,
   screening_rule = c("none", "strong"),
+  tol_dev_change = 1e-05,
+  tol_dev_ratio = 0.999,
   max_passes = 1e+06,
   diagnostics = FALSE,
   verbosity = 0,
@@ -67,6 +69,15 @@ to construct the lambda path or the a vector or matrix}
 Group SLOPE)}
 
 \item{screening_rule}{type of screening rule to use}
+
+\item{tol_dev_change}{the regularization path is stopped if the
+fractional change in deviance falls below this value. Note that this is
+automatically set to 0 if a sigma is manually entered}
+
+\item{tol_dev_ratio}{the regularization path is stopped if the
+deviance ratio
+\eqn{1 - \mathrm{deviance}/\mathrm{(null-deviance)}}{1 - deviance/(null deviance)}
+is above this threshold}
 
 \item{max_passes}{maximum number of passes for optimizer}
 

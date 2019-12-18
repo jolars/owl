@@ -17,6 +17,7 @@ struct Results {
   std::vector<double> infeasibilities;
   std::vector<double> time;
   std::vector<unsigned> line_searches;
+  double deviance;
 
   Results() {}
 
@@ -27,7 +28,8 @@ struct Results {
           std::vector<double> duals,
           std::vector<double> infeasibilities,
           std::vector<double> time,
-          std::vector<unsigned> line_searches)
+          std::vector<unsigned> line_searches,
+          double deviance)
           : intercept(intercept),
             beta(beta),
             passes(passes),
@@ -35,7 +37,8 @@ struct Results {
             duals(duals),
             infeasibilities(infeasibilities),
             time(time),
-            line_searches(line_searches) {}
+            line_searches(line_searches),
+            deviance(deviance) {}
 };
 
 class Solver {
