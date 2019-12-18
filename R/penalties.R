@@ -67,7 +67,7 @@ Slope <- function(x,
                             family$name,
                             standardize_features)
 
-    start <- max(sort(lambda_max, decreasing = TRUE)/lambda)
+    start <- max(cumsum(sort(abs(lambda_max), decreasing = TRUE))/cumsum(lambda))
 
     sigma <- exp(seq(log(start),
                      log(start*lambda_min_ratio),
