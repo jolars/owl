@@ -22,15 +22,6 @@ public:
   double
   infeasibility(const mat& gradient, const vec& lambda) = 0;
 
-  virtual
-  uvec
-  activeSet(const std::unique_ptr<Family>& family,
-            const mat& y,
-            const mat& gradient_prev,
-            const vec& lambda,
-            const vec& lambda_prev,
-            const std::string screening_rule) = 0;
-
   // returns the indices of coefficients for which the kkt test fails
   uvec
   kktCheck(const mat&   gradient,
@@ -74,14 +65,6 @@ public:
     vec abs_gradient_sorted = sort(abs(vectorise(gradient)), "descending");
     return std::max(cumsum(abs_gradient_sorted - lambda).max(), 0.0);
   }
-
-  uvec
-  activeSet(const std::unique_ptr<Family>& family,
-            const mat& y,
-            const mat& gradient_prev,
-            const vec& lambda,
-            const vec& lambda_prev,
-            const std::string screening_rule);
 };
 
 class GroupSLOPE : public Penalty {
@@ -137,14 +120,6 @@ public:
     const vec gradient_norms_sorted = sort(gradient_norms, "descending");
     return std::max(cumsum(gradient_norms_sorted - lambda).max(), 0.0);
   }
-
-  uvec
-  activeSet(const std::unique_ptr<Family>& family,
-            const mat& y,
-            const mat& gradient_prev,
-            const vec& lambda,
-            const vec& lambda_prev,
-            const std::string screening_rule);
 };
 
 // helper to choose penalty

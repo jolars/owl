@@ -31,7 +31,7 @@ owlCpp(const T& x, const mat& y, const List control)
 
   auto family_args = as<List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
-  auto screening_rule = as<std::string>(control["screening_rule"]);
+  auto screening = as<bool>(control["screening"]);
   auto sigma_type = as<std::string>(control["sigma_type"]);
 
   auto standardize_features = as<bool>(control["standardize_features"]);
@@ -123,7 +123,7 @@ owlCpp(const T& x, const mat& y, const List control)
     if (verbosity >= 1)
       Rcpp::Rcout << "penalty: " << k + 1 << std::endl;
 
-    if (screening_rule == "none") {
+    if (!screening) {
 
       active_set = regspace<uvec>(0, p-1);
 
@@ -150,12 +150,10 @@ owlCpp(const T& x, const mat& y, const List control)
         pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
         gradient_prev = x.t() * pseudo_gradient_prev;
 
-        active_set = penalty->activeSet(family,
-                                        y,
-                                        gradient_prev,
-                                        lambda*sigma(k),
-                                        lambda*sigma(k-1),
-                                        screening_rule);
+        active_set = activeSet(y,
+                               gradient_prev,
+                               lambda*sigma(k),
+                               lambda*sigma(k-1));
       }
     }
 

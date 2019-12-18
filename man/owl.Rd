@@ -19,9 +19,10 @@ owl(
   lambda_min_ratio = if (NROW(x) < NCOL(x)) 0.01 else 1e-04,
   n_sigma = 100,
   fdr = 0.2,
-  screening_rule = c("none", "strong"),
+  screening = FALSE,
   tol_dev_change = 1e-05,
   tol_dev_ratio = 0.999,
+  max_variables = NCOL(x) + intercept,
   max_passes = 1e+06,
   diagnostics = FALSE,
   verbosity = 0,
@@ -68,7 +69,8 @@ to construct the lambda path or the a vector or matrix}
 \item{fdr}{target false discovery rate (only applies to SLOPE and
 Group SLOPE)}
 
-\item{screening_rule}{type of screening rule to use}
+\item{screening}{whether the strong rule for SLOPE be used to screen
+variables for inclusion}
 
 \item{tol_dev_change}{the regularization path is stopped if the
 fractional change in deviance falls below this value. Note that this is
@@ -78,6 +80,8 @@ automatically set to 0 if a sigma is manually entered}
 deviance ratio
 \eqn{1 - \mathrm{deviance}/\mathrm{(null-deviance)}}{1 - deviance/(null deviance)}
 is above this threshold}
+
+\item{max_variables}{maximum number of nonzero coefficients in model. The path is}
 
 \item{max_passes}{maximum number of passes for optimizer}
 

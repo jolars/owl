@@ -107,7 +107,8 @@
 #' @param max_passes maximum number of passes for optimizer
 #' @param diagnostics should diagnostics be saved for the model fit (timings,
 #'   primal and dual objectives, and infeasibility)
-#' @param screening_rule type of screening rule to use
+#' @param screening whether the strong rule for SLOPE be used to screen
+#'   variables for inclusion
 #' @param ... arguments passed on to the solver (see [FISTA()], and [ADMM()])
 #' @param verbosity level of verbosity for displaying output from the
 #'   program. Setting this to 1 displays information on the path level,
@@ -188,7 +189,7 @@ owl <- function(x,
                 lambda_min_ratio = if (NROW(x) < NCOL(x)) 1e-2 else 1e-4,
                 n_sigma = 100,
                 fdr = 0.2,
-                screening_rule = c("none", "strong"),
+                screening = FALSE,
                 tol_dev_change = 1e-5,
                 tol_dev_ratio = 0.999,
                 max_variables = NCOL(x) + intercept,
@@ -203,7 +204,6 @@ owl <- function(x,
   family <- match.arg(family)
   penalty <- match.arg(penalty)
   solver <- match.arg(solver)
-  screening_rule <- match.arg(screening_rule)
 
   if (is.character(sigma)) {
     sigma <- match.arg(sigma)
@@ -246,7 +246,7 @@ owl <- function(x,
   # convert sparse x to dgCMatrix class from package Matrix.
   is_sparse <- inherits(x, "sparseMatrix")
 
-  if (group_penalty && !(screening_rule == "none"))
+  if (group_penalty && screening)
     stop("screening rules are only implemented for standard slope penalty")
 
   if (NROW(y) != NROW(x))
@@ -415,7 +415,7 @@ owl <- function(x,
                   n_sigma = n_sigma,
                   n_targets = n_targets,
                   sigma_type = sigma_type,
-                  screening_rule = screening_rule,
+                  screening = screening,
                   sigma = sigma,
                   lambda = lambda,
                   max_passes = max_passes,
