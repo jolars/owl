@@ -9,6 +9,7 @@ using namespace Rcpp;
 template <typename T>
 void regularizationPath(vec& sigma,
                         vec& lambda,
+                        double& sigma_max,
                         const T& x,
                         const mat& y,
                         const rowvec& x_center,
@@ -49,20 +50,22 @@ void regularizationPath(vec& sigma,
     lambda.tail(n_lambda - lambda.index_min()).fill(min(lambda));
   }
 
+  vec lambda_max = lambdaMax(x,
+                             y,
+                             x_center,
+                             x_scale,
+                             y_scale,
+                             m,
+                             family,
+                             standardize_features,
+                             is_sparse);
+
+  sigma_max =
+    (cumsum(sort(abs(lambda_max), "descending"))/cumsum(lambda)).max();
+
   if (sigma_type == "auto") {
-    vec lambda_max = lambdaMax(x,
-                               y,
-                               x_center,
-                               x_scale,
-                               y_scale,
-                               m,
-                               family,
-                               standardize_features,
-                               is_sparse);
-
-    double start =
-      (cumsum(sort(abs(lambda_max), "descending"))/cumsum(lambda)).max();
-
-    sigma = exp(linspace(log(start), log(start*lambda_min_ratio), n_sigma));
+    sigma = exp(linspace(log(sigma_max),
+                         log(sigma_max*lambda_min_ratio),
+                         n_sigma));
   }
 }

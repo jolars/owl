@@ -54,9 +54,11 @@ List owlCpp(T& x, mat& y, const List control)
   auto lambda_min_ratio = as<double>(control["lambda_min_ratio"]);
   auto q = as<double>(control["q"]);
   uword n_sigma = sigma.n_elem;
+  double sigma_max = 0;
 
   regularizationPath(sigma,
                      lambda,
+                     sigma_max,
                      x,
                      y,
                      x_center,
@@ -123,7 +125,7 @@ List owlCpp(T& x, mat& y, const List control)
 
   // sets of active predictors
   field<uvec> active_sets(n_sigma);
-  uvec active_set;
+  uvec active_set = regspace<uvec>(0, p-1);
 
   if (verbosity >= 1)
     Rcpp::Rcout << "setting up solver" << std::endl;
@@ -144,40 +146,28 @@ List owlCpp(T& x, mat& y, const List control)
   while (k < n_sigma) {
 
     if (verbosity >= 1)
-      Rcpp::Rcout << "penalty: " << k + 1 << std::endl;
+      Rcout << "penalty: " << k + 1 << std::endl;
 
-    if (!screening) {
+    if (screening) {
+      // NOTE(JL): the screening rules should probably not be used if
+      // the coefficients from the previous fit are already very dense
 
-      active_set = regspace<uvec>(0, p-1);
+      linear_predictor_prev = linearPredictor(x,
+                                              beta_prev,
+                                              intercept_prev,
+                                              x_center,
+                                              x_scale,
+                                              standardize_features);
 
-    } else {
+      pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
+      gradient_prev = x.t() * pseudo_gradient_prev;
 
-      if (sigma_type == "auto" && k == 0) {
-        // no predictors active at first step (except intercept)
+      double sigma_prev = k == 0 ? sigma_max : sigma(k-1);
 
-        active_set.set_size(0);
-        beta.zeros();
-
-      } else {
-
-        // NOTE(JL): the screening rules should probably not be used if
-        // the coefficients from the previous fit are already very dense
-
-        linear_predictor_prev = linearPredictor(x,
-                                                beta_prev,
-                                                intercept_prev,
-                                                x_center,
-                                                x_scale,
-                                                standardize_features);
-
-        pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
-        gradient_prev = x.t() * pseudo_gradient_prev;
-
-        active_set = activeSet(y,
-                               gradient_prev,
-                               lambda*sigma(k),
-                               lambda*sigma(k-1));
-      }
+      active_set = activeSet(y,
+                             gradient_prev,
+                             lambda*sigma(k),
+                             lambda*sigma_prev);
     }
 
     if (active_set.n_elem == 0) {
@@ -229,7 +219,7 @@ List owlCpp(T& x, mat& y, const List control)
 
       do {
         if (verbosity > 0) {
-          Rcpp::Rcout << "active set: " << std::endl;
+          Rcpp::Rcout << "active predictors:" << std::endl;
           active_set.print();
           Rcpp::Rcout << std::endl;
         }
