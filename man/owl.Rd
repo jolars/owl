@@ -12,14 +12,14 @@ owl(
   standardize_features = TRUE,
   orthogonalize = TRUE,
   sigma = NULL,
-  lambda = NULL,
+  lambda = c("bhq", "gaussian"),
   lambda_min_ratio = if (NROW(x) < NCOL(x)) 0.01 else 1e-04,
   n_sigma = 100,
-  fdr = 0.2,
+  q = 0.2,
   screening = FALSE,
   tol_dev_change = 1e-05,
   tol_dev_ratio = 0.999,
-  max_variables = NCOL(x) + intercept,
+  max_variables = NROW(x) + intercept,
   max_passes = 1e+06,
   tol_rel_gap = 1e-05,
   tol_infeas = 1e-04,
@@ -52,7 +52,7 @@ to construct the lambda path or the a vector or matrix}
 
 \item{n_sigma}{length of regularization path}
 
-\item{fdr}{shape of lambda sequence}
+\item{q}{shape of lambda sequence}
 
 \item{screening}{whether the strong rule for SLOPE be used to screen
 variables for inclusion}

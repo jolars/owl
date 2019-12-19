@@ -7,7 +7,7 @@
 trainOwl(
   x,
   y,
-  fdr = 0.2,
+  q = 0.2,
   method = "cv",
   number = 10,
   repeats = 1,
@@ -25,7 +25,7 @@ be converted to matrices internally.}
 \item{y}{the response. For Gaussian models this must be numeric; for
 binomial models, it can be a factor.}
 
-\item{fdr}{shape of lambda sequence}
+\item{q}{shape of lambda sequence}
 
 \item{method}{type of model tuning method}
 
@@ -68,7 +68,7 @@ to \code{\link[=plot.TrainedOwl]{plot.TrainedOwl()}}.
 # 8-fold cross-validation repeated 5 times
 tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
                    mtcars$hp,
-                   fdr = c(0.1, 0.2),
+                   q = c(0.1, 0.2),
                    number = 8,
                    repeats = 5)
 }
