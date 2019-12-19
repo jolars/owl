@@ -12,6 +12,7 @@ test_that("SLOPE and owl agree for gaussian designs", {
   g <- owl(x, y,
            intercept = FALSE,
            sigma = 1,
+           lambda = "gaussian",
            diagnostics = TRUE,
            standardize_features = FALSE)
 
@@ -31,15 +32,4 @@ test_that("SLOPE and owl agree when computing lambda sequences", {
     owl_lambda <- owl(x, y, sigma = 1, lambda = lambda)$lambda
     expect_equivalent(owl_lambda, slope_lambda)
   }
-})
-
-test_that("fitting SLOPE path works", {
-  set.seed(239)
-
-  problem <- owl:::randomProblem(100, 5, sigma = 1)
-
-  x <- problem$x
-  y <- problem$y
-
-  expect_silent(owl(x, y, sigma = NULL))
 })

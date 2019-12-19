@@ -38,12 +38,12 @@
 #' # 8-fold cross-validation repeated 5 times
 #' tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
 #'                    mtcars$hp,
-#'                    fdr = c(0.1, 0.2),
+#'                    q = c(0.1, 0.2),
 #'                    number = 8,
 #'                    repeats = 5)
 trainOwl <- function(x,
                      y,
-                     fdr = 0.2,
+                     q = 0.2,
                      method = "cv",
                      number = 10,
                      repeats = 1,
@@ -96,11 +96,11 @@ trainOwl <- function(x,
 
   result <- array(
     NA,
-    dim = c(number*repeats, length(sigma), length(fdr)),
+    dim = c(number*repeats, length(sigma), length(q)),
     dimnames = list(
       foldnames,
       paste("sigma", signif(sigma, 2), sep = "_"),
-      paste("fdr", signif(fdr, 2), sep = "_")
+      paste("q", signif(q, 2), sep = "_")
     )
   )
 
@@ -131,18 +131,18 @@ trainOwl <- function(x,
 
       for (k in seq_len(d[3])) {
 
-        args$fdr <- fdr[k]
+        args$q <- q[k]
 
         # collect each measure
         for (l in seq_along(measure)) {
           result_list[[l]][j + (i-1)*number, , k] <-
             score(do.call(owl, args), x_test, y_test, measure[l])
         }
-      } # loop over each outer parameter (e.g. fdr)
+      } # loop over each outer parameter (e.g. q)
     } # loop over each fold
   } # repeated cv
 
-  grid <- expand.grid(sigma = sigma, fdr = fdr)
+  grid <- expand.grid(sigma = sigma, q = q)
 
   n <- number*repeats
 
@@ -168,7 +168,7 @@ trainOwl <- function(x,
       best_ind <- which.min(s$mean)
 
     optima[[i]] <- data.frame(sigma = s[best_ind, "sigma"],
-                              fdr = s[best_ind, "fdr"],
+                              q = s[best_ind, "q"],
                               measure = measure[i],
                               mean = s$mean[best_ind],
                               lo = s$lo[best_ind],

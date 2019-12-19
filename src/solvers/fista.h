@@ -44,9 +44,9 @@ public:
       const rowvec& intercept_init,
       const mat& beta_init,
       const bool fit_intercept,
-      const vec& lambda,
-      const vec& x_center,
-      const vec& x_scale)
+      vec lambda,
+      rowvec x_center,
+      rowvec x_scale)
   {
     return fitImpl(x,
                    y,
@@ -69,9 +69,9 @@ public:
       const rowvec& intercept_init,
       const mat& beta_init,
       const bool fit_intercept,
-      const vec& lambda,
-      const vec& x_center,
-      const vec& x_scale)
+      vec lambda,
+      rowvec x_center,
+      rowvec x_scale)
   {
     return fitImpl(x,
                    y,
@@ -94,9 +94,9 @@ public:
           const rowvec& intercept_init,
           const mat& beta_init,
           const bool fit_intercept,
-          const vec& lambda,
-          const vec& x_center,
-          const vec& x_scale)
+          vec lambda,
+          rowvec x_center,
+          rowvec x_scale)
   {
     using namespace arma;
 

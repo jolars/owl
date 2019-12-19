@@ -4,20 +4,19 @@
 #include "penalties.h"
 #include "families.h"
 #include "screening_rules.h"
+#include "standardize.h"
+#include "rescale.h"
+#include "regularizationPath.h"
 
 using namespace Rcpp;
 using namespace arma;
 
 template <typename T>
-List
-owlCpp(const T& x, const mat& y, const List control)
+List owlCpp(T& x, mat& y, const List control)
 {
   auto p = x.n_cols;
   auto n = x.n_rows;
-  auto m = as<uword>(control["n_targets"]);
-
-  // parameter packs for penalty and solver
-  auto penalty_args = as<List>(control["penalty"]);
+  auto m = y.n_cols;
 
   auto tol_dev_ratio = as<double>(control["tol_dev_ratio"]);
   auto tol_dev_change = as<double>(control["tol_dev_change"]);
@@ -34,21 +33,42 @@ owlCpp(const T& x, const mat& y, const List control)
   auto family_args = as<List>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
   auto screening = as<bool>(control["screening"]);
-  auto sigma_type = as<std::string>(control["sigma_type"]);
 
   auto standardize_features = as<bool>(control["standardize_features"]);
   auto is_sparse = as<bool>(control["is_sparse"]);
-  auto n_sigma = as<uword>(control["n_sigma"]);
+
+  auto y_center = as<rowvec>(control["y_center"]);
+  auto y_scale = as<rowvec>(control["y_scale"]);
+  rowvec x_center(p, fill::zeros);
+  rowvec x_scale(p, fill::ones);
+
+  if (standardize_features)
+    standardize(x, x_center, x_scale);
+
+  auto family_choice = as<std::string>(family_args["name"]);
 
   auto lambda = as<vec>(control["lambda"]);
   auto sigma  = as<vec>(control["sigma"]);
+  auto lambda_type = as<std::string>(control["lambda_type"]);
+  auto sigma_type = as<std::string>(control["sigma_type"]);
+  auto lambda_min_ratio = as<double>(control["lambda_min_ratio"]);
+  auto q = as<double>(control["q"]);
+  uword n_sigma = sigma.n_elem;
 
-  // get scaled vector of feature matrix centers for use in sparse fitting
-  vec x_center        = as<vec>(control["x_center"]);
-  vec x_scale         = as<vec>(control["x_scale"]);
-  vec x_scaled_center = x_center/x_scale;
-
-  auto family_choice = as<std::string>(family_args["name"]);
+  regularizationPath(sigma,
+                     lambda,
+                     x,
+                     y,
+                     x_center,
+                     x_scale,
+                     y_scale,
+                     standardize_features,
+                     lambda_type,
+                     sigma_type,
+                     lambda_min_ratio,
+                     q,
+                     family_choice,
+                     is_sparse);
 
   // setup family and penalty
   if (verbosity >= 1)
@@ -59,7 +79,7 @@ owlCpp(const T& x, const mat& y, const List control)
   if (verbosity >= 1)
     Rcpp::Rcout << "setting up penalty" << std::endl;
 
-  auto penalty = setupPenalty(penalty_args);
+  auto penalty = setupPenalty();
 
   cube betas(p, m, n_sigma, fill::zeros);
   cube intercepts(1, m, n_sigma);
@@ -132,7 +152,7 @@ owlCpp(const T& x, const mat& y, const List control)
 
     } else {
 
-      if (sigma_type == "sequence" && k == 0) {
+      if (sigma_type == "auto" && k == 0) {
         // no predictors active at first step (except intercept)
 
         active_set.set_size(0);
@@ -209,7 +229,7 @@ owlCpp(const T& x, const mat& y, const List control)
 
       do {
         if (verbosity > 0) {
-          Rcpp::Rcout << "\t active set: " << std::endl;
+          Rcpp::Rcout << "active set: " << std::endl;
           active_set.print();
           Rcpp::Rcout << std::endl;
         }
@@ -224,8 +244,8 @@ owlCpp(const T& x, const mat& y, const List control)
                           beta.rows(active_set),
                           fit_intercept,
                           lambda.head(active_set.n_elem*m)*sigma(k),
-                          x_center(active_set),
-                          x_scale(active_set));
+                          x_center.cols(active_set),
+                          x_scale.cols(active_set));
 
         beta.rows(active_set) = res.beta;
         intercept = res.intercept;
@@ -246,7 +266,7 @@ owlCpp(const T& x, const mat& y, const List control)
         uvec check_failures = setDiff(possible_failures, active_set);
 
         if (verbosity >= 1) {
-          Rcpp::Rcout << "\t kkt-failures at: ";
+          Rcpp::Rcout << "kkt-failures at: " << std::endl;
           check_failures.print();
           Rcpp::Rcout << std::endl;
         }
@@ -318,10 +338,20 @@ owlCpp(const T& x, const mat& y, const List control)
   betas.set_size(p, m, k);
   active_sets.set_size(k);
   violations.set_size(k);
+  passes.set_size(k);
+  sigma.set_size(k);
+
+  rescale(intercepts,
+          betas,
+          x_center,
+          x_scale,
+          y_center,
+          y_scale,
+          fit_intercept);
 
   return List::create(
-    Named("intercept")           = wrap(intercepts),
-    Named("beta")                = wrap(betas),
+    Named("intercepts")           = wrap(intercepts),
+    Named("betas")                = wrap(betas),
     Named("active_sets")         = wrap(active_sets),
     Named("passes")              = wrap(passes),
     Named("primals")             = wrap(primals),
@@ -332,25 +362,24 @@ owlCpp(const T& x, const mat& y, const List control)
     Named("violations")          = wrap(violations),
     Named("deviance_ratio")      = wrap(deviance_ratios),
     Named("null_deviance")       = wrap(null_deviance),
-    Named("path_length")         = k
+    Named("sigma")               = wrap(sigma),
+    Named("lambda")              = wrap(lambda)
   );
 }
 
 
 // [[Rcpp::export]]
-Rcpp::List
-owlSparse(const arma::sp_mat& x,
-          const arma::mat& y,
-          const Rcpp::List control)
+Rcpp::List owlSparse(arma::sp_mat x,
+                     arma::mat y,
+                     const Rcpp::List control)
 {
   return owlCpp(x, y, control);
 }
 
 // [[Rcpp::export]]
-Rcpp::List
-owlDense(const arma::mat& x,
-         const arma::mat& y,
-         const Rcpp::List control)
+Rcpp::List owlDense(arma::mat x,
+                    arma::mat y,
+                    const Rcpp::List control)
 {
   return owlCpp(x, y, control);
 }

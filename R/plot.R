@@ -127,7 +127,7 @@ plot.Owl = function(x, intercept = FALSE, ...) {
 #' set.seed(123)
 #' tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
 #'                    mtcars$hp,
-#'                    fdr = c(0.1, 0.2),
+#'                    q = c(0.1, 0.2),
 #'                    number = 10)
 #' plot(tune, ci_col = "salmon", col = "black")
 plot.TrainedOwl <-
@@ -154,21 +154,21 @@ plot.TrainedOwl <-
   model <- object$model
 
   sigma <- unique(summary$sigma)
-  fdr <- unique(summary$fdr)
+  q <- unique(summary$q)
 
-  summary$fdr <- as.factor(summary$fdr)
+  summary$q <- as.factor(summary$q)
 
   # get indices of best fit
   best_ind <- match(optimum$sigma, summary$sigma)
 
-  if (length(fdr) > 1) {
-    x <- quote(mean ~ sigma | fdr)
+  if (length(q) > 1) {
+    x <- quote(mean ~ sigma | q)
     strip <- lattice::strip.custom(
-      var.name = "FDR",
+      var.name = "q",
       sep = expression(" = "),
       strip.names = TRUE
     )
-    best_outer_ind <- match(optimum$fdr, unique(summary$fdr))
+    best_outer_ind <- match(optimum$q, unique(summary$q))
   } else {
     x <- quote(mean ~ sigma)
     strip <- lattice::strip.default

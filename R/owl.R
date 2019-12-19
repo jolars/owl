@@ -74,7 +74,7 @@
 #'   to construct the lambda path or the a vector or matrix
 #' @param lambda_min_ratio smallest value for `lambda` as a fraction of
 #'   `lambda_max`
-#' @param fdr shape of lambda sequence
+#' @param q shape of lambda sequence
 #' @param max_passes maximum number of passes for optimizer
 #' @param diagnostics should diagnostics be saved for the model fit (timings,
 #'   primal and dual objectives, and infeasibility)
@@ -158,14 +158,14 @@ owl <- function(x,
                 standardize_features = TRUE,
                 orthogonalize = TRUE,
                 sigma = NULL,
-                lambda = NULL,
+                lambda = c("bhq", "gaussian"),
                 lambda_min_ratio = if (NROW(x) < NCOL(x)) 1e-2 else 1e-4,
                 n_sigma = 100,
-                fdr = 0.2,
+                q = 0.2,
                 screening = FALSE,
                 tol_dev_change = 1e-5,
                 tol_dev_ratio = 0.999,
-                max_variables = NCOL(x) + intercept,
+                max_variables = NROW(x) + intercept,
                 max_passes = 1e6,
                 tol_rel_gap = 1e-5,
                 tol_infeas = 1e-4,
@@ -176,24 +176,15 @@ owl <- function(x,
 
   family <- match.arg(family)
 
-  if (is.null(sigma)) {
-    sigma_type <- "sequence"
-  } else {
-    sigma <- as.double(sigma)
-    sigma_type <- "user"
-
-    # do not stop path early if user requests specific sigma
-    tol_dev_change <- 0
-    tol_dev_ratio <- 1
-  }
+  n <- NROW(x)
+  p <- NCOL(x)
 
   stopifnot(
     is.null(lambda_min_ratio) ||
       (lambda_min_ratio > 0 && lambda_min_ratio < 1),
     max_passes > 0,
-    fdr > 0,
-    fdr < 1,
-    is.null(sigma) || all(sigma >= 0 & is.finite(sigma)),
+    q > 0,
+    q < 1,
     length(n_sigma) == 1,
     n_sigma >= 1,
     is.null(lambda) || is.character(lambda) || is.numeric(lambda),
@@ -206,10 +197,24 @@ owl <- function(x,
     tol_infeas >= 0
   )
 
-  fit_intercept <- intercept
+  if (is.null(sigma)) {
+    sigma_type <- "auto"
+    sigma <- double(n_sigma)
+  } else {
+    sigma_type <- "user"
 
-  n <- NROW(x)
-  p <- NCOL(x)
+    sigma <- as.double(sigma)
+    n_sigma <- length(sigma)
+
+    stopifnot(n_sigma > 0)
+
+    # do not stop path early if user requests specific sigma
+    tol_dev_change <- 0
+    tol_dev_ratio <- 1
+    max_variables <- NCOL(x) + 1
+  }
+
+  fit_intercept <- intercept
 
   # convert sparse x to dgCMatrix class from package Matrix.
   is_sparse <- inherits(x, "sparseMatrix")
@@ -218,10 +223,10 @@ owl <- function(x,
     stop("the number of samples in 'x' and 'y' must match")
 
   if (NROW(y) == 0)
-    stop("the response (y) is empty")
+    stop("y is empty")
 
   if (NROW(x) == 0)
-    stop("the feature matrix (x) is empty")
+    stop("x is empty")
 
   if (anyNA(y) || anyNA(x))
     stop("missing values are not allowed")
@@ -251,70 +256,51 @@ owl <- function(x,
   if (is.null(variable_names))
     variable_names <- paste0("V", seq_len(p))
   if (is.null(response_names))
-    response_names <- paste0("y", seq_len(NCOL(y)))
+    response_names <- paste0("y", seq_len(m))
 
-  # prepare responses
-  intercept_init <- double(m)
-  beta_init <- matrix(0, p, m)
+  n_lambda <- m*p
 
-  # setup feature matrix
-  if (standardize_features) {
-    res <- standardize(x)
-    x <- res$x
-    x_center <- res$x_center
-    x_scale <- res$x_scale
+  if (is.null(lambda)) {
+    lambda_type <- "bhq"
+    lambda <- double(n_lambda)
+  } else if (is.character(lambda)) {
+    lambda_type <- match.arg(lambda)
+    lambda <- double(n_lambda)
   } else {
-    x_center <- rep(0, p)
-    x_scale <- rep(1, p)
+    lambda_type <- "user"
+    lambda <- as.double(lambda)
+
+    if (length(lambda) != n_lambda)
+      stop("lambda sequence must be as long as there are variables")
+
+    if (is.unsorted(rev(lambda)))
+      stop("lambda sequence must be non-increasing")
+
+    if (any(lambda < 0))
+      stop("lambda sequence cannot contain negative values")
   }
 
-  names(x_center) <- variable_names
-  names(x_scale) <- variable_names
-
-  if (is_sparse)
-    x <- methods::as(x, "dgCMatrix")
-
-  # setup penalty settings
-  penalty <- Slope(x = x,
-                   y = y,
-                   x_center = x_center,
-                   x_scale = x_scale,
-                   y_scale = y_scale,
-                   standardize_features = standardize_features,
-                   lambda = lambda,
-                   sigma = sigma,
-                   lambda_min_ratio = lambda_min_ratio,
-                   n_sigma = n_sigma,
-                   fdr = fdr,
-                   family = family,
-                   n_targets = n_targets)
-
-  sigma <- penalty$sigma
-  lambda <- penalty$lambda
-  n_sigma <- length(penalty$sigma)
-
-  control <- list(intercept_init = intercept_init,
-                  beta_init = beta_init,
-                  family = family,
-                  penalty = penalty,
+  control <- list(family = family,
                   fit_intercept = fit_intercept,
                   is_sparse = is_sparse,
-                  weights = weights,
                   standardize_features = standardize_features,
-                  x_center = x_center,
-                  x_scale = x_scale,
                   n_sigma = n_sigma,
                   n_targets = n_targets,
-                  sigma_type = sigma_type,
                   screening = screening,
                   sigma = sigma,
+                  sigma_type = sigma_type,
                   lambda = lambda,
+                  lambda_type = lambda_type,
+                  lambda_min_ratio = lambda_min_ratio,
+                  q = q,
+                  y_center = y_center,
+                  y_scale = y_scale,
                   max_passes = max_passes,
                   diagnostics = diagnostics,
                   verbosity = verbosity,
+                  max_variables = max_variables,
                   tol_dev_change = tol_dev_change,
                   tol_dev_ratio = tol_dev_ratio,
-                  max_variables = max_variables,
                   tol_rel_gap = tol_rel_gap,
                   tol_infeas = tol_infeas)
 
@@ -322,37 +308,13 @@ owl <- function(x,
 
   fit <- owlFit(x, y, control)
 
-  n_sigma <- fit$path_length
-  sigma <- sigma[seq_len(n_sigma)]
-
-  # c++ to R indexing
-  active_sets <- lapply(drop(fit$active_sets),
-                        function(x) drop(x) + 1)
-
-  intercept <- fit$intercept
-  beta <- fit$beta
-
-  # post-processing to get back non-standardized coefficients
-  res <- postProcess(penalty,
-                     intercept,
-                     beta,
-                     x,
-                     y,
-                     fit_intercept,
-                     x_center,
-                     x_scale,
-                     y_center,
-                     y_scale)
-
-  intercept <- res$intercepts
-  beta <- res$betas
-  nonzeros <- res$nonzeros
-
-  # make sure intercepts sum to zero in multinomial model
-  # if (family$name == "multinomial")
-  #   intercept <- sweep(intercept, 3, apply(intercept, 3, mean), "-")
-
-  n_sigma <- dim(beta)[3]
+  lambda <- fit$lambda
+  sigma <- fit$sigma
+  n_sigma <- length(sigma)
+  active_sets <- lapply(drop(fit$active_sets), function(x) drop(x) + 1)
+  intercept <- fit$intercepts
+  beta <- fit$betas
+  nonzeros <- apply(beta, c(2, 3), function(x) abs(x) > 0)
 
   if (fit_intercept) {
     coefficients <- array(NA, dim = c(p + 1, m, n_sigma))
@@ -386,6 +348,5 @@ owl <- function(x,
                  diagnostics = diagnostics,
                  call = ocall),
             class = c(paste0("Owl", camelCase(family$name)),
-                      paste0("Owl", camelCase(penalty$name)),
                       "Owl"))
 }

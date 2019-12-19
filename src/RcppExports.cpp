@@ -7,26 +7,26 @@
 using namespace Rcpp;
 
 // owlSparse
-Rcpp::List owlSparse(const arma::sp_mat& x, const arma::mat& y, const Rcpp::List control);
+Rcpp::List owlSparse(arma::sp_mat x, arma::mat y, const Rcpp::List control);
 RcppExport SEXP _owl_owlSparse(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::sp_mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< arma::sp_mat >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Rcpp::List >::type control(controlSEXP);
     rcpp_result_gen = Rcpp::wrap(owlSparse(x, y, control));
     return rcpp_result_gen;
 END_RCPP
 }
 // owlDense
-Rcpp::List owlDense(const arma::mat& x, const arma::mat& y, const Rcpp::List control);
+Rcpp::List owlDense(arma::mat x, arma::mat y, const Rcpp::List control);
 RcppExport SEXP _owl_owlDense(SEXP xSEXP, SEXP ySEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Rcpp::List >::type control(controlSEXP);
     rcpp_result_gen = Rcpp::wrap(owlDense(x, y, control));
     return rcpp_result_gen;

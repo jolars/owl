@@ -4,26 +4,22 @@
 
 using namespace arma;
 
-inline
-mat
-linearPredictor(const mat& x,
-                const mat& beta,
-                const rowvec& intercept,
-                const vec& x_center,
-                const vec& x_scale,
-                const bool standardize_features)
+inline mat linearPredictor(const mat& x,
+                           const mat& beta,
+                           const rowvec& intercept,
+                           const rowvec& x_center,
+                           const rowvec& x_scale,
+                           const bool standardize_features)
 {
   return (x*beta).eval().each_row() + intercept;
 }
 
-inline
-mat
-linearPredictor(const sp_mat& x,
-                const mat& beta,
-                const rowvec& intercept,
-                const vec& x_center,
-                const vec& x_scale,
-                const bool standardize_features)
+inline mat linearPredictor(const sp_mat& x,
+                           const mat& beta,
+                           const rowvec& intercept,
+                           const rowvec& x_center,
+                           const rowvec& x_scale,
+                           const bool standardize_features)
 {
   uword m = beta.n_cols;
 
@@ -39,12 +35,9 @@ linearPredictor(const sp_mat& x,
 }
 
 template <typename T>
-T
-matrixSubset(const T& x,
-             const uvec& active_set)
+T matrixSubset(const T& x,
+               const uvec& active_set)
 {
-  using namespace arma;
-
   const uword p = active_set.n_elem;
   const uword n = x.n_rows;
 
@@ -58,9 +51,7 @@ matrixSubset(const T& x,
   return x_subset;
 }
 
-inline
-uvec
-setUnion(const uvec& a, const uvec& b)
+inline uvec setUnion(const uvec& a, const uvec& b)
 {
   std::vector<unsigned> out;
   std::set_union(a.begin(), a.end(),
@@ -71,9 +62,7 @@ setUnion(const uvec& a, const uvec& b)
 }
 
 
-inline
-uvec
-setDiff(uvec& a, uvec& b)
+inline uvec setDiff(uvec& a, uvec& b)
 {
   std::vector<int> out;
   std::set_difference(a.begin(), a.end(),
@@ -83,9 +72,7 @@ setDiff(uvec& a, uvec& b)
   return conv_to<uvec>::from(out);
 }
 
-inline
-bool
-isSparse(SEXP x)
+inline bool isSparse(SEXP x)
 {
   bool is_sparse = false;
 

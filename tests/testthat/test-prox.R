@@ -23,7 +23,7 @@ test_that("prox_sorted_L1 agrees with isotone package", {
   y <- as.matrix(sort(abs(rnorm(n, mean = mu)), decreasing = TRUE))
   lambda <- n:1
 
-  args <- list(lambda = lambda, n = n, p = n, fdr = 0.2, sigma = 1,
+  args <- list(lambda = lambda, n = n, p = n, q = 0.2, sigma = 1,
                sigma_type = "user", lambda_type = "user")
 
   expect_equivalent(owl:::prox_slope_cpp(y, args),

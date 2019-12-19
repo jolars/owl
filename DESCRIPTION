@@ -51,7 +51,7 @@ Imports:
     methods,
     Rcpp
 LinkingTo:
-    Rcpp (>= 1.0.0),
+    Rcpp,
     RcppArmadillo (>= 0.9.200.7.0)
 Suggests:
     caret,

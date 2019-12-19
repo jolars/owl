@@ -63,7 +63,7 @@ public:
 };
 
 // helper to choose penalty
-inline std::unique_ptr<Penalty> setupPenalty(const List& args)
+inline std::unique_ptr<Penalty> setupPenalty()
 {
   return std::unique_ptr<SLOPE>(new SLOPE);
 }

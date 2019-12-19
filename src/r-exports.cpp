@@ -1,6 +1,7 @@
 #include <RcppArmadillo.h>
 #include "penalties.h"
 #include "utils.h"
+#include "lambdaMax.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -324,3 +325,4 @@ tester(arma::uvec y, arma::mat lin_pred)
 
   return bla;
 }
+

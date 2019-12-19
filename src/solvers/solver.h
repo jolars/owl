@@ -55,9 +55,9 @@ public:
       const rowvec& intercept_init,
       const mat& beta_init,
       const bool fit_intercept,
-      const vec& lambda,
-      const vec& x_center,
-      const vec& x_scale) = 0;
+      vec lambda,
+      rowvec x_center,
+      rowvec x_scale) = 0;
 
   virtual
   Results
@@ -68,8 +68,8 @@ public:
       const rowvec& intercept_init,
       const mat& beta_init,
       const bool fit_intercept,
-      const vec& lambda,
-      const vec& x_center,
-      const vec& x_scale) = 0;
+      vec lambda,
+      rowvec x_center,
+      rowvec x_scale) = 0;
 };
 

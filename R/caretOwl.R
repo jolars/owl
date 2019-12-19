@@ -18,14 +18,14 @@ caretSlopeOwl <- function() {
     library = c("owl", "Matrix"),
     type = c("Regression", "Classification"),
 
-    parameters = data.frame(parameter = c("sigma", "fdr"),
+    parameters = data.frame(parameter = c("sigma", "q"),
                             class = rep("numeric", 2),
                             label = c("sigma", "False discovery rate")),
 
     grid = function(x, y, len = NULL, search = "grid") {
 
       s <- 0.2*(1 - 1/len)
-      fdr <- seq(-s, s, length.out = len) + 0.2
+      q <- seq(-s, s, length.out = len) + 0.2
 
       numLev <- if (is.character(y) | is.factor(y)) length(levels(y)) else NA
 
@@ -46,16 +46,16 @@ caretSlopeOwl <- function() {
 
       if (search == "grid") {
         out <- expand.grid(sigma = sigma,
-                           fdr = fdr)
+                           q = q)
       } else {
-        fdr <- stats::runif(0.01, 0.4, len)
+        q <- stats::runif(0.01, 0.4, len)
 
         sigma <- exp(stats::runif(log(min(sigma)),
                                   log(max(sigma)),
                                   len))
 
         out <- data.frame(sigma = sigma,
-                          fdr = fdr)
+                          q = q)
       }
 
       out
@@ -63,15 +63,15 @@ caretSlopeOwl <- function() {
 
     loop = function(grid) {
 
-      fdr <- unique(grid$fdr)
-      loop <- data.frame(fdr = fdr)
+      q <- unique(grid$q)
+      loop <- data.frame(q = q)
       loop$sigma <- NA
 
-      submodels <- vector("list", length = length(fdr))
+      submodels <- vector("list", length = length(q))
 
-      for (i in seq_along(fdr)) {
-        np <- grid[grid$fdr == fdr[i], "sigma"]
-        loop$sigma[loop$fdr == fdr[i]] <- np[which.max(np)]
+      for (i in seq_along(q)) {
+        np <- grid[grid$q == q[i], "sigma"]
+        loop$sigma[loop$q == q[i]] <- np[which.max(np)]
         submodels[[i]] <- data.frame(sigma = np[-which.max(np)])
       }
 
@@ -99,7 +99,7 @@ caretSlopeOwl <- function() {
 
       dots$x <- x
       dots$y <- y
-      dots$fdr <- param$fdr
+      dots$q <- param$q
       dots$standardize_features <- FALSE
       dots$tol_dev_change <- 0
       dots$tol_dev_ratio <- 1
@@ -250,7 +250,7 @@ caretSlopeOwl <- function() {
     },
 
     sort = function(x) {
-      x[order(-x$sigma, x$fdr),]
+      x[order(-x$sigma, x$q),]
     },
 
     trim = function(x) {
