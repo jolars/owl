@@ -367,7 +367,6 @@ List owlCpp(T& x, mat& y, const List control)
   );
 }
 
-
 // [[Rcpp::export]]
 Rcpp::List owlSparse(arma::sp_mat x,
                      arma::mat y,

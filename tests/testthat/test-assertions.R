@@ -1,5 +1,5 @@
 test_that("incorrect data dimensions throw errors", {
-    expect_error(owl(matrix(1, 3, 3), double(2)))
+  expect_error(owl(matrix(1, 3, 3), double(2)))
 })
 
 test_that("na values in input throws errors", {
