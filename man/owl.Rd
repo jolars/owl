@@ -10,7 +10,6 @@ owl(
   family = c("gaussian", "binomial", "multinomial", "poisson"),
   intercept = TRUE,
   standardize_features = TRUE,
-  orthogonalize = TRUE,
   sigma = NULL,
   lambda = c("bhq", "gaussian"),
   lambda_min_ratio = if (NROW(x) < NCOL(x)) 0.01 else 1e-04,
