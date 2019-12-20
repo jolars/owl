@@ -79,7 +79,7 @@ List owlCpp(T& x, mat& y, const List control)
   auto family = setupFamily(family_choice);
 
   if (verbosity >= 1)
-    Rcpp::Rcout << "setting up penalty" << std::endl;
+    Rcout << "setting up penalty" << std::endl;
 
   auto penalty = setupPenalty();
 
@@ -92,7 +92,7 @@ List owlCpp(T& x, mat& y, const List control)
   uword n_variables = static_cast<uword>(fit_intercept);
 
   if (verbosity >= 1)
-    Rcpp::Rcout << "fitting intercept for null model" << std::endl;
+    Rcout << "fitting intercept for null model" << std::endl;
 
   if (fit_intercept)
     intercept = family->fitNullModel(y, m);
@@ -128,7 +128,7 @@ List owlCpp(T& x, mat& y, const List control)
   uvec active_set = regspace<uvec>(0, p-1);
 
   if (verbosity >= 1)
-    Rcpp::Rcout << "setting up solver" << std::endl;
+    Rcout << "setting up solver" << std::endl;
 
   auto solver = setupSolver("fista",
                             standardize_features,
@@ -219,9 +219,9 @@ List owlCpp(T& x, mat& y, const List control)
 
       do {
         if (verbosity > 0) {
-          Rcpp::Rcout << "active predictors:" << std::endl;
+          Rcout << "active predictors:" << std::endl;
           active_set.print();
-          Rcpp::Rcout << std::endl;
+          Rcout << std::endl;
         }
 
         T x_subset = matrixSubset(x, active_set);
@@ -256,9 +256,9 @@ List owlCpp(T& x, mat& y, const List control)
         uvec check_failures = setDiff(possible_failures, active_set);
 
         if (verbosity >= 1) {
-          Rcpp::Rcout << "kkt-failures at: " << std::endl;
+          Rcout << "kkt-failures at: " << std::endl;
           check_failures.print();
-          Rcpp::Rcout << std::endl;
+          Rcout << std::endl;
         }
 
         kkt_violation = check_failures.n_elem > 0;
@@ -340,8 +340,8 @@ List owlCpp(T& x, mat& y, const List control)
           fit_intercept);
 
   return List::create(
-    Named("intercepts")           = wrap(intercepts),
-    Named("betas")                = wrap(betas),
+    Named("intercepts")          = wrap(intercepts),
+    Named("betas")               = wrap(betas),
     Named("active_sets")         = wrap(active_sets),
     Named("passes")              = wrap(passes),
     Named("primals")             = wrap(primals),
