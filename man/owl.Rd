@@ -11,7 +11,7 @@ owl(
   intercept = TRUE,
   standardize_features = TRUE,
   sigma = NULL,
-  lambda = c("bhq", "gaussian"),
+  lambda = c("gaussian", "bhq"),
   lambda_min_ratio = if (NROW(x) < NCOL(x)) 0.01 else 1e-04,
   n_sigma = 100,
   q = 0.2,
