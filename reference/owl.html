@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Regularized Generalized Linear Models — owl • owl</title>
+<title>Generalized Linear Models Penalized with the SLOPE (OWL) Norm — owl • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,9 +42,11 @@
 
 
 
-<meta property="og:title" content="Regularized Generalized Linear Models — owl" />
-<meta property="og:description" content="This functions fits a generalized linear model (GLM) using efficient
-optimization routines suitable to big data problems." />
+<meta property="og:title" content="Generalized Linear Models Penalized with the SLOPE (OWL) Norm — owl" />
+<meta property="og:description" content="SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
+Unlike the latter, however, SLOPE uses a non-increasing
+sequence of \(\lambda\)---one
+for each coefficient. The penalty term looks like" />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -132,34 +134,33 @@ optimization routines suitable to big data problems." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Regularized Generalized Linear Models</h1>
+    <h1>Generalized Linear Models Penalized with the SLOPE (OWL) Norm</h1>
     <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/owl.R'><code>R/owl.R</code></a></small>
     <div class="hidden name"><code>owl.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This functions fits a generalized linear model (GLM) using efficient
-optimization routines suitable to big data problems.</p>
+    <p>SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
+Unlike the latter, however, SLOPE uses a non-increasing
+sequence of \(\lambda\)---one
+for each coefficient. The penalty term looks like</p>
     </div>
 
     <pre class="usage"><span class='fu'>owl</span>(
   <span class='no'>x</span>,
   <span class='no'>y</span>,
-  <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>, <span class='st'>"multinomial"</span>, <span class='st'>"poisson"</span>),
-  <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"slope"</span>, <span class='st'>"group_slope"</span>),
   <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>orthogonalize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"sequence"</span>, <span class='st'>"estimate"</span>),
-  <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"bhq"</span>, <span class='st'>"gaussian"</span>),
   <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='kw'>if</span> (<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NROW</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NCOL</a></span>(<span class='no'>x</span>)) <span class='fl'>0.01</span> <span class='kw'>else</span> <span class='fl'>1e-04</span>,
   <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-  <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
+  <span class='kw'>q</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
   <span class='kw'>screening</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>tol_dev_change</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
   <span class='kw'>tol_dev_ratio</span> <span class='kw'>=</span> <span class='fl'>0.999</span>,
-  <span class='kw'>max_variables</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NCOL</a></span>(<span class='no'>x</span>) + <span class='no'>intercept</span>,
+  <span class='kw'>max_variables</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>NROW</a></span>(<span class='no'>x</span>) + <span class='no'>intercept</span>,
   <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>1e+06</span>,
   <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
   <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>,
@@ -183,18 +184,8 @@ be converted to matrices internally.</p></td>
 binomial models, it can be a factor.</p></td>
     </tr>
     <tr>
-      <th>groups</th>
-      <td><p>a vector of integers giving the group membership of each
-feature (only applies to Group SLOPE)</p></td>
-    </tr>
-    <tr>
       <th>family</th>
       <td><p>response type. See <strong>Families</strong> for details.</p></td>
-    </tr>
-    <tr>
-      <th>penalty</th>
-      <td><p>the regularization penalty to use. See <strong>Penalties</strong> for
-details.</p></td>
     </tr>
     <tr>
       <th>intercept</th>
@@ -205,14 +196,8 @@ details.</p></td>
       <td><p>whether to standardize features (predictors)</p></td>
     </tr>
     <tr>
-      <th>orthogonalize</th>
-      <td><p>whether <code>x</code> should be orthogonalized. Note that
-setting this to TRUE when <code>x</code> is sparse will through an error. (only
-applies to Group SLOPE)</p></td>
-    </tr>
-    <tr>
       <th>sigma</th>
-      <td><p>noise estimate (only applies to SLOPE and Group SLOPE)</p></td>
+      <td><p>scale of lambda sequence</p></td>
     </tr>
     <tr>
       <th>lambda</th>
@@ -229,9 +214,8 @@ to construct the lambda path or the a vector or matrix</p></td>
       <td><p>length of regularization path</p></td>
     </tr>
     <tr>
-      <th>fdr</th>
-      <td><p>target false discovery rate (only applies to SLOPE and
-Group SLOPE)</p></td>
+      <th>q</th>
+      <td><p>shape of lambda sequence</p></td>
     </tr>
     <tr>
       <th>screening</th>
@@ -307,7 +291,10 @@ available if <code>diagnostics = TRUE</code> in the call to <code>owl()</code>.<
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The objective for each model is simply the loss function for
+    <p>$$
+  \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
+$$</p>
+<p>The objective for each model is simply the loss function for
 each family plus a penalty term.</p>
     <h2 class="hasAnchor" id="families"><a class="anchor" href="#families"></a>Families</h2>
 
@@ -336,26 +323,6 @@ $$</p>
   -\sum_{i=1}^n\left( \sum_{k=1}^m y_{ik}(x_i^T\beta_k + \alpha_k)
                      - \log\sum_{k=1}^m \exp(x_i^T\beta_k + \alpha_k) \right)
 $$</p>
-    <h2 class="hasAnchor" id="penalties"><a class="anchor" href="#penalties"></a>Penalties</h2>
-
-    
-
-<p>Models fit by <code>owl()</code> can be regularized via several
-penalties.</p>
-<p><strong>SLOPE</strong></p>
-<p>SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
-Unlike the latter, however, SLOPE uses a non-increasing
-sequence of \(\lambda\)---one
-for each coefficient. The penalty term looks like</p>
-<p>$$
-  \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
-$$</p>
-<p><strong>Group SLOPE</strong></p>
-<p>Group SLOPE is an extension of Group LASSO. It applies the following
-penalty</p>
-<p>$$
-  J_\lambda(\beta) = \sum_{j=1}^p \lambda_j |W||\beta||_{I,X}|_{(j)}
-$$</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='plot.Owl.html'>plot.Owl()</a></code>, <code><a href='plotDiagnostics.html'>plotDiagnostics()</a></code>, <code><a href='score.html'>score()</a></code>, <code><a href='predict.Owl.html'>predict.Owl()</a></code>,
@@ -373,7 +340,11 @@ $$</p>
 
 <span class='co'># Poisson response</span>
 
-<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>owl</span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"poisson"</span>)</div></pre>
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>owl</span>(<span class='no'>abalone</span>$<span class='no'>x</span>, <span class='no'>abalone</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"poisson"</span>)
+
+<span class='co'># Multinomial response</span>
+
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>owl</span>(<span class='no'>wine</span>$<span class='no'>x</span>, <span class='no'>wine</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"multinomial"</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -382,7 +353,6 @@ $$</p>
       <li><a href="#value">Value</a></li>
       <li><a href="#details">Details</a></li>
       <li><a href="#families">Families</a></li>
-      <li><a href="#penalties">Penalties</a></li>
       <li><a href="#see-also">See also</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>

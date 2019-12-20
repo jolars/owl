@@ -202,8 +202,7 @@ current display device.</p>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>123</span>)
 <span class='no'>tune</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='trainOwl.html'>trainOwl</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span>(<span class='no'>mtcars</span>, <span class='kw'>select</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"mpg"</span>, <span class='st'>"drat"</span>, <span class='st'>"wt"</span>)),
                    <span class='no'>mtcars</span>$<span class='no'>hp</span>,
-                   <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>),
-                   <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='st'>"slope"</span>,
+                   <span class='kw'>q</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>),
                    <span class='kw'>number</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>tune</span>, <span class='kw'>ci_col</span> <span class='kw'>=</span> <span class='st'>"salmon"</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"black"</span>)</div><div class='img'><img src='plot.TrainedOwl-1.png' alt='' width='700' height='433' /></div></pre>
   </div>

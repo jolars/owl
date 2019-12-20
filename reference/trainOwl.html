@@ -145,8 +145,7 @@ through the resampling method chosen by the <code>method</code> argument.</p>
     <pre class="usage"><span class='fu'>trainOwl</span>(
   <span class='no'>x</span>,
   <span class='no'>y</span>,
-  <span class='kw'>groups</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
+  <span class='kw'>q</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
   <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"cv"</span>,
   <span class='kw'>number</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>repeats</span> <span class='kw'>=</span> <span class='fl'>1</span>,
@@ -171,14 +170,8 @@ be converted to matrices internally.</p></td>
 binomial models, it can be a factor.</p></td>
     </tr>
     <tr>
-      <th>groups</th>
-      <td><p>a vector of integers giving the group membership of each
-feature (only applies to Group SLOPE)</p></td>
-    </tr>
-    <tr>
-      <th>fdr</th>
-      <td><p>target false discovery rate (only applies to SLOPE and
-Group SLOPE)</p></td>
+      <th>q</th>
+      <td><p>shape of lambda sequence</p></td>
     </tr>
     <tr>
       <th>method</th>
@@ -236,8 +229,7 @@ to <code><a href='plot.TrainedOwl.html'>plot.TrainedOwl()</a></code>.</p>
     <pre class="examples"><div class='input'><span class='co'># 8-fold cross-validation repeated 5 times</span>
 <span class='no'>tune</span> <span class='kw'>&lt;-</span> <span class='fu'>trainOwl</span>(<span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span>(<span class='no'>mtcars</span>, <span class='kw'>select</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"mpg"</span>, <span class='st'>"drat"</span>, <span class='st'>"wt"</span>)),
                    <span class='no'>mtcars</span>$<span class='no'>hp</span>,
-                   <span class='kw'>fdr</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>),
-                   <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='st'>"slope"</span>,
+                   <span class='kw'>q</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>),
                    <span class='kw'>number</span> <span class='kw'>=</span> <span class='fl'>8</span>,
                    <span class='kw'>repeats</span> <span class='kw'>=</span> <span class='fl'>5</span>)</div></pre>
   </div>

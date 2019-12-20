@@ -95,7 +95,7 @@
       <h1>Regularization penalties in owl</h1>
                         <h4 class="author">Johan Larsson</h4>
             
-            <h4 class="date">2019-12-18</h4>
+            <h4 class="date">2019-12-20</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jolars/owl/blob/master/vignettes/penalties.Rmd"><code>vignettes/penalties.Rmd</code></a></small>
       <div class="hidden name"><code>penalties.Rmd</code></div>
@@ -129,22 +129,21 @@
 <a class="sourceLine" id="cb1-18" data-line-number="18">  </a>
 <a class="sourceLine" id="cb1-19" data-line-number="19">  fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/owl.html">owl</a></span>(x,</a>
 <a class="sourceLine" id="cb1-20" data-line-number="20">             y,</a>
-<a class="sourceLine" id="cb1-21" data-line-number="21">             <span class="dt">penalty =</span> <span class="st">"slope"</span>, </a>
-<a class="sourceLine" id="cb1-22" data-line-number="22">             <span class="dt">lambda =</span> <span class="st">"gaussian"</span>, </a>
-<a class="sourceLine" id="cb1-23" data-line-number="23">             <span class="dt">sigma =</span> sigma,</a>
-<a class="sourceLine" id="cb1-24" data-line-number="24">             <span class="dt">intercept =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb1-25" data-line-number="25">  </a>
-<a class="sourceLine" id="cb1-26" data-line-number="26">  selected_golem &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span>(<span class="kw"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(fit)) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)</a>
-<a class="sourceLine" id="cb1-27" data-line-number="27">  V &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/sets.html">setdiff</a></span>(selected_golem, signals))</a>
-<a class="sourceLine" id="cb1-28" data-line-number="28">  R &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(selected_golem)</a>
-<a class="sourceLine" id="cb1-29" data-line-number="29">  fdr[i] &lt;-<span class="st"> </span>V<span class="op">/</span>R</a>
-<a class="sourceLine" id="cb1-30" data-line-number="30">}</a>
-<a class="sourceLine" id="cb1-31" data-line-number="31"></a>
-<a class="sourceLine" id="cb1-32" data-line-number="32"><span class="kw"><a href="https://rdrr.io/pkg/lattice/man/xyplot.html">xyplot</a></span>(fdr <span class="op">~</span><span class="st"> </span>q, <span class="dt">type =</span> <span class="st">"b"</span>, <span class="dt">ylab =</span> <span class="st">"FDR"</span>,</a>
-<a class="sourceLine" id="cb1-33" data-line-number="33">       <span class="dt">panel =</span> <span class="cf">function</span>(...) {</a>
-<a class="sourceLine" id="cb1-34" data-line-number="34">         <span class="kw"><a href="https://rdrr.io/pkg/lattice/man/panel.functions.html">panel.refline</a></span>(<span class="dt">h =</span> <span class="fl">0.2</span>)</a>
-<a class="sourceLine" id="cb1-35" data-line-number="35">         <span class="kw"><a href="https://rdrr.io/pkg/lattice/man/panel.xyplot.html">panel.xyplot</a></span>(...)</a>
-<a class="sourceLine" id="cb1-36" data-line-number="36">       })</a></code></pre></div>
+<a class="sourceLine" id="cb1-21" data-line-number="21">             <span class="dt">lambda =</span> <span class="st">"gaussian"</span>, </a>
+<a class="sourceLine" id="cb1-22" data-line-number="22">             <span class="dt">sigma =</span> sigma,</a>
+<a class="sourceLine" id="cb1-23" data-line-number="23">             <span class="dt">intercept =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-24" data-line-number="24">  </a>
+<a class="sourceLine" id="cb1-25" data-line-number="25">  selected_golem &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span>(<span class="kw"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(fit)) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb1-26" data-line-number="26">  V &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/sets.html">setdiff</a></span>(selected_golem, signals))</a>
+<a class="sourceLine" id="cb1-27" data-line-number="27">  R &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(selected_golem)</a>
+<a class="sourceLine" id="cb1-28" data-line-number="28">  fdr[i] &lt;-<span class="st"> </span>V<span class="op">/</span>R</a>
+<a class="sourceLine" id="cb1-29" data-line-number="29">}</a>
+<a class="sourceLine" id="cb1-30" data-line-number="30"></a>
+<a class="sourceLine" id="cb1-31" data-line-number="31"><span class="kw"><a href="https://rdrr.io/pkg/lattice/man/xyplot.html">xyplot</a></span>(fdr <span class="op">~</span><span class="st"> </span>q, <span class="dt">type =</span> <span class="st">"b"</span>, <span class="dt">ylab =</span> <span class="st">"FDR"</span>,</a>
+<a class="sourceLine" id="cb1-32" data-line-number="32">       <span class="dt">panel =</span> <span class="cf">function</span>(...) {</a>
+<a class="sourceLine" id="cb1-33" data-line-number="33">         <span class="kw"><a href="https://rdrr.io/pkg/lattice/man/panel.functions.html">panel.refline</a></span>(<span class="dt">h =</span> <span class="fl">0.2</span>)</a>
+<a class="sourceLine" id="cb1-34" data-line-number="34">         <span class="kw"><a href="https://rdrr.io/pkg/lattice/man/panel.xyplot.html">panel.xyplot</a></span>(...)</a>
+<a class="sourceLine" id="cb1-35" data-line-number="35">       })</a></code></pre></div>
 <div class="figure">
 <img src="penalties_files/figure-html/unnamed-chunk-1-1.png" alt="Control of false discovery rate using SLOPE." width="700"><p class="caption">
 Control of false discovery rate using SLOPE.
