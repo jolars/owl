@@ -1,9 +1,8 @@
 test_that("screening rules return correct results for instances with known violations", {
   set.seed(216) # there is a violation for this seed and this setup
 
-
   for (family in c("gaussian", "binomial", "poisson", "multinomial")) {
-    d <- owl:::randomProblem(100, 10, q = 0.1, response = family)
+    d <- owl:::randomProblem(100, 20, q = 0.1, response = family)
 
     coefs <- coef(owl(d$x, d$y, family = family, screening = FALSE))
     fit <- owl(d$x, d$y, family = family, screening = TRUE)
