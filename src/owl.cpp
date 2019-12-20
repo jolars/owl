@@ -107,6 +107,7 @@ List owlCpp(T& x, mat& y, const List control)
   double null_deviance = 2*family->primal(y, linear_predictor);
   std::vector<double> deviances;
   std::vector<double> deviance_ratios;
+  double deviance_change{0};
 
   rowvec intercept_prev(m, fill::zeros);
   mat beta_prev(p, m, fill::zeros);
@@ -218,7 +219,7 @@ List owlCpp(T& x, mat& y, const List control)
       bool kkt_violation = true;
 
       do {
-        if (verbosity > 0) {
+        if (verbosity >= 2) {
           Rcout << "active predictors:" << std::endl;
           active_set.print();
           Rcout << std::endl;
@@ -255,7 +256,7 @@ List owlCpp(T& x, mat& y, const List control)
           penalty->kktCheck(gradient_prev, beta, lambda*sigma(k), tol_infeas);
         uvec check_failures = setDiff(possible_failures, active_set);
 
-        if (verbosity >= 1) {
+        if (verbosity >= 2) {
           Rcout << "kkt-failures at: " << std::endl;
           check_failures.print();
           Rcout << std::endl;
@@ -283,6 +284,11 @@ List owlCpp(T& x, mat& y, const List control)
     double deviance = res.deviance;
     double deviance_ratio = 1.0 - deviance/null_deviance;
 
+    if (k > 0) {
+      deviance_change =
+        std::abs((deviances[k-1] - deviances[k])/deviances[k-1]);
+    }
+
     deviances.push_back(deviance);
     deviance_ratios.push_back(deviance_ratio);
     betas.slice(k) = beta;
@@ -293,17 +299,12 @@ List owlCpp(T& x, mat& y, const List control)
     active_sets(k) = active_set;
 
     if (verbosity >= 1)
-      Rcout << "deviance: " << deviance << "\t"
-            << "deviance ratio: " << deviance_ratio << std::endl;
+      Rcout << "deviance: "        << deviance        << "\t"
+            << "deviance ratio: "  << deviance_ratio  << "\t"
+            << "deviance change: " << deviance_change << std::endl;
 
     if (k > 0) {
       // stop path if fractional deviance change is small
-      double deviance_change =
-        std::abs((deviances[k-1] - deviances[k])/deviances[k-1]);
-
-      if (verbosity >= 1)
-        Rcout << "deviance change: " << deviance_change << std::endl;
-
       if (deviance_change < tol_dev_change || deviance_ratio > tol_dev_ratio) {
         k++;
         break;
