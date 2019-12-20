@@ -12,17 +12,6 @@ camelCase <- function(x) {
   })
 }
 
-logSeq <- function(from, to, length.out) {
-  exp(seq(log(from), log(to), length.out = length.out))
-}
-
-colNorms <- function(x, norm_type = 2) {
-  if (inherits(x, "sparseMatrix"))
-    colNormsSparse(x, norm_type)
-  else
-    colNormsDense(x, norm_type)
-}
-
 randomProblem <-
   function(n = 1000,
            p = 100,
