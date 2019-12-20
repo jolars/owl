@@ -53,18 +53,18 @@ class Binomial : public Family {
 public:
   double primal(const mat& y, const mat& lin_pred)
   {
-    return accu(log(1.0 + exp(-y % lin_pred)));
+    return accu(trunc_log(1.0 + trunc_exp(-y % lin_pred)));
   }
 
   double dual(const mat& y, const mat& lin_pred)
   {
-    const vec r = 1.0/(1.0 + exp(y % lin_pred));
-    return as_scalar((r - 1.0).t()*log(1.0 - r) - r.t()*log(r));
+    const vec r = 1.0/(1.0 + trunc_exp(y % lin_pred));
+    return as_scalar((r - 1.0).t()*trunc_log(1.0 - r) - r.t()*trunc_log(r));
   }
 
   mat pseudoGradient(const mat& y, const mat& lin_pred)
   {
-    return -y / (1.0 + exp(y % lin_pred));
+    return -y / (1.0 + trunc_exp(y % lin_pred));
   }
 
   rowvec fitNullModel(const mat& y, const uword n_classes)
@@ -74,7 +74,7 @@ public:
 
     vec mu = clamp(mean(0.5*y + 0.5), pmin, pmax);
 
-    return log(mu/(1 - mu));
+    return trunc_log(mu/(1 - mu));
   }
 
   std::string name()
@@ -118,7 +118,8 @@ public:
   {
     // logsumexp bit
     vec lp_max = max(lin_pred, 1);
-    vec lse = log(sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+    vec lse =
+      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
     return accu(lse) - accu(y % lin_pred);
   }
@@ -126,7 +127,8 @@ public:
   double dual(const mat& y, const mat& lin_pred)
   {
     vec lp_max = max(lin_pred, 1);
-    vec lse = log(sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+    vec lse =
+      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
     return accu(lse) - accu(lin_pred % trunc_exp(lin_pred.each_col() - lse));
   }
@@ -134,9 +136,10 @@ public:
   mat pseudoGradient(const mat& y, const mat& lin_pred)
   {
     vec lp_max = max(lin_pred, 1);
-    vec lse = log(sum(exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+    vec lse =
+      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
-    return exp(lin_pred.each_col() - lse) - y;
+    return trunc_exp(lin_pred.each_col() - lse) - y;
   }
 
   rowvec fitNullModel(const mat& y, const uword n_classes)
