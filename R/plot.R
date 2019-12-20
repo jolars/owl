@@ -23,6 +23,10 @@ plot.Owl = function(x, intercept = FALSE, ...) {
 
   intercept_in_model <- "(Intercept)" %in% rownames(coefs)
 
+  nz <- which(apply(object$nonzeros, 1, any))
+
+  coefs <- coefs[nz + intercept_in_model, , , drop = FALSE]
+
   if (intercept_in_model && !intercept)
     coefs <- coefs[-1, , , drop = FALSE]
 
