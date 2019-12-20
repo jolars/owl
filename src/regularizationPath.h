@@ -24,7 +24,6 @@ void regularizationPath(vec& sigma,
                         const bool is_sparse)
 {
   const uword n = x.n_rows;
-  const uword p = x.n_cols;
   const uword m = y.n_cols;
   const uword n_lambda = lambda.n_elem;
   const uword n_sigma = sigma.n_elem;
