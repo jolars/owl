@@ -124,7 +124,7 @@ List owlCpp(T& x, mat& y, const List control)
   mat pseudo_gradient_prev(n, m);
 
   // sets of active predictors
-  std::vector<uvec> active_sets;
+  field<uvec> active_sets(n_sigma);
   uvec active_set = regspace<uvec>(0, p-1);
 
   if (verbosity >= 1)
@@ -252,7 +252,7 @@ List owlCpp(T& x, mat& y, const List control)
         gradient_prev = x.t() * pseudo_gradient_prev;
 
         uvec possible_failures =
-          penalty->kktCheck(gradient_prev, beta, lambda*sigma(k), 1e-6);
+          penalty->kktCheck(gradient_prev, beta, lambda*sigma(k), tol_infeas);
         uvec check_failures = setDiff(possible_failures, active_set);
 
         if (verbosity >= 1) {
@@ -290,7 +290,7 @@ List owlCpp(T& x, mat& y, const List control)
     intercept_prev = intercept;
     beta_prev = beta;
 
-    active_sets.push_back(active_set);
+    active_sets(k) = active_set;
 
     if (verbosity >= 1)
       Rcout << "deviance: " << deviance << "\t"
@@ -329,6 +329,7 @@ List owlCpp(T& x, mat& y, const List control)
   violations.resize(k);
   passes.resize(k);
   sigma.resize(k);
+  active_sets = active_sets.rows(0, k-1);
 
   rescale(intercepts,
           betas,
