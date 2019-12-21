@@ -182,7 +182,7 @@ In multinomial regression, we use the following objective.
 
 # Gaussian response
 
-fit <- owl(abalone$x, abalone$y)
+fit <- owl(bodyfat$x, bodyfat$y)
 
 # Binomial response
 
