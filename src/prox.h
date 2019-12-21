@@ -1,29 +1,23 @@
 #pragma once
 
 #include <RcppArmadillo.h>
-#include <memory>
-#include "families.h"
-#include "utils.h"
 
+using namespace Rcpp;
 using namespace arma;
 
-inline
-mat
-slopeProx(const mat& beta,
-          const vec& lambda,
-          const double shrinkage)
+inline mat prox(const mat& beta, const vec& lambda)
 {
-  uword p = beta.n_rows;
+  uword p = beta.n_elem;
 
   // collect sign of beta and work with sorted absolutes
-  mat beta_sign = sign(beta);
-  vec beta2 = abs(beta);
-  uvec beta_order = sort_index(beta2, "descend");
-  beta2 = (beta2(beta_order)).eval();
+  vec beta_vec = vectorise(beta);
+  vec beta_sign = sign(beta_vec);
+  beta_vec = abs(beta_vec);
+  uvec beta_order = sort_index(beta_vec, "descend");
+  beta_vec = (beta_vec(beta_order)).eval();
 
   vec s(p);
   vec w(p);
-  vec betax(p);
 
   uvec idx_i(p);
   uvec idx_j(p);
@@ -33,10 +27,10 @@ slopeProx(const mat& beta,
   for (uword i = 0; i < p; i++) {
     idx_i(k) = i;
     idx_j(k) = i;
-    s(k)     = beta2(i) - lambda(i)*shrinkage;
+    s(k)     = beta_vec(i) - lambda(i);
     w(k)     = s(k);
 
-    while ((k > 0) && (w[k - 1] <= w(k))) {
+    while ((k > 0) && (w(k - 1) <= w(k))) {
       k--;
       idx_j(k)  = i;
       s(k)     += s(k + 1);
@@ -48,14 +42,16 @@ slopeProx(const mat& beta,
   for (uword j = 0; j < k; j++) {
     double d = std::max(w(j), 0.0);
     for (uword i = idx_i(j); i <= idx_j(j); i++) {
-      betax(i) = d;
+      beta_vec(i) = d;
     }
   }
 
   // reset order
-  betax(beta_order) = betax;
+  beta_vec(beta_order) = beta_vec;
+
+  beta_vec %= beta_sign;
 
   // reset sign and return
-  return (betax % beta_sign).eval();
+  return reshape(beta_vec, size(beta));
 }
 

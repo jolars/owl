@@ -1,18 +1,16 @@
 #include <RcppArmadillo.h>
-#include "penalties.h"
+#include "prox.h"
 
 using namespace Rcpp;
 using namespace arma;
 
 // [[Rcpp::export]]
-arma::vec prox_slope_cpp(const arma::mat& y, const Rcpp::List& args)
+arma::vec prox_slope_cpp(const arma::vec& y, const Rcpp::List& args)
 {
   auto sigma = Rcpp::as<arma::vec>(args["sigma"]);
   auto lambda = Rcpp::as<arma::vec>(args["lambda"]);
 
-  SLOPE penalty;
-
-  return penalty.eval(y, lambda*sigma(0), 1.0);
+  return prox(y, lambda*sigma(0));
 }
 
 //

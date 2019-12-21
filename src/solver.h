@@ -2,14 +2,48 @@
 
 #include <RcppArmadillo.h>
 #include <memory>
-#include "../families.h"
-#include "../penalties.h"
-#include "solver.h"
+#include "families.h"
+#include "utils.h"
+#include "prox.h"
+#include "infeasibility.h"
 
 using namespace arma;
 using namespace Rcpp;
 
-class FISTA : public Solver {
+struct Results {
+  rowvec intercept;
+  mat beta;
+  uword passes;
+  std::vector<double> primals;
+  std::vector<double> duals;
+  std::vector<double> infeasibilities;
+  std::vector<double> time;
+  std::vector<unsigned> line_searches;
+  double deviance;
+
+  Results() {}
+
+  Results(rowvec intercept,
+          mat beta,
+          uword passes,
+          std::vector<double> primals,
+          std::vector<double> duals,
+          std::vector<double> infeasibilities,
+          std::vector<double> time,
+          std::vector<unsigned> line_searches,
+          double deviance)
+          : intercept(intercept),
+            beta(beta),
+            passes(passes),
+            primals(primals),
+            duals(duals),
+            infeasibilities(infeasibilities),
+            time(time),
+            line_searches(line_searches),
+            deviance(deviance) {}
+};
+
+class Solver {
 private:
   const bool standardize;
   const bool is_sparse;
@@ -20,86 +54,32 @@ private:
   const uword verbosity;
 
 public:
-  FISTA(const bool standardize,
-        const bool is_sparse,
-        const bool diagnostics,
-        const uword max_passes,
-        const double tol_rel_gap,
-        const double tol_infeas,
-        const uword verbosity)
-        : standardize(standardize),
-          is_sparse(is_sparse),
-          diagnostics(diagnostics),
-          max_passes(max_passes),
-          tol_rel_gap(tol_rel_gap),
-          tol_infeas(tol_infeas),
-          verbosity(verbosity) {}
-
-  virtual
-  Results
-  fit(const mat& x,
-      const mat& y,
-      const std::unique_ptr<Family>& family,
-      const std::unique_ptr<Penalty>& penalty,
-      const rowvec& intercept_init,
-      const mat& beta_init,
-      const bool fit_intercept,
-      vec lambda,
-      rowvec x_center,
-      rowvec x_scale)
-  {
-    return fitImpl(x,
-                   y,
-                   family,
-                   penalty,
-                   intercept_init,
-                   beta_init,
-                   fit_intercept,
-                   lambda,
-                   x_center,
-                   x_scale);
-  }
-
-  virtual
-  Results
-  fit(const sp_mat& x,
-      const mat& y,
-      const std::unique_ptr<Family>& family,
-      const std::unique_ptr<Penalty>& penalty,
-      const rowvec& intercept_init,
-      const mat& beta_init,
-      const bool fit_intercept,
-      vec lambda,
-      rowvec x_center,
-      rowvec x_scale)
-  {
-    return fitImpl(x,
-                   y,
-                   family,
-                   penalty,
-                   intercept_init,
-                   beta_init,
-                   fit_intercept,
-                   lambda,
-                   x_center,
-                   x_scale);
-  }
+  Solver(const bool standardize,
+         const bool is_sparse,
+         const bool diagnostics,
+         const uword max_passes,
+         const double tol_rel_gap,
+         const double tol_infeas,
+         const uword verbosity)
+    : standardize(standardize),
+      is_sparse(is_sparse),
+      diagnostics(diagnostics),
+      max_passes(max_passes),
+      tol_rel_gap(tol_rel_gap),
+      tol_infeas(tol_infeas),
+      verbosity(verbosity) {}
 
   template <typename T>
-  Results
-  fitImpl(const T& x,
-          const mat& y,
-          const std::unique_ptr<Family>& family,
-          const std::unique_ptr<Penalty>& penalty,
-          const rowvec& intercept_init,
-          const mat& beta_init,
-          const bool fit_intercept,
-          vec lambda,
-          rowvec x_center,
-          rowvec x_scale)
+  Results fit(const T& x,
+              const mat& y,
+              const std::unique_ptr<Family>& family,
+              const rowvec& intercept_init,
+              const mat& beta_init,
+              const bool fit_intercept,
+              vec lambda,
+              rowvec x_center,
+              rowvec x_scale)
   {
-    using namespace arma;
-
     uword n = y.n_rows;
     uword p = x.n_cols;
     uword m = beta_init.n_cols;
@@ -181,9 +161,9 @@ public:
         Rcout << std::endl;
       }
 
-      double primal = f + penalty->primal(beta, lambda);
+      double primal = f + dot(sort(abs(vectorise(beta)), "descending"), lambda);
       double dual = family->dual(y, lin_pred);
-      double infeasibility = penalty->infeasibility(gradient, lambda);
+      double infeasibility = Infeasibility(gradient, lambda);
 
       if (verbosity >= 2) {
         Rcout << "primal: " << primal << "\t"
@@ -225,9 +205,7 @@ public:
         current_line_searches++;
 
         // Update beta and intercept
-        beta_tilde = penalty->eval(beta - learning_rate*gradient,
-                                   lambda,
-                                   learning_rate);
+        beta_tilde = prox(beta - learning_rate*gradient, lambda*learning_rate);
 
         if (fit_intercept)
           intercept_tilde = intercept - learning_rate*gradient_intercept;
@@ -251,13 +229,13 @@ public:
           + dot(d, vectorise(gradient))
           + (1.0/(2*learning_rate))*accu(square(d));
 
-        if (q >= f*(1 - 1e-12)) {
-          break;
-        } else {
-          learning_rate *= eta;
-        }
+          if (q >= f*(1 - 1e-12)) {
+            break;
+          } else {
+            learning_rate *= eta;
+          }
 
-        Rcpp::checkUserInterrupt();
+          checkUserInterrupt();
       }
 
       if (diagnostics)
@@ -269,7 +247,7 @@ public:
 
       if (fit_intercept)
         intercept = intercept_tilde
-                    + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
+        + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
 
       if (family->name() == "multinomial") {
         intercept -= mean(intercept);
@@ -284,7 +262,7 @@ public:
                                  standardize);
 
       if (passes % 100 == 0)
-        Rcpp::checkUserInterrupt();
+        checkUserInterrupt();
     }
 
     double deviance = 2*family->primal(y, lin_pred);

@@ -1,12 +1,12 @@
 #include <RcppArmadillo.h>
 #include <memory>
-#include "solvers.h"
-#include "penalties.h"
+#include "solver.h"
 #include "families.h"
-#include "screening_rules.h"
+#include "screening.h"
 #include "standardize.h"
 #include "rescale.h"
 #include "regularizationPath.h"
+#include "kktCheck.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -23,14 +23,14 @@ List owlCpp(T& x, mat& y, const List control)
   auto max_variables = as<uword>(control["max_variables"]);
 
   auto diagnostics = as<bool>(control["diagnostics"]);
-  auto verbosity = as<int>(control["verbosity"]);
+  auto verbosity = as<uword>(control["verbosity"]);
 
   // solver arguments
   auto max_passes = as<uword>(control["max_passes"]);
   auto tol_rel_gap = as<double>(control["tol_rel_gap"]);
   auto tol_infeas = as<double>(control["tol_infeas"]);
 
-  auto family_args = as<List>(control["family"]);
+  auto family_choice = as<std::string>(control["family"]);
   auto fit_intercept = as<bool>(control["fit_intercept"]);
   auto screening = as<bool>(control["screening"]);
 
@@ -44,8 +44,6 @@ List owlCpp(T& x, mat& y, const List control)
 
   if (standardize_features)
     standardize(x, x_center, x_scale);
-
-  auto family_choice = as<std::string>(family_args["name"]);
 
   auto lambda = as<vec>(control["lambda"]);
   auto sigma  = as<vec>(control["sigma"]);
@@ -72,16 +70,7 @@ List owlCpp(T& x, mat& y, const List control)
                      family_choice,
                      is_sparse);
 
-  // setup family and penalty
-  if (verbosity >= 1)
-    Rcpp::Rcout << "setting up family" << std::endl;
-
   auto family = setupFamily(family_choice);
-
-  if (verbosity >= 1)
-    Rcout << "setting up penalty" << std::endl;
-
-  auto penalty = setupPenalty();
 
   cube betas(p, m, n_sigma, fill::zeros);
   cube intercepts(1, m, n_sigma);
@@ -90,9 +79,6 @@ List owlCpp(T& x, mat& y, const List control)
   mat beta(p, m, fill::zeros);
 
   uword n_variables = static_cast<uword>(fit_intercept);
-
-  if (verbosity >= 1)
-    Rcout << "fitting intercept for null model" << std::endl;
 
   if (fit_intercept)
     intercept = family->fitNullModel(y, m);
@@ -128,17 +114,13 @@ List owlCpp(T& x, mat& y, const List control)
   field<uvec> active_sets(n_sigma);
   uvec active_set = regspace<uvec>(0, p-1);
 
-  if (verbosity >= 1)
-    Rcout << "setting up solver" << std::endl;
-
-  auto solver = setupSolver("fista",
-                            standardize_features,
-                            is_sparse,
-                            diagnostics,
-                            max_passes,
-                            tol_rel_gap,
-                            tol_infeas,
-                            verbosity);
+  Solver solver{standardize_features,
+                is_sparse,
+                diagnostics,
+                max_passes,
+                tol_rel_gap,
+                tol_infeas,
+                verbosity};
 
   Results res;
 
@@ -191,16 +173,15 @@ List owlCpp(T& x, mat& y, const List control)
     } else if (active_set.n_elem == p) {
       // all features active
 
-      res = solver->fit(x,
-                        y,
-                        family,
-                        penalty,
-                        intercept,
-                        beta,
-                        fit_intercept,
-                        lambda*sigma(k),
-                        x_center,
-                        x_scale);
+      res = solver.fit(x,
+                       y,
+                       family,
+                       intercept,
+                       beta,
+                       fit_intercept,
+                       lambda*sigma(k),
+                       x_center,
+                       x_scale);
 
       passes(k) = res.passes;
       beta = res.beta;
@@ -227,16 +208,15 @@ List owlCpp(T& x, mat& y, const List control)
 
         T x_subset = matrixSubset(x, active_set);
 
-        res = solver->fit(x_subset,
-                          y,
-                          family,
-                          penalty,
-                          intercept,
-                          beta.rows(active_set),
-                          fit_intercept,
-                          lambda.head(active_set.n_elem*m)*sigma(k),
-                          x_center.cols(active_set),
-                          x_scale.cols(active_set));
+        res = solver.fit(x_subset,
+                         y,
+                         family,
+                         intercept,
+                         beta.rows(active_set),
+                         fit_intercept,
+                         lambda.head(active_set.n_elem*m)*sigma(k),
+                         x_center.cols(active_set),
+                         x_scale.cols(active_set));
 
         beta.rows(active_set) = res.beta;
         intercept = res.intercept;
@@ -253,7 +233,7 @@ List owlCpp(T& x, mat& y, const List control)
         gradient_prev = x.t() * pseudo_gradient_prev;
 
         uvec possible_failures =
-          penalty->kktCheck(gradient_prev, beta, lambda*sigma(k), tol_infeas);
+          kktCheck(gradient_prev, beta, lambda*sigma(k), tol_infeas);
         uvec check_failures = setDiff(possible_failures, active_set);
 
         if (verbosity >= 2) {
@@ -283,14 +263,14 @@ List owlCpp(T& x, mat& y, const List control)
     // store coefficients and intercept
     double deviance = res.deviance;
     double deviance_ratio = 1.0 - deviance/null_deviance;
+    deviances.push_back(deviance);
+    deviance_ratios.push_back(deviance_ratio);
 
     if (k > 0) {
       deviance_change =
         std::abs((deviances[k-1] - deviances[k])/deviances[k-1]);
     }
 
-    deviances.push_back(deviance);
-    deviance_ratios.push_back(deviance_ratio);
     betas.slice(k) = beta;
     intercepts.slice(k) = intercept;
     intercept_prev = intercept;

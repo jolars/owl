@@ -1,8 +1,6 @@
 #pragma once
 
-#include <memory>
-#include "penalties.h"
-#include "families.h"
+#include <RcppArmadillo.h>
 
 using namespace arma;
 

@@ -137,7 +137,7 @@
 #'
 #' # Gaussian response
 #'
-#' fit <- owl(abalone$x, abalone$y)
+#' fit <- owl(bodyfat$x, bodyfat$y)
 #'
 #' # Binomial response
 #'
@@ -278,7 +278,7 @@ owl <- function(x,
       stop("lambda sequence cannot contain negative values")
   }
 
-  control <- list(family = family,
+  control <- list(family = family$name,
                   fit_intercept = fit_intercept,
                   is_sparse = is_sparse,
                   standardize_features = standardize_features,
