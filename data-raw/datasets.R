@@ -32,6 +32,10 @@ usethis::use_data(bodyfat, overwrite = TRUE)
 
 # abalone (poisson) -------------------------------------------------------
 
+library(SparseM)
+library(Matrix)
+library(caret)
+
 temp_file <- tempfile()
 
 download.file(
@@ -55,7 +59,10 @@ colnames(tmp_x) <- c("sex",
                      "weight_viscera",
                      "weight_shell")
 
-abalone <- list(x = tmp_x, y = tmp$y)
+# randomly select a subset of the rows
+part <- caret::createDataPartition(tmp$y, p = 0.05, list = FALSE)
+
+abalone <- list(x = tmp_x[part, ], y = tmp$y[part])
 
 usethis::use_data(abalone, overwrite = TRUE)
 
