@@ -119,7 +119,7 @@ public:
     // logsumexp bit
     vec lp_max = max(lin_pred, 1);
     vec lse =
-      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+      trunc_log(exp(-lp_max) + sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
     return accu(lse) - accu(y % lin_pred);
   }
@@ -128,7 +128,7 @@ public:
   {
     vec lp_max = max(lin_pred, 1);
     vec lse =
-      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+      trunc_log(exp(-lp_max) + sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
     return accu(lse) - accu(lin_pred % trunc_exp(lin_pred.each_col() - lse));
   }
@@ -137,14 +137,19 @@ public:
   {
     vec lp_max = max(lin_pred, 1);
     vec lse =
-      trunc_log(sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
+      trunc_log(exp(-lp_max) + sum(trunc_exp(lin_pred.each_col() - lp_max), 1)) + lp_max;
 
     return trunc_exp(lin_pred.each_col() - lse) - y;
   }
 
   rowvec fitNullModel(const mat& y, const uword n_classes)
   {
-    return trunc_log(mean(y)) - mean(trunc_log(mean(y)));
+    const uword m = y.n_cols;
+
+    rowvec mu = mean(y);
+    rowvec log_mu = trunc_log(mu);
+
+    return log_mu - accu(log_mu + trunc_log(1 - accu(mu)))/(m + 1);
   }
 
   std::string name()
