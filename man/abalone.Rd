@@ -4,7 +4,7 @@
 \name{abalone}
 \alias{abalone}
 \title{Abalone}
-\format{A list with two items representing 20,640 observations from
+\format{A list with two items representing 211 observations from
 9 variables
 \describe{
 \item{sex}{sex of abalone, 1 for female}
@@ -30,5 +30,8 @@ This data set contains observations of abalones, the common
 name for any of a group of sea snails. The goal is to predict the
 age of an individual abalone given physical measurements such as
 sex, weight, and height.
+}
+\details{
+Only a stratified sample of 211 rows of the original data set are used here.
 }
 \keyword{datasets}
