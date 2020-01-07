@@ -35,7 +35,7 @@ public:
 
   mat pseudoGradient(const mat& y, const mat& lin_pred)
   {
-    return -y + lin_pred;
+    return lin_pred - y;
   }
 
   rowvec fitNullModel(const mat& y, const uword n_classes)
