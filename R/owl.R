@@ -236,6 +236,7 @@ owl <- function(x,
   }
 
   # setup response
+  family_choice <- family
   family <- switch(family,
                    gaussian = Gaussian(),
                    binomial = Binomial(),
@@ -343,6 +344,7 @@ owl <- function(x,
                  active_sets = active_sets,
                  deviance_ratio = as.vector(fit$deviance_ratio),
                  null_deviance = fit$null_deviance,
+                 family = family_choice,
                  diagnostics = diagnostics,
                  call = ocall),
             class = c(paste0("Owl", camelCase(family$name)),
