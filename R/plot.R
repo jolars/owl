@@ -22,13 +22,17 @@ plot.Owl = function(x, intercept = FALSE, ...) {
   coefs <- object$coefficients
 
   intercept_in_model <- "(Intercept)" %in% rownames(coefs)
+  include_intercept <- intercept && intercept_in_model
 
   nz <- which(apply(object$nonzeros, 1, any))
 
-  coefs <- coefs[nz + intercept_in_model, , , drop = FALSE]
+  if (include_intercept) {
+    ind <- c(1, nz + 1)
+  } else {
+    ind <- nz + intercept_in_model
+  }
 
-  if (intercept_in_model && !intercept)
-    coefs <- coefs[-1, , , drop = FALSE]
+  coefs <- coefs[ind, , , drop = FALSE]
 
   if (is.null(coefs))
     stop("nothing to plot since model is yet to be fit")
