@@ -4,34 +4,41 @@
 
 using namespace arma;
 
-inline mat linearPredictor(const mat& x,
-                           const mat& beta,
-                           const rowvec& intercept,
-                           const rowvec& x_center,
-                           const rowvec& x_scale,
-                           const bool standardize_features)
+inline void linearPredictor(mat& linear_predictor,
+                            const mat& x,
+                            const mat& beta,
+                            const rowvec& intercept,
+                            const rowvec& x_center,
+                            const rowvec& x_scale,
+                            const bool fit_intercept,
+                            const bool standardize_features)
 {
-  return (x*beta).eval().each_row() + intercept;
+  linear_predictor = x*beta;
+
+  if (fit_intercept) {
+    for (uword k = 0; k < linear_predictor.n_cols; ++k)
+      linear_predictor.col(k) += as_scalar(intercept(k));
+  }
 }
 
-inline mat linearPredictor(const sp_mat& x,
-                           const mat& beta,
-                           const rowvec& intercept,
-                           const rowvec& x_center,
-                           const rowvec& x_scale,
-                           const bool standardize_features)
+inline void linearPredictor(mat& linear_predictor,
+                            const sp_mat& x,
+                            const mat& beta,
+                            const rowvec& intercept,
+                            const rowvec& x_center,
+                            const rowvec& x_scale,
+                            const bool fit_intercept,
+                            const bool standardize_features)
 {
-  uword m = beta.n_cols;
+  linear_predictor = x*beta;
 
-  mat lin_pred = x*beta;
+  for (uword k = 0; k < beta.n_cols; ++k) {
+    if (fit_intercept)
+      linear_predictor.col(k) += as_scalar(intercept(k));
 
-  for (uword k = 0; k < m; ++k) {
-    lin_pred.col(k) += intercept(k);
     if (standardize_features)
-      lin_pred.col(k) -= dot(x_center/x_scale, beta.col(k));
+      linear_predictor.col(k) -= dot(x_center/x_scale, beta.col(k));
   }
-
-  return lin_pred;
 }
 
 template <typename T>
@@ -64,7 +71,7 @@ inline uvec setUnion(const uvec& a, const uvec& b)
 
 inline uvec setDiff(uvec& a, uvec& b)
 {
-  std::vector<int> out;
+  std::vector<unsigned> out;
   std::set_difference(a.begin(), a.end(),
                       b.begin(), b.end(),
                       std::back_inserter(out));

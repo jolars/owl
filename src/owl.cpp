@@ -83,12 +83,16 @@ List owlCpp(T& x, mat& y, const List control)
   if (fit_intercept)
     intercept = family->fitNullModel(y, m);
 
-  mat linear_predictor = linearPredictor(x,
-                                         beta,
-                                         intercept,
-                                         x_center,
-                                         x_scale,
-                                         standardize_features);
+  mat linear_predictor(n, m);
+
+  linearPredictor(linear_predictor,
+                  x,
+                  beta,
+                  intercept,
+                  x_center,
+                  x_scale,
+                  fit_intercept,
+                  standardize_features);
 
   double null_deviance = 2*family->primal(y, linear_predictor);
   std::vector<double> deviances;
@@ -135,12 +139,14 @@ List owlCpp(T& x, mat& y, const List control)
       // NOTE(JL): the screening rules should probably not be used if
       // the coefficients from the previous fit are already very dense
 
-      linear_predictor_prev = linearPredictor(x,
-                                              beta_prev,
-                                              intercept_prev,
-                                              x_center,
-                                              x_scale,
-                                              standardize_features);
+      linearPredictor(linear_predictor_prev,
+                      x,
+                      beta_prev,
+                      intercept_prev,
+                      x_center,
+                      x_scale,
+                      fit_intercept,
+                      standardize_features);
 
       pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
       gradient_prev = x.t() * pseudo_gradient_prev;
@@ -222,12 +228,14 @@ List owlCpp(T& x, mat& y, const List control)
         intercept = res.intercept;
         passes(k) = res.passes;
 
-        linear_predictor_prev = linearPredictor(x,
-                                                beta,
-                                                intercept,
-                                                x_center,
-                                                x_scale,
-                                                standardize_features);
+        linearPredictor(linear_predictor_prev,
+                        x,
+                        beta,
+                        intercept,
+                        x_center,
+                        x_scale,
+                        fit_intercept,
+                        standardize_features);
 
         pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
         gradient_prev = x.t() * pseudo_gradient_prev;
@@ -283,15 +291,16 @@ List owlCpp(T& x, mat& y, const List control)
             << "deviance ratio: "  << deviance_ratio  << "\t"
             << "deviance change: " << deviance_change << std::endl;
 
-    if (k > 0) {
+    uword n_coefs = accu(any(beta != 0, 1));
+    n_variables = static_cast<uword>(fit_intercept) + n_coefs;
+
+    if (n_coefs > 0 && k > 0) {
       // stop path if fractional deviance change is small
       if (deviance_change < tol_dev_change || deviance_ratio > tol_dev_ratio) {
         k++;
         break;
       }
     }
-
-    n_variables = static_cast<uword>(fit_intercept) + accu(any(beta != 0, 1));
 
     if (verbosity >= 1)
       Rcout << "number of variables: " << n_variables << std::endl;

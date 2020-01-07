@@ -123,13 +123,6 @@ public:
       timer.tic();
     }
 
-    lin_pred = linearPredictor(x,
-                               beta,
-                               intercept,
-                               x_center,
-                               x_scale,
-                               standardize);
-
     // main loop
     uword passes = 0;
     while (passes < max_passes) {
@@ -137,6 +130,15 @@ public:
         Rcout << "pass: " << passes + 1 << std::endl;
 
       ++passes;
+
+      linearPredictor(lin_pred,
+                      x,
+                      beta,
+                      intercept,
+                      x_center,
+                      x_scale,
+                      fit_intercept,
+                      standardize);
 
       double f = family->primal(y, lin_pred);
       pseudo_gradient = family->pseudoGradient(y, lin_pred);
@@ -212,12 +214,14 @@ public:
 
         vec d = vectorise(beta_tilde - beta);
 
-        lin_pred = linearPredictor(x,
-                                   beta_tilde,
-                                   intercept_tilde,
-                                   x_center,
-                                   x_scale,
-                                   standardize);
+        linearPredictor(lin_pred,
+                        x,
+                        beta_tilde,
+                        intercept_tilde,
+                        x_center,
+                        x_scale,
+                        fit_intercept,
+                        standardize);
 
         f = family->primal(y, lin_pred);
         double q = f_old
@@ -243,13 +247,6 @@ public:
       if (fit_intercept)
         intercept = intercept_tilde
         + (t_old - 1.0)/t * (intercept_tilde - intercept_tilde_old);
-
-      lin_pred = linearPredictor(x,
-                                 beta,
-                                 intercept,
-                                 x_center,
-                                 x_scale,
-                                 standardize);
 
       if (passes % 100 == 0)
         checkUserInterrupt();
