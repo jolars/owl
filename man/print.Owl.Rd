@@ -5,14 +5,12 @@
 \alias{print.TrainedOwl}
 \title{Print results from owl fit}
 \usage{
-print.Owl(x, digits = 2, ...)
+\method{print}{Owl}(x, ...)
 
-print.TrainedOwl(x, ...)
+\method{print}{TrainedOwl}(x, ...)
 }
 \arguments{
 \item{x}{an object of class \code{'Owl'} or \code{'TrainedOwl'}}
-
-\item{digits}{number of significant digits to print in results}
 
 \item{...}{other arguments passed to \code{\link[=print]{print()}}}
 }
@@ -21,4 +19,9 @@ Prints output on the screen
 }
 \description{
 Print results from owl fit
+}
+\examples{
+fit <- owl(wine$x, wine$y, family = "multinomial")
+print(fit, digits = 1)
+
 }
