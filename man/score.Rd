@@ -4,13 +4,16 @@
 \alias{score}
 \alias{score.OwlGaussian}
 \alias{score.OwlBinomial}
+\alias{score.OwlMultinomial}
 \title{Return the loss of a owl model}
 \usage{
 score(object, x, y, measure)
 
 \method{score}{OwlGaussian}(object, x, y, measure = c("deviance", "mse", "mae"))
 
-\method{score}{OwlBinomial}(object, x, y, measure = c("deviance", "mse", "mae", "accuracy", "auc"))
+\method{score}{OwlBinomial}(object, x, y, measure = c("deviance", "mse", "mae", "misclass", "auc"))
+
+\method{score}{OwlMultinomial}(object, x, y, measure = c("deviance", "mse", "mae", "misclass"))
 }
 \arguments{
 \item{object}{an object of class \code{"Owl"}}

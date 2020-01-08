@@ -23,4 +23,3 @@ arma::vec prox_slope_cpp(const arma::vec& y, const Rcpp::List& args)
 //
 //   return bla;
 // }
-
