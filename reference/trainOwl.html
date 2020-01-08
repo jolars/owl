@@ -146,11 +146,10 @@ through the resampling method chosen by the <code>method</code> argument.</p>
   <span class='no'>x</span>,
   <span class='no'>y</span>,
   <span class='kw'>q</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
-  <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"cv"</span>,
   <span class='kw'>number</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>repeats</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"accuracy"</span>, <span class='st'>"auc"</span>),
-  <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"missclass"</span>, <span class='st'>"auc"</span>),
+  <span class='kw'>cl</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='no'>...</span>
 )</pre>
 
@@ -174,10 +173,6 @@ binomial models, it can be a factor.</p></td>
       <td><p>shape of lambda sequence</p></td>
     </tr>
     <tr>
-      <th>method</th>
-      <td><p>type of model tuning method</p></td>
-    </tr>
-    <tr>
       <th>number</th>
       <td><p>number of folds (cross-validation)</p></td>
     </tr>
@@ -193,8 +188,9 @@ supply <em>multiple</em> values here and that, by default,
 all the possible measures for the given model will be used.</p></td>
     </tr>
     <tr>
-      <th>n_cores</th>
-      <td><p>number of cores to use for parallel processing</p></td>
+      <th>cl</th>
+      <td><p>cluster if parallel fitting is desired. Can be any
+cluster accepted by <code><a href='https://rdrr.io/r/parallel/clusterApply.html'>parallel::parLapply()</a></code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
