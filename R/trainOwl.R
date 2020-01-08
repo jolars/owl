@@ -11,14 +11,14 @@
 #' to [plot.TrainedOwl()].
 #'
 #' @inheritParams owl
-#' @param method type of model tuning method
 #' @param number number of folds (cross-validation)
 #' @param repeats number of repeats for each fold (for repeated *k*-fold
 #'   cross validation)
+#' @param cl cluster if parallel fitting is desired. Can be any
+#'   cluster accepted by [parallel::parLapply()].
 #' @param measure measure to try to optimize; note that you may
 #'   supply *multiple* values here and that, by default,
 #'   all the possible measures for the given model will be used.
-#' @param n_cores number of cores to use for parallel processing
 #' @param ... other arguments to pass on to [owl()]
 #'
 #' @return An object of class `"TrainedOwl"`, with the following slots:
@@ -44,22 +44,20 @@
 trainOwl <- function(x,
                      y,
                      q = 0.2,
-                     method = "cv",
                      number = 10,
                      repeats = 1,
                      measure = c("deviance",
                                  "mse",
                                  "mae",
-                                 "accuracy",
+                                 "missclass",
                                  "auc"),
-                     n_cores = 1,
+                     cl = NULL,
                      ...) {
   ocall <- match.call()
 
-  measure <- match.arg(measure, several.ok = TRUE)
-  method <- match.arg(method)
-
   n <- NROW(x)
+
+  measure <- match.arg(measure, several.ok = TRUE)
 
   y <- as.matrix(y)
 
@@ -71,111 +69,96 @@ trainOwl <- function(x,
   fit <- owl(x, y, ...)
 
   # match measure against accepted measure for the given family
-  family <- if (inherits(fit, "OwlGaussian"))
-    "gaussian"
-  else if (inherits(fit, "OwlBinomial"))
-    "binomial"
-  else if (inherits(fit, "OwnPoisson"))
-    "poisson"
+  family <- fit$family
 
   ok <- switch(family,
                gaussian = c("deviance", "mse", "mae"),
-               binomial = c("deviance", "mse", "mae", "accuracy", "auc"))
+               binomial = c("deviance", "mse", "mae", "misclass", "auc"),
+               poisson = c("deviance", "mse", "mae"),
+               multinomial = c("deviance", "mse", "mae"))
   measure <- measure[measure %in% ok]
 
-  foldnames <- paste("fold", seq_len(number), sep = "_")
-
-  if (repeats > 1) {
-    foldnames <- paste(foldnames,
-                       "rep",
-                       rep(seq_len(repeats), each = number),
-                       sep = "_")
-  }
+  if (length(measure) == 0)
+    stop("measure needs to be one of ", ok)
 
   sigma <- fit$sigma
 
-  result <- array(
-    NA,
-    dim = c(number*repeats, length(sigma), length(q)),
-    dimnames = list(
-      foldnames,
-      paste("sigma", signif(sigma, 2), sep = "_"),
-      paste("q", signif(q, 2), sep = "_")
-    )
-  )
+  n_sigma <- length(sigma)
+  n_q <- length(q)
+  n_measure <- length(measure)
 
-  d <- dim(result)
+  fold_size <- ceiling(n/number)
 
-  result_list <- lapply(seq_along(measure), function(x) result)
-  names(result_list) <- measure
+  fold_id <- replicate(repeats, {
+    matrix(c(sample(n), rep(0, number*fold_size - n)), fold_size, byrow = TRUE)
+  })
 
-  # repeat each k-fold cv
-  for (i in seq_len(repeats)) {
-    # sample fold indicies for each data point
-    fold_id <- as.numeric(cut(sample(n), number))
+  grid <- expand.grid(q = q,
+                      fold = seq_len(number),
+                      repetition = seq_len(repeats))
 
-    # loop over each fold
-    for (j in seq_len(number)) {
+  grid_list <- split(grid, seq_len(nrow(grid)))
 
-      train_ind <- j == fold_id
-      test_ind <- !train_ind
+  f <- function(g, xmat, y, sigma, measure, fold_id, dots) {
+    id <- g$fold
+    repetition <- g$repetition
+    q <- g$q
 
-      x_train <- x[train_ind, , drop = FALSE]
-      y_train <- y[train_ind, , drop = FALSE]
-      x_test <- x[test_ind, , drop = FALSE]
-      y_test <- y[test_ind, , drop = FALSE]
+    test_ind <- fold_id[, id, repetition]
 
-      args <- utils::modifyList(list(x = x_train,
-                                     y = y_train,
-                                     sigma = sigma), list(...))
+    x_train <- xmat[-test_ind, , drop = FALSE]
+    y_train <- y[-test_ind, , drop = FALSE]
+    x_test  <- xmat[test_ind, , drop = FALSE]
+    y_test  <- y[test_ind, , drop = FALSE]
 
-      for (k in seq_len(d[3])) {
+    args <- utils::modifyList(list(x = x_train,
+                                   y = y_train,
+                                   q = q,
+                                   sigma = sigma), dots)
+    s <- lapply(measure, function(m) {
+      owl::score(do.call(owl::owl, args), x_test, y_test, m)
+    })
 
-        args$q <- q[k]
-
-        # collect each measure
-        for (l in seq_along(measure)) {
-          result_list[[l]][j + (i-1)*number, , k] <-
-            score(do.call(owl, args), x_test, y_test, measure[l])
-        }
-      } # loop over each outer parameter (e.g. q)
-    } # loop over each fold
-  } # repeated cv
-
-  grid <- expand.grid(sigma = sigma, q = q)
-
-  n <- number*repeats
-
-  arrange_results <- function(result, grid) {
-    out <- grid
-    out$mean <- as.vector(apply(result, 3, colMeans))
-    out$se <- as.vector(apply(result, c(2, 3), stats::sd))/sqrt(n)
-    out$lo <- out$mean - stats::qt(0.975, n - 1)*out$se
-    out$hi <- out$mean + stats::qt(0.975, n - 1)*out$se
-    out
+    unlist(s)
   }
 
-  summary <- lapply(result_list, arrange_results, grid = grid)
-
-  optima <- vector("list", length(measure))
-
-  for (i in seq_along(measure)) {
-    s <- summary[[i]]
-
-    if (measure[i] %in% c("auc", "accuracy"))
-      best_ind <- which.max(s$mean)
-    else
-      best_ind <- which.min(s$mean)
-
-    optima[[i]] <- data.frame(sigma = s[best_ind, "sigma"],
-                              q = s[best_ind, "q"],
-                              measure = measure[i],
-                              mean = s$mean[best_ind],
-                              lo = s$lo[best_ind],
-                              hi = s$hi[best_ind])
+  if (is.null(cl)) {
+    r <- lapply(grid_list,
+                f,
+                fold_id = fold_id,
+                sigma = sigma,
+                xmat = x,
+                y = y,
+                measure = measure,
+                dots = list(...))
+  } else {
+    r <- parallel::parLapply(cl,
+                             grid_list,
+                             f,
+                             fold_id = fold_id,
+                             sigma = sigma,
+                             xmat = x,
+                             y = y,
+                             measure = measure,
+                             dots = list(...))
   }
 
-  optima <- do.call(rbind, optima)
+  tmp <- array(unlist(r), c(n_sigma*n_q, n_measure, number*repeats))
+  d <- matrix(tmp, c(n_sigma*n_q*n_measure, number*repeats))
+
+  means <- rowMeans(d)
+  se <- apply(d, 1, stats::sd)
+  ci <- stats::qt(0.975, n - 1)*se
+  lo <- means - ci
+  hi <- means + ci
+
+  summary <- data.frame(q = rep(q, each = n_sigma*n_measure),
+                        sigma = rep(sigma, n_measure*n_q),
+                        measure = rep(measure, each = n_sigma, times = n_q),
+                        mean = means, se = se, lo = lo, hi = hi)
+
+  best <- tapply(summary$mean, list(as.factor(summary$measure)), which.min)
+  optima <- summary[best, ]
 
   labels <- vapply(measure, function(m) {
     switch(
@@ -187,6 +170,8 @@ trainOwl <- function(x,
           "Binomial Deviance"
         else if (inherits(fit, "OwlPoisson"))
           "Mean-Squared Error"
+        else if (inherits(fit, "OwlMultinomial"))
+          "Multinomial Deviance"
       },
       mse = "Mean Squared Error",
       mae = "Mean Absolute Error",
@@ -196,7 +181,7 @@ trainOwl <- function(x,
   }, FUN.VALUE = character(1))
 
   structure(list(summary = summary,
-                 data = result_list,
+                 data = d,
                  optima = optima,
                  measure = data.frame(measure = measure,
                                       label = labels,

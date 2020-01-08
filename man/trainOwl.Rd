@@ -8,11 +8,10 @@ trainOwl(
   x,
   y,
   q = 0.2,
-  method = "cv",
   number = 10,
   repeats = 1,
-  measure = c("deviance", "mse", "mae", "accuracy", "auc"),
-  n_cores = 1,
+  measure = c("deviance", "mse", "mae", "missclass", "auc"),
+  cl = NULL,
   ...
 )
 }
@@ -27,8 +26,6 @@ binomial models, it can be a factor.}
 
 \item{q}{shape of lambda sequence}
 
-\item{method}{type of model tuning method}
-
 \item{number}{number of folds (cross-validation)}
 
 \item{repeats}{number of repeats for each fold (for repeated \emph{k}-fold
@@ -38,7 +35,8 @@ cross validation)}
 supply \emph{multiple} values here and that, by default,
 all the possible measures for the given model will be used.}
 
-\item{n_cores}{number of cores to use for parallel processing}
+\item{cl}{cluster if parallel fitting is desired. Can be any
+cluster accepted by \code{\link[parallel:parLapply]{parallel::parLapply()}}.}
 
 \item{...}{other arguments to pass on to \code{\link[=owl]{owl()}}}
 }

@@ -155,9 +155,12 @@ plot.TrainedOwl <-
     stop("measure ", measure, " was not used or not available when",
          "fitting the model")
 
+  if (length(measure) > 1)
+    stop("you are only allowed to plot one measure at a time")
+
   measure_label <- object$measure$label[ind]
 
-  summary <- object$summary[[measure]]
+  summary <- object$summary[object$summary$measure == measure, ]
   optimum <- object$optima[ind, , drop = FALSE]
   model <- object$model
 
@@ -171,6 +174,7 @@ plot.TrainedOwl <-
 
   if (length(q) > 1) {
     x <- quote(mean ~ sigma | q)
+
     strip <- lattice::strip.custom(
       var.name = "q",
       sep = expression(" = "),
