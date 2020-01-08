@@ -1,40 +1,3 @@
-#' Softmax-based prediction
-#'
-#' @param x linear predictors
-#'
-#' @author Jerome Friedman, Trevor Hastie, Rob Tibshirani, and Noah Simon
-#'
-#' @return Class predictions.
-#' @keywords internal
-#' @noRd
-softmax <- function(x) {
-  d <- dim(x)
-  nas <- apply(is.na(x), 1, any)
-  if (any(nas)) {
-    pclass <- rep(NA, d[1])
-    if (sum(nas) < d[1]) {
-      pclass2 <- softmax(x[!nas, ])
-      pclass[!nas] <- pclass2
-      if (is.factor(pclass2))
-        pclass <- factor(pclass, levels = seq(d[2]), labels = levels(pclass2))
-    }
-  } else {
-    maxdist <- x[, 1]
-    pclass <- rep(1, d[1])
-    for (i in seq(2, d[2])) {
-      l <- x[, i] > maxdist
-      pclass[l] <- i
-      maxdist[l] <- x[l, i]
-    }
-    dd <- dimnames(x)[[2]]
-    pclass <- if (is.null(dd) || !length(dd))
-      pclass
-    else
-      factor(pclass, levels = seq(d[2]), labels = dd)
-  }
-  pclass
-}
-
 #' Generate predictions from owl models
 #'
 #' Return predictions from models fit by [owl()].
@@ -199,14 +162,37 @@ predict.OwlMultinomial <- function(object,
                                    ...) {
   type <- match.arg(type)
 
-  lin_pred <- NextMethod(object, type = type)
+  lin_pred <- NextMethod(object, type = type, simplify = FALSE)
+  m <- NCOL(lin_pred)
 
   out <- switch(
     type,
-    response = aperm(apply(lin_pred, c(1, 3), function(x) exp(x)/sum(exp(x))),
-                     c(2, 1, 3)),
+
+    response = {
+      n <- nrow(lin_pred)
+      m <- ncol(lin_pred)
+      n_sigma <- dim(lin_pred)[3]
+
+      tmp <- array(0, c(n, m + 1, n_sigma))
+      tmp[, 1:m, ] <- lin_pred
+
+      aperm(apply(tmp, c(1, 3), function(x) exp(x)/sum(exp(x))), c(2, 1, 3))
+    },
+
     link = lin_pred,
-    class = apply(lin_pred, 3, softmax)
+
+    class = {
+      response <- stats::predict(object, x, type = "response", simplify = FALSE)
+      tmp <- apply(response, c(1, 3), which.max)
+      class_names <- object$class_names
+
+      predicted_classes <-
+        apply(tmp,
+              2,
+              function(a) factor(a, levels = 1:(m+1), labels = class_names))
+      colnames(predicted_classes) <- dimnames(lin_pred)[[3]]
+      predicted_classes
+    }
   )
 
   if (simplify)
