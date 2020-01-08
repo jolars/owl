@@ -46,7 +46,7 @@ LazyData: true
 Depends:
     R (>= 3.3.0)
 Imports:
-    grpSLOPE,
+    lattice,
     Matrix,
     methods,
     Rcpp
@@ -57,9 +57,9 @@ Suggests:
     caret,
     covr,
     glmnet,
+    grpSLOPE,
     isotone,
     knitr,
-    lattice,
     latticeExtra,
     rmarkdown,
     SLOPE,
