@@ -21,7 +21,8 @@ randomProblem <-
            density = 1,
            amplitude = if (match.arg(response) == "poisson") 1 else 3,
            sigma = 1,
-           response = c("gaussian", "binomial", "poisson", "multinomial")) {
+           response = c("gaussian", "binomial", "poisson", "multinomial"),
+           rho = 0) {
   m <- n_targets
 
   if (density == 1) {
@@ -29,6 +30,9 @@ randomProblem <-
   } else {
     x <- Matrix::rsparsematrix(n, p, density)
   }
+
+  if (rho > 0)
+    x <- x + sqrt(rho/(1 - rho)) * matrix(rnorm(n), n, p)
 
   if (!is.null(n_groups)) {
     groups <- rep(seq_len(n_groups), each = ceiling(m*p/n_groups),
