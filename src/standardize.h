@@ -9,8 +9,10 @@ void standardize(mat& x, rowvec& x_center, rowvec& x_scale)
 {
   const uword p = x.n_cols;
 
-  x_center = mean(x);
-  x_scale = stddev(x);
+  for (uword j = 0; j < p; ++j) {
+    x_center(j) = mean(x.col(j));
+    x_scale(j) = norm(x.col(j) - x_center(j));
+  }
 
   // don't scale zero-variance predictors
   x_scale.replace(0, 1);
@@ -28,7 +30,7 @@ void standardize(sp_mat& x, rowvec& x_center, rowvec& x_scale)
 
   for (uword j = 0; j < p; ++j) {
     x_center(j) = accu(x.col(j))/n;
-    x_scale(j) = norm(x.col(j) - x_center(j), 2)/sqrt(n-1);
+    x_scale(j) = norm(x.col(j) - x_center(j));
   }
 
   // don't scale zero-variance predictors

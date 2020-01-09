@@ -38,7 +38,7 @@ test_that("regularized slope logistic regression picks out correct features", {
 
   y <- rbinom(n, 1, prob)
 
-  owl_fit <- owl(x, y, family = "binomial", sigma = 5)
+  owl_fit <- owl(x, y, family = "binomial", sigma = 1)
 
   expect_setequal(nz, which(owl_fit$nonzeros))
 })
