@@ -42,7 +42,7 @@ test_that("owl reproduces lasoso fit when all lambda are equal", {
 
   gnt_fit <- glmnet(x, y, family = "poisson",
                     standardize = FALSE,
-                    lambda = 1/n)
+                    lambda = 1)
 
   owl_fit <- owl(x, y,
                  family = "poisson",

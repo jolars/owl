@@ -47,6 +47,9 @@ void regularizationPath(vec& sigma,
 
     // ensure non-increasing lambda
     lambda.tail(n_lambda - lambda.index_min()).fill(min(lambda));
+  } else if (lambda_type == "user") {
+    // standardize lambda with number of observations
+    lambda *= static_cast<double>(n);
   }
 
   vec lambda_max = lambdaMax(x,

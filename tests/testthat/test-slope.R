@@ -29,7 +29,7 @@ test_that("SLOPE and owl agree when computing lambda sequences", {
 
   for (lambda in c("bhq", "gaussian")) {
     slope_lambda <- SLOPE::SLOPE(x, y, sigma = 1, lambda = lambda)$lambda
-    owl_lambda <- owl(x, y, sigma = 1, lambda = lambda)$lambda
+    owl_lambda <- owl(x, y, sigma = 1, lambda = lambda)$lambda*nrow(x)
     expect_equivalent(owl_lambda, slope_lambda)
   }
 })

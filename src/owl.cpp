@@ -329,6 +329,9 @@ List owlCpp(T& x, mat& y, const List control)
           y_scale,
           fit_intercept);
 
+  // standardize lambda
+  lambda /= static_cast<double>(n);
+
   return List::create(
     Named("intercepts")          = wrap(intercepts),
     Named("betas")               = wrap(betas),
