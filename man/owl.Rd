@@ -17,7 +17,7 @@ owl(
   q = 0.2,
   screening = FALSE,
   tol_dev_change = 1e-05,
-  tol_dev_ratio = 0.999,
+  tol_dev_ratio = 0.995,
   max_variables = NROW(x) + intercept,
   max_passes = 1e+06,
   tol_rel_gap = 1e-05,
