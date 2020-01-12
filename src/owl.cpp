@@ -108,7 +108,8 @@ List owlCpp(T& x, mat& y, const List control)
   std::vector<std::vector<double>> timings;
   std::vector<std::vector<double>> infeasibilities;
   std::vector<std::vector<unsigned>> line_searches;
-  uvec violations(n_sigma, fill::zeros);
+  std::vector<unsigned> violations;
+  std::vector<std::vector<unsigned>> violation_list;
 
   mat linear_predictor_prev(n, m);
   mat gradient_prev(p, m);
@@ -132,6 +133,8 @@ List owlCpp(T& x, mat& y, const List control)
 
   while (k < n_sigma) {
 
+    violations.clear();
+
     if (verbosity >= 1)
       Rcout << "penalty: " << k + 1 << std::endl;
 
@@ -153,8 +156,7 @@ List owlCpp(T& x, mat& y, const List control)
 
       double sigma_prev = k == 0 ? sigma_max : sigma(k-1);
 
-      active_set = activeSet(y,
-                             gradient_prev,
+      active_set = activeSet(gradient_prev,
                              lambda*sigma(k),
                              lambda*sigma_prev);
     }
@@ -174,6 +176,7 @@ List owlCpp(T& x, mat& y, const List control)
         infeasibilities.emplace_back(0);
         timings.emplace_back(0);
         line_searches.emplace_back(0);
+        violation_list.push_back(violations);
       }
 
     } else if (active_set.n_elem == p) {
@@ -199,6 +202,7 @@ List owlCpp(T& x, mat& y, const List control)
         infeasibilities.push_back(res.infeasibilities);
         timings.push_back(res.time);
         line_searches.emplace_back(res.line_searches);
+        violation_list.push_back(violations);
       }
 
     } else {
@@ -206,12 +210,6 @@ List owlCpp(T& x, mat& y, const List control)
       bool kkt_violation = true;
 
       do {
-        if (verbosity >= 2) {
-          Rcout << "active predictors:" << std::endl;
-          active_set.print();
-          Rcout << std::endl;
-        }
-
         T x_subset = matrixSubset(x, active_set);
 
         res = solver.fit(x_subset,
@@ -251,7 +249,9 @@ List owlCpp(T& x, mat& y, const List control)
         }
 
         kkt_violation = check_failures.n_elem > 0;
-        violations(k) += check_failures.n_elem;
+
+        if (diagnostics)
+          violations.push_back(check_failures.n_elem);
 
         active_set = setUnion(check_failures, active_set);
 
@@ -265,6 +265,7 @@ List owlCpp(T& x, mat& y, const List control)
         infeasibilities.push_back(res.infeasibilities);
         timings.push_back(res.time);
         line_searches.push_back(res.line_searches);
+        violation_list.push_back(violations);
       }
     }
 
@@ -316,7 +317,6 @@ List owlCpp(T& x, mat& y, const List control)
 
   intercepts.resize(1, m, k);
   betas.resize(p, m, k);
-  violations.resize(k);
   passes.resize(k);
   sigma.resize(k);
   active_sets = active_sets.rows(0, k-1);
@@ -330,7 +330,7 @@ List owlCpp(T& x, mat& y, const List control)
           fit_intercept);
 
   // standardize lambda
-  lambda /= static_cast<double>(n);
+  lambda /= n;
 
   return List::create(
     Named("intercepts")          = wrap(intercepts),
@@ -342,7 +342,7 @@ List owlCpp(T& x, mat& y, const List control)
     Named("infeasibilities")     = wrap(infeasibilities),
     Named("time")                = wrap(timings),
     Named("line_searches")       = wrap(line_searches),
-    Named("violations")          = wrap(violations),
+    Named("violations")          = wrap(violation_list),
     Named("deviance_ratio")      = wrap(deviance_ratios),
     Named("null_deviance")       = wrap(null_deviance),
     Named("sigma")               = wrap(sigma),
