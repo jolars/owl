@@ -167,7 +167,7 @@ public:
       double dual = family->dual(y, lin_pred);
       double infeasibility = Infeasibility(gradient, lambda);
 
-      if (verbosity >= 2) {
+      if (verbosity >= 3) {
         Rcout << "primal: " << primal << "\t"
               << "dual: "   << dual << "\t"
               << "infeas: " << infeasibility << std::endl;
