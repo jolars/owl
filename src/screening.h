@@ -9,13 +9,9 @@ uvec activeSet(const mat& gradient_prev,
                const vec& lambda_prev)
 {
   const uword p = gradient_prev.n_elem;
-
-  uvec active_set = zeros<uvec>(p);
-
-  vec abs_grad = abs(vectorise(gradient_prev));
-  uvec ord = sort_index(abs_grad, "descend");
-  vec abs_grad_sorted = abs_grad(ord);
-  vec tmp = abs_grad_sorted + lambda_prev - 2*lambda;
+  const vec abs_grad = abs(vectorise(gradient_prev));
+  const uvec ord = sort_index(abs_grad, "descend");
+  const vec tmp = abs_grad(ord) + lambda_prev - 2*lambda;
 
   uword i = 0;
   uword k = 0;
@@ -34,7 +30,10 @@ uvec activeSet(const mat& gradient_prev,
     }
   }
 
+  uvec active_set(p, fill::zeros);
   active_set.head(k).ones();
+
+  // reset order
   active_set(ord) = active_set;
 
   umat active_set_mat = reshape(active_set, size(gradient_prev));
