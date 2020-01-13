@@ -65,7 +65,9 @@ deviance ratio
 \eqn{1 - \mathrm{deviance}/\mathrm{(null-deviance)}}{1 - deviance/(null deviance)}
 is above this threshold}
 
-\item{max_variables}{maximum number of nonzero coefficients in model. The path is}
+\item{max_variables}{criterion for stoping the path in terms of the
+maximum number of unique, nonzero
+coefficients in absolute value in model}
 
 \item{max_passes}{maximum number of passes for optimizer}
 

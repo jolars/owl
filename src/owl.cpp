@@ -79,6 +79,7 @@ List owlCpp(T& x, mat& y, const List control)
   mat beta(p, m, fill::zeros);
 
   uword n_variables = static_cast<uword>(fit_intercept);
+  uvec n_unique(n_sigma);
 
   if (fit_intercept)
     intercept = family->fitNullModel(y, m);
@@ -293,7 +294,8 @@ List owlCpp(T& x, mat& y, const List control)
             << "deviance change: " << deviance_change << std::endl;
 
     uword n_coefs = accu(any(beta != 0, 1));
-    n_variables = static_cast<uword>(fit_intercept) + n_coefs;
+    n_variables = n_coefs;
+    n_unique(k) = unique(abs(nonzeros(beta))).eval().n_elem;
 
     if (n_coefs > 0 && k > 0) {
       // stop path if fractional deviance change is small
@@ -303,10 +305,14 @@ List owlCpp(T& x, mat& y, const List control)
       }
     }
 
-    if (verbosity >= 1)
-      Rcout << "number of variables: " << n_variables << std::endl;
+    if (verbosity >= 1) {
+      Rcout <<
+        "n_var: "      << n_variables <<
+        ", n_unique: " << n_unique    <<
+      std::endl;
+    }
 
-    if (n_variables > max_variables) {
+    if (n_unique(k) > max_variables) {
       break;
     }
 
@@ -319,7 +325,8 @@ List owlCpp(T& x, mat& y, const List control)
   betas.resize(p, m, k);
   passes.resize(k);
   sigma.resize(k);
-  active_sets = active_sets.rows(0, k-1);
+  n_unique.resize(k);
+  active_sets = active_sets.rows(0, std::max(static_cast<int>(k-1), 0));
 
   rescale(intercepts,
           betas,
@@ -342,6 +349,7 @@ List owlCpp(T& x, mat& y, const List control)
     Named("infeasibilities")     = wrap(infeasibilities),
     Named("time")                = wrap(timings),
     Named("line_searches")       = wrap(line_searches),
+    Named("n_unique")            = wrap(n_unique),
     Named("violations")          = wrap(violation_list),
     Named("deviance_ratio")      = wrap(deviance_ratios),
     Named("null_deviance")       = wrap(null_deviance),

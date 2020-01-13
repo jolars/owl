@@ -90,7 +90,9 @@
 #'   deviance ratio
 #'   \eqn{1 - \mathrm{deviance}/\mathrm{(null-deviance)}}{1 - deviance/(null deviance)}
 #'   is above this threshold
-#' @param max_variables maximum number of nonzero coefficients in model. The path is
+#' @param max_variables criterion for stoping the path in terms of the
+#'   maximum number of unique, nonzero
+#'   coefficients in absolute value in model
 #' @param tol_rel_gap stopping criterion for the duality gap
 #' @param tol_infeas stopping criterion for the level of infeasibility
 #'
@@ -158,13 +160,13 @@ owl <- function(x,
                 standardize_features = TRUE,
                 sigma = NULL,
                 lambda = c("gaussian", "bhq"),
-                lambda_min_ratio = if (NROW(x) < NCOL(x)) 1e-2 else 1e-4,
+                lambda_min_ratio = if (n < p) 1e-2 else 1e-4,
                 n_sigma = 100,
                 q = 0.2,
                 screening = FALSE,
                 tol_dev_change = 1e-5,
                 tol_dev_ratio = 0.995,
-                max_variables = NROW(x) + intercept,
+                max_variables = p*m,
                 max_passes = 1e6,
                 tol_rel_gap = 1e-5,
                 tol_infeas = 1e-4,
@@ -194,23 +196,6 @@ owl <- function(x,
     tol_rel_gap >= 0,
     tol_infeas >= 0
   )
-
-  if (is.null(sigma)) {
-    sigma_type <- "auto"
-    sigma <- double(n_sigma)
-  } else {
-    sigma_type <- "user"
-
-    sigma <- as.double(sigma)
-    n_sigma <- length(sigma)
-
-    stopifnot(n_sigma > 0)
-
-    # do not stop path early if user requests specific sigma
-    tol_dev_change <- 0
-    tol_dev_ratio <- 1
-    max_variables <- NCOL(x) + 1
-  }
 
   fit_intercept <- intercept
 
@@ -256,6 +241,23 @@ owl <- function(x,
     variable_names <- paste0("V", seq_len(p))
   if (is.null(response_names))
     response_names <- paste0("y", seq_len(m))
+
+  if (is.null(sigma)) {
+    sigma_type <- "auto"
+    sigma <- double(n_sigma)
+  } else {
+    sigma_type <- "user"
+
+    sigma <- as.double(sigma)
+    n_sigma <- length(sigma)
+
+    stopifnot(n_sigma > 0)
+
+    # do not stop path early if user requests specific sigma
+    tol_dev_change <- 0
+    tol_dev_ratio <- 1
+    max_variables <- (NCOL(x) + intercept)*m
+  }
 
   n_lambda <- m*p
 
@@ -342,6 +344,7 @@ owl <- function(x,
                  passes = fit$passes,
                  violations = fit$violations,
                  active_sets = active_sets,
+                 unique = fit$n_unique,
                  deviance_ratio = as.vector(fit$deviance_ratio),
                  null_deviance = fit$null_deviance,
                  family = family_choice,
