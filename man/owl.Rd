@@ -11,7 +11,7 @@ owl(
   intercept = TRUE,
   standardize_features = TRUE,
   sigma = NULL,
-  lambda = c("gaussian", "bhq"),
+  lambda = c("gaussian", "bhq", "oscar"),
   lambda_min_ratio = if (n < p) 0.01 else 1e-04,
   n_sigma = 100,
   q = 0.1 * min(1, n/p),
@@ -44,7 +44,8 @@ binomial models, it can be a factor.}
 \item{sigma}{scale of lambda sequence}
 
 \item{lambda}{either a character vector indicating the method used
-to construct the lambda path or the a vector or matrix}
+to construct the lambda path or a vector with length equal to the number
+of coefficients in the model}
 
 \item{lambda_min_ratio}{smallest value for \code{lambda} as a fraction of
 \code{lambda_max}}

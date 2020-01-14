@@ -43,10 +43,15 @@ void regularizationPath(vec& sigma,
         double w = std::max(1.0, static_cast<double>(n - i - 1));
         lambda(i) *= std::sqrt(1.0 + sum_sq/w);
       }
+
+      // ensure non-increasing lambda
+      lambda.tail(n_lambda - lambda.index_min()).fill(min(lambda));
     }
 
-    // ensure non-increasing lambda
-    lambda.tail(n_lambda - lambda.index_min()).fill(min(lambda));
+  } else if (lambda_type == "oscar") {
+
+    lambda = q*(regspace(n_lambda, 1) - 1) + 1;
+
   } else if (lambda_type == "user") {
     // standardize lambda with number of observations
     lambda *= static_cast<double>(n);

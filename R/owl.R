@@ -71,7 +71,8 @@
 #' @param sigma scale of lambda sequence
 #' @param n_sigma length of regularization path
 #' @param lambda either a character vector indicating the method used
-#'   to construct the lambda path or the a vector or matrix
+#'   to construct the lambda path or a vector with length equal to the number
+#'   of coefficients in the model
 #' @param lambda_min_ratio smallest value for `lambda` as a fraction of
 #'   `lambda_max`
 #' @param q shape of lambda sequence
@@ -159,7 +160,7 @@ owl <- function(x,
                 intercept = TRUE,
                 standardize_features = TRUE,
                 sigma = NULL,
-                lambda = c("gaussian", "bhq"),
+                lambda = c("gaussian", "bhq", "oscar"),
                 lambda_min_ratio = if (n < p) 1e-2 else 1e-4,
                 n_sigma = 100,
                 q = 0.1*min(1, n/p),
