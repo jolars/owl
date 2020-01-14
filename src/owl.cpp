@@ -308,7 +308,7 @@ List owlCpp(T& x, mat& y, const List control)
     if (verbosity >= 1) {
       Rcout <<
         "n_var: "      << n_variables <<
-        ", n_unique: " << n_unique    <<
+        ", n_unique: " << n_unique(k) <<
       std::endl;
     }
 
