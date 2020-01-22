@@ -8,15 +8,7 @@
 \alias{predict.OwlMultinomial}
 \title{Generate predictions from owl models}
 \usage{
-\method{predict}{Owl}(
-  object,
-  x,
-  lambda = NULL,
-  sigma = NULL,
-  type = "link",
-  simplify = TRUE,
-  ...
-)
+\method{predict}{Owl}(object, x, sigma = NULL, type = "link", simplify = TRUE, ...)
 
 \method{predict}{OwlGaussian}(
   object,
@@ -63,9 +55,6 @@
 a call to \code{\link[=owl]{owl()}}}
 
 \item{x}{new data}
-
-\item{lambda}{penalty parameter for Lasso-type models; if \code{NULL}, the
-values used in the original fit will be used}
 
 \item{sigma}{penalty parameter for SLOPE models; if \code{NULL}, the
 values used in the original fit will be used}

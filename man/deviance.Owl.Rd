@@ -2,7 +2,7 @@
 % Please edit documentation in R/deviance.R
 \name{deviance.Owl}
 \alias{deviance.Owl}
-\title{Get model deviance from owl fit}
+\title{Model deviance}
 \usage{
 \method{deviance}{Owl}(object, ...)
 }
@@ -13,10 +13,10 @@
 }
 \value{
 For Gaussian models this is twice the residual sums of squares. For
-all other models two times the negative loglikelihood is returned.
+all other models, two times the negative loglikelihood is returned.
 }
 \description{
-Get model deviance from owl fit
+Model deviance
 }
 \examples{
 fit <- owl(wine$x, wine$y, family = "multinomial", n_sigma = 10)

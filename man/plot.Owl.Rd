@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plot.Owl}
 \alias{plot.Owl}
-\title{Plot coefficients for a model fit by owl}
+\title{Plot coefficients}
 \usage{
 \method{plot}{Owl}(x, intercept = FALSE, ...)
 }

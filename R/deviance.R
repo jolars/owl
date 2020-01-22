@@ -1,10 +1,10 @@
-#' Get model deviance from owl fit
+#' Model deviance
 #'
 #' @param object an object of class `'Owl'`.
 #' @param ... ignored
 #'
 #' @return For Gaussian models this is twice the residual sums of squares. For
-#'   all other models two times the negative loglikelihood is returned.
+#'   all other models, two times the negative loglikelihood is returned.
 #' @export
 #'
 #' @examples

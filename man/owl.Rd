@@ -2,7 +2,7 @@
 % Please edit documentation in R/owl.R
 \name{owl}
 \alias{owl}
-\title{Generalized Linear Models Penalized with the SLOPE (OWL) Norm}
+\title{Generalized linear models regularized with the SLOPE (OWL) norm}
 \usage{
 owl(
   x,

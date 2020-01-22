@@ -9,8 +9,6 @@
 #'   `"response"` returns the result of applying the link function,
 #'    and `"class"` returns class predictions.
 #' @param ... ignored and only here for method consistency
-#' @param lambda penalty parameter for Lasso-type models; if `NULL`, the
-#'   values used in the original fit will be used
 #' @param sigma penalty parameter for SLOPE models; if `NULL`, the
 #'   values used in the original fit will be used
 #' @param simplify if `TRUE`, [base::drop()] will be called before returning
@@ -33,7 +31,6 @@
 #' @export
 predict.Owl <- function(object,
                         x,
-                        lambda = NULL,
                         sigma = NULL,
                         type = "link",
                         simplify = TRUE,
@@ -46,7 +43,7 @@ predict.Owl <- function(object,
   if (inherits(x, "data.frame"))
     x <- as.matrix(x)
 
-  beta <- stats::coef(object, lambda = lambda, sigma = sigma, simplify = FALSE)
+  beta <- stats::coef(object, sigma = sigma, simplify = FALSE)
 
   intercept <- "(Intercept)" %in% dimnames(beta)[[1]]
 

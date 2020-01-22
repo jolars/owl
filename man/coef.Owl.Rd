@@ -2,15 +2,12 @@
 % Please edit documentation in R/coef.R
 \name{coef.Owl}
 \alias{coef.Owl}
-\title{Obtain Coefficients from Model fit by Owl}
+\title{Obtain coefficients}
 \usage{
-\method{coef}{Owl}(object, lambda = NULL, sigma = NULL, exact = FALSE, simplify = TRUE, ...)
+\method{coef}{Owl}(object, sigma = NULL, exact = FALSE, simplify = TRUE, ...)
 }
 \arguments{
 \item{object}{an object of class \code{'Owl'}.}
-
-\item{lambda}{penalty parameter for Lasso-type models; if \code{NULL}, the
-values used in the original fit will be used}
 
 \item{sigma}{penalty parameter for SLOPE models; if \code{NULL}, the
 values used in the original fit will be used}
@@ -29,12 +26,17 @@ also to \code{\link[=owl]{owl()}}) if \code{exact = TRUE} and the given penalty
 is not in \code{object}}
 }
 \value{
-Coefficients from the model after having dropped extraneous
-dimensions by calling drop.
+Coefficients from the model.
 }
 \description{
-This function is equivalent to simply calling \code{drop(object$coefficients)}
-on a model fit by \code{\link[=owl]{owl()}}.
+This function returns coefficients from a model fit by \code{\link[=owl]{owl()}}.
+}
+\details{
+If \code{exact == FALSE} and \code{sigma} is not in \code{object},
+then the returned coefficients will be approximated by linear interpolation.
+If coefficients from another type of penalty sequence
+(with a different \code{lambda}) are required, however,
+please use \code{\link[=owl]{owl()}} to refit the model.
 }
 \examples{
 fit <- owl(mtcars$mpg, mtcars$vs, n_sigma = 1)

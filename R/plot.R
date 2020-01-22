@@ -1,4 +1,4 @@
-#' Plot coefficients for a model fit by owl
+#' Plot coefficients
 #'
 #' Plot the model's coefficient along the regularization path.
 #'
@@ -108,7 +108,7 @@ plot.Owl = function(x, intercept = FALSE, ...) {
   do.call(lattice::xyplot, utils::modifyList(args, list(...)))
 }
 
-#' Plot Results from Cross-Validation
+#' Plot results from cross-validation
 #'
 #' @param x an object of class `'TrainedOwl'`, typically from a call
 #'   to [trainOwl()]

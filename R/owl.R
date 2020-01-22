@@ -1,4 +1,4 @@
-#' Generalized Linear Models Penalized with the SLOPE (OWL) Norm
+#' Generalized linear models regularized with the SLOPE (OWL) norm
 #'
 #' SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
 #' Unlike the latter, however, SLOPE uses a non-increasing

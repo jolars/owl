@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plot.TrainedOwl}
 \alias{plot.TrainedOwl}
-\title{Plot Results from Cross-Validation}
+\title{Plot results from cross-validation}
 \usage{
 \method{plot}{TrainedOwl}(
   x,
@@ -39,7 +39,7 @@ interactively, will most likely have its print function
 current display device.
 }
 \description{
-Plot Results from Cross-Validation
+Plot results from cross-validation
 }
 \examples{
 # Cross-validation for a SLOPE binomial model

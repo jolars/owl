@@ -1,7 +1,12 @@
-#' Obtain Coefficients from Model fit by Owl
+#' Obtain coefficients
 #'
-#' This function is equivalent to simply calling `drop(object$coefficients)`
-#' on a model fit by [owl()].
+#' This function returns coefficients from a model fit by [owl()].
+#'
+#' If `exact == FALSE` and `sigma` is not in `object`,
+#' then the returned coefficients will be approximated by linear interpolation.
+#' If coefficients from another type of penalty sequence
+#' (with a different `lambda`) are required, however,
+#' please use [owl()] to refit the model.
 #'
 #' @param object an object of class `'Owl'`.
 #' @param ... arguments that are passed on to [stats::update()] (and therefore
@@ -9,15 +14,13 @@
 #'   is not in `object`
 #' @inheritParams predict.Owl
 #'
-#' @return Coefficients from the model after having dropped extraneous
-#'   dimensions by calling drop.
+#' @return Coefficients from the model.
 #'
 #' @export
 #' @examples
 #' fit <- owl(mtcars$mpg, mtcars$vs, n_sigma = 1)
 #' coef(fit)
 coef.Owl <- function(object,
-                     lambda = NULL,
                      sigma = NULL,
                      exact = FALSE,
                      simplify = TRUE,
@@ -35,7 +38,7 @@ coef.Owl <- function(object,
     n_penalties <- length(value)
     beta <- beta[, , penalty %in% value, drop = FALSE]
   } else if (exact) {
-    object <- stats::update(object, lambda = lambda, sigma = sigma, ...)
+    object <- stats::update(object, sigma = sigma, ...)
     beta <- object$coefficients
   } else {
     stopifnot(value >= 0)
