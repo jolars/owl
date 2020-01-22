@@ -150,3 +150,21 @@ score.OwlMultinomial <- function(object,
     misclass = apply(y[, 1] * (y_hat > 0.5) + y[, 2] * (y_hat <= 0.5), 3, mean)
   )
 }
+
+#' @rdname score
+#' @export
+score.OwlPoisson <- function(object,
+                             x,
+                             y,
+                             measure = c("deviance", "mse", "mae")) {
+
+  measure <- match.arg(measure)
+
+  y <- as.vector(y)
+  y_hat <- stats::predict(object, x, simplify = FALSE)
+
+  switch(measure,
+         deviance = apply((y_hat - y)^2, 3, mean),
+         mse = apply((y_hat - y)^2, 3, mean),
+         mae = apply(abs(y_hat - y), 3, mean))
+}
