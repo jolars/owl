@@ -221,15 +221,7 @@ owl <- function(x,
     x <- as.matrix(x)
   }
 
-  # setup response
-  family_choice <- family
-  family <- switch(family,
-                   gaussian = Gaussian(),
-                   binomial = Binomial(),
-                   multinomial = Multinomial(),
-                   poisson = Poisson())
-
-  res <- preProcessResponse(family, y)
+  res <- preprocessResponse(family, y)
   y <- as.matrix(res$y)
   y_center <- res$y_center
   y_scale <- res$y_scale
@@ -282,7 +274,7 @@ owl <- function(x,
       stop("lambda sequence cannot contain negative values")
   }
 
-  control <- list(family = family$name,
+  control <- list(family = family,
                   fit_intercept = fit_intercept,
                   is_sparse = is_sparse,
                   standardize_features = standardize_features,
@@ -348,9 +340,9 @@ owl <- function(x,
                  unique = fit$n_unique,
                  deviance_ratio = as.vector(fit$deviance_ratio),
                  null_deviance = fit$null_deviance,
-                 family = family_choice,
+                 family = family,
                  diagnostics = diagnostics,
                  call = ocall),
-            class = c(paste0("Owl", camelCase(family$name)),
+            class = c(paste0("Owl", camelCase(family)),
                       "Owl"))
 }

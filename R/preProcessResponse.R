@@ -1,105 +1,104 @@
-preProcessResponse <- function(object, ...) {
-  UseMethod("preProcessResponse", object)
-}
+preprocessResponse <- function(family, y) {
+  switch(
+    family,
+    gaussian = {
+      y <- as.numeric(y)
 
-preProcessResponse.Gaussian <- function(object, y) {
-  y <- as.numeric(y)
+      if (NCOL(y) > 1)
+        stop("response for Gaussian regression must be one-dimensional.")
 
-  if (NCOL(y) > 1)
-    stop("response for Gaussian regression must be one-dimensional.")
+      y_center <- mean(y)
+      y_scale  <- 1
 
-  y_center <- mean(y)
-  y_scale  <- 1
+      y <- as.matrix(y - y_center)
 
-  y <- as.matrix(y - y_center)
+      list(y = y,
+           y_center = y_center,
+           y_scale = y_scale,
+           n_classes = 1L,
+           n_targets = 1L,
+           class_names = NA_character_)
+    },
 
-  list(y = y,
-       y_center = y_center,
-       y_scale = y_scale,
-       n_classes = 1L,
-       n_targets = 1L,
-       class_names = NA_character_)
-}
+    binomial = {
+      if (NCOL(y) > 1)
+        stop("response for binomial regression must be one-dimensional.")
 
-preProcessResponse.Binomial <- function(object, y) {
-  if (NCOL(y) > 1)
-    stop("response for binomial regression must be one-dimensional.")
+      if (length(unique(y)) > 2)
+        stop("more than two classes in response")
 
-  if (length(unique(y)) > 2)
-    stop("more than two classes in response")
+      if (length(unique(y)) == 1)
+        stop("only one class in response.")
 
-  if (length(unique(y)) == 1)
-    stop("only one class in response.")
+      y_table <- table(y)
+      min_class <- min(y_table)
 
-  y_table <- table(y)
-  min_class <- min(y_table)
+      if (min_class <= 1)
+        stop("one class only has ", min_class, " observations.")
 
-  if (min_class <= 1)
-    stop("one class only has ", min_class, " observations.")
+      class_names <- names(y_table)
 
-  class_names <- names(y_table)
+      # Transform response to {-1, 1}, which is used internally
+      y <- as.matrix(ifelse(as.numeric(as.factor(y)) == 1, -1, 1))
 
-  # Transform response to {-1, 1}, which is used internally
-  y <- as.matrix(ifelse(as.numeric(as.factor(y)) == 1, -1, 1))
+      list(y = y,
+           y_center = 0,
+           y_scale = 1,
+           n_classes = 1L,
+           n_targets = 1L,
+           class_names = class_names,
+           response_names = colnames(y))
+    },
 
-  list(y = y,
-       y_center = 0,
-       y_scale = 1,
-       n_classes = 1L,
-       n_targets = 1L,
-       class_names = class_names,
-       response_names = colnames(y))
-}
+    multinomial = {
+      if (NCOL(y) > 1)
+        stop("response for multinomial regression must be one-dimensional.")
 
-preProcessResponse.Poisson <- function(object, y) {
-  if (NCOL(y) > 1)
-    stop("response for poisson regression must be one-dimensional.")
+      y <- droplevels(as.factor(y))
+      y_table <- table(y)
+      min_class <- min(y_table)
+      class_names <- names(y_table)
+      n_classes <- length(y_table)
+      n_targets <- n_classes - 1
 
-  if (any(y < 0))
-    stop("cannot have negative responses in poisson model")
+      Y <- matrix(NA, NROW(y), n_targets)
 
-  list(y = y,
-       y_center = 0,
-       y_scale = 1,
-       n_classes = 1L,
-       n_targets = 1L,
-       class_names = NA_character_,
-       response_names = colnames(y))
+      for (k in 1:n_targets) {
+        Y[, k] <- as.integer(y == names(y_table)[k])
+      }
 
-}
+      if (n_classes == 2)
+        stop("only two classes in response. Are you looking for family = 'binomial'?")
 
-preProcessResponse.Multinomial <- function(object, y) {
-  if (NCOL(y) > 1)
-    stop("response for multinomial regression must be one-dimensional.")
+      if (n_classes == 1)
+        stop("only one class in response")
 
-  y <- droplevels(as.factor(y))
-  y_table <- table(y)
-  min_class <- min(y_table)
-  class_names <- names(y_table)
-  n_classes <- length(y_table)
-  n_targets <- n_classes - 1
+      if (min_class <= 1)
+        stop("one class only has ", min_class, " observations.")
 
-  Y <- matrix(NA, NROW(y), n_targets)
+      list(y = Y,
+           y_center = rep(0, n_targets),
+           y_scale = rep(1, n_targets),
+           n_classes = n_classes,
+           n_targets = n_targets,
+           class_names = class_names,
+           response_names = class_names)
+    },
 
-  for (k in 1:n_targets) {
-    Y[, k] <- as.integer(y == names(y_table)[k])
-  }
+    poisson = {
+      if (NCOL(y) > 1)
+        stop("response for poisson regression must be one-dimensional.")
 
-  if (n_classes == 2)
-    stop("only two classes in response. Are you looking for family = 'binomial'?")
+      if (any(y < 0))
+        stop("cannot have negative responses in poisson model")
 
-  if (n_classes == 1)
-    stop("only one class in response")
-
-  if (min_class <= 1)
-    stop("one class only has ", min_class, " observations.")
-
-  list(y = Y,
-       y_center = rep(0, n_targets),
-       y_scale = rep(1, n_targets),
-       n_classes = n_classes,
-       n_targets = n_targets,
-       class_names = class_names,
-       response_names = class_names)
-
+      list(y = y,
+           y_center = 0,
+           y_scale = 1,
+           n_classes = 1L,
+           n_targets = 1L,
+           class_names = NA_character_,
+           response_names = colnames(y))
+    }
+  )
 }
