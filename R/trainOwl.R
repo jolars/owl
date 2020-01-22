@@ -147,15 +147,18 @@ trainOwl <- function(x,
   d <- matrix(tmp, c(n_sigma*n_q*n_measure, number*repeats))
 
   means <- rowMeans(d)
-  se <- apply(d, 1, stats::sd)
-  ci <- stats::qt(0.975, n - 1)*se
+  se <- apply(d, 1, stats::sd)/sqrt(repeats*number)
+  ci <- stats::qt(0.975, number*repeats - 1)*se
   lo <- means - ci
   hi <- means + ci
 
   summary <- data.frame(q = rep(q, each = n_sigma*n_measure),
                         sigma = rep(sigma, n_measure*n_q),
                         measure = rep(measure, each = n_sigma, times = n_q),
-                        mean = means, se = se, lo = lo, hi = hi)
+                        mean = means,
+                        se = se,
+                        lo = lo,
+                        hi = hi)
 
   best <- tapply(summary$mean, list(as.factor(summary$measure)), which.min)
   optima <- summary[best, ]
