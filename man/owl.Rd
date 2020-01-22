@@ -15,7 +15,7 @@ owl(
   lambda_min_ratio = if (n < p) 0.01 else 1e-04,
   n_sigma = 100,
   q = 0.1 * min(1, n/p),
-  screening = FALSE,
+  screening = TRUE,
   tol_dev_change = 1e-05,
   tol_dev_ratio = 0.995,
   max_variables = n * m,
