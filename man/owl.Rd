@@ -80,8 +80,9 @@ coefficients in absolute value in model}
 primal and dual objectives, and infeasibility)}
 
 \item{verbosity}{level of verbosity for displaying output from the
-program. Setting this to 1 displays information on the path level,
-while setting it to 2 displays information also from inside the solver.}
+program. Setting this to 1 displays basic information on the path level,
+2 a little bit more information on the path level, and 3 displays
+information from the solver.}
 }
 \value{
 An object of class \code{"Owl"} with the following slots:
@@ -111,6 +112,18 @@ multinomial families
 \item{active_sets}{
 a list where each element indicates the indices of the
 coefficients that were active at that point in the regularization path
+}
+\item{unique}{
+the number of unique predictors (in absolute value)
+}
+\item{deviance_ratio}{
+the deviance ratio (as a fraction of 1)
+}
+\item{null_deviance}{
+the deviance of the null (intercept-only) model
+}
+\item{family}{
+the name of the family used in the model fit
 }
 \item{diagnostics}{
 a \code{data.frame} of objective values for the primal and dual problems, as
@@ -202,5 +215,5 @@ fit <- owl(wine$x, wine$y, family = "multinomial")
 }
 \seealso{
 \code{\link[=plot.Owl]{plot.Owl()}}, \code{\link[=plotDiagnostics]{plotDiagnostics()}}, \code{\link[=score]{score()}}, \code{\link[=predict.Owl]{predict.Owl()}},
-\code{\link[=trainOwl]{trainOwl()}}
+\code{\link[=trainOwl]{trainOwl()}}, \code{\link[=coef.Owl]{coef.Owl()}}, \code{\link[=score.Owl]{score.Owl()}}, \code{\link[=print.Owl]{print.Owl()}}
 }

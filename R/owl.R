@@ -82,8 +82,9 @@
 #' @param screening whether the strong rule for SLOPE be used to screen
 #'   variables for inclusion
 #' @param verbosity level of verbosity for displaying output from the
-#'   program. Setting this to 1 displays information on the path level,
-#'   while setting it to 2 displays information also from inside the solver.
+#'   program. Setting this to 1 displays basic information on the path level,
+#'   2 a little bit more information on the path level, and 3 displays
+#'   information from the solver.
 #' @param tol_dev_change the regularization path is stopped if the
 #'   fractional change in deviance falls below this value. Note that this is
 #'   automatically set to 0 if a sigma is manually entered
@@ -125,6 +126,18 @@
 #'   a list where each element indicates the indices of the
 #'   coefficients that were active at that point in the regularization path
 #' }
+#' \item{unique}{
+#'   the number of unique predictors (in absolute value)
+#' }
+#' \item{deviance_ratio}{
+#'   the deviance ratio (as a fraction of 1)
+#' }
+#' \item{null_deviance}{
+#'   the deviance of the null (intercept-only) model
+#' }
+#' \item{family}{
+#'   the name of the family used in the model fit
+#' }
 #' \item{diagnostics}{
 #'   a `data.frame` of objective values for the primal and dual problems, as
 #'   well as a measure of the infeasibility, time, and iteration. Only
@@ -134,7 +147,7 @@
 #' @export
 #'
 #' @seealso [plot.Owl()], [plotDiagnostics()], [score()], [predict.Owl()],
-#'   [trainOwl()]
+#'   [trainOwl()], [coef.Owl()], [score.Owl()], [print.Owl()]
 #'
 #' @examples
 #'
