@@ -9,7 +9,3 @@ owlDense <- function(x, y, control) {
     .Call(`_owl_owlDense`, x, y, control)
 }
 
-prox_slope_cpp <- function(y, args) {
-    .Call(`_owl_prox_slope_cpp`, y, args)
-}
-

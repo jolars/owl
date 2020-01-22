@@ -58,7 +58,6 @@ Suggests:
     covr,
     glmnet,
     grpSLOPE,
-    isotone,
     knitr,
     latticeExtra,
     rmarkdown,
