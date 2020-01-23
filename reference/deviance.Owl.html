@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get model deviance from owl fit — deviance.Owl • owl</title>
+<title>Model deviance — deviance.Owl • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,8 +42,8 @@
 
 
 
-<meta property="og:title" content="Get model deviance from owl fit — deviance.Owl" />
-<meta property="og:description" content="Get model deviance from owl fit" />
+<meta property="og:title" content="Model deviance — deviance.Owl" />
+<meta property="og:description" content="Model deviance" />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -131,13 +131,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get model deviance from owl fit</h1>
+    <h1>Model deviance</h1>
     <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/deviance.R'><code>R/deviance.R</code></a></small>
     <div class="hidden name"><code>deviance.Owl.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Get model deviance from owl fit</p>
+    <p>Model deviance</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for Owl</span>
@@ -159,7 +159,7 @@
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>For Gaussian models this is twice the residual sums of squares. For
-all other models two times the negative loglikelihood is returned.</p>
+all other models, two times the negative loglikelihood is returned.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='owl.html'>owl</a></span>(<span class='no'>wine</span>$<span class='no'>x</span>, <span class='no'>wine</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"multinomial"</span>, <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>10</span>)

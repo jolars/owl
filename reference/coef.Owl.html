@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Obtain Coefficients from Model fit by Owl — coef.Owl • owl</title>
+<title>Obtain coefficients — coef.Owl • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,9 +42,8 @@
 
 
 
-<meta property="og:title" content="Obtain Coefficients from Model fit by Owl — coef.Owl" />
-<meta property="og:description" content="This function is equivalent to simply calling drop(object$coefficients)
-on a model fit by owl()." />
+<meta property="og:title" content="Obtain coefficients — coef.Owl" />
+<meta property="og:description" content="This function returns coefficients from a model fit by owl()." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -132,18 +131,17 @@ on a model fit by owl()." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Obtain Coefficients from Model fit by Owl</h1>
+    <h1>Obtain coefficients</h1>
     <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/coef.R'><code>R/coef.R</code></a></small>
     <div class="hidden name"><code>coef.Owl.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This function is equivalent to simply calling <code><a href='https://rdrr.io/r/base/drop.html'>drop(object$coefficients)</a></code>
-on a model fit by <code><a href='owl.html'>owl()</a></code>.</p>
+    <p>This function returns coefficients from a model fit by <code><a href='owl.html'>owl()</a></code>.</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for Owl</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>object</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>exact</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)</pre>
+<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>object</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>exact</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -151,11 +149,6 @@ on a model fit by <code><a href='owl.html'>owl()</a></code>.</p>
     <tr>
       <th>object</th>
       <td><p>an object of class <code>'Owl'</code>.</p></td>
-    </tr>
-    <tr>
-      <th>lambda</th>
-      <td><p>penalty parameter for Lasso-type models; if <code>NULL</code>, the
-values used in the original fit will be used</p></td>
     </tr>
     <tr>
       <th>sigma</th>
@@ -185,8 +178,14 @@ is not in <code>object</code></p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Coefficients from the model after having dropped extraneous
-dimensions by calling drop.</p>
+    <p>Coefficients from the model.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>If <code>exact == FALSE</code> and <code>sigma</code> is not in <code>object</code>,
+then the returned coefficients will be approximated by linear interpolation.
+If coefficients from another type of penalty sequence
+(with a different <code>lambda</code>) are required, however,
+please use <code><a href='owl.html'>owl()</a></code> to refit the model.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='owl.html'>owl</a></span>(<span class='no'>mtcars</span>$<span class='no'>mpg</span>, <span class='no'>mtcars</span>$<span class='no'>vs</span>, <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>1</span>)
@@ -198,6 +197,7 @@ dimensions by calling drop.</p>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
+      <li><a href="#details">Details</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
 

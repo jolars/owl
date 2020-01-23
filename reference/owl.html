@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Generalized Linear Models Penalized with the SLOPE (OWL) Norm — owl • owl</title>
+<title>Generalized linear models regularized with the SLOPE (OWL) norm — owl • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,11 +42,12 @@
 
 
 
-<meta property="og:title" content="Generalized Linear Models Penalized with the SLOPE (OWL) Norm — owl" />
-<meta property="og:description" content="SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
-Unlike the latter, however, SLOPE uses a non-increasing
-sequence of \(\lambda\)---one
-for each coefficient. The penalty term looks like" />
+<meta property="og:title" content="Generalized linear models regularized with the SLOPE (OWL) norm — owl" />
+<meta property="og:description" content="Fit a generalized linear model regularized with the
+SLOPE (Sorted L-One Penalized Estimation) norm, which applies a
+decreasing \(\lambda\) (penalty sequence) to the
+coefficient vector (\(\beta\)) after having sorted it
+in decreasing order according  to its absolute values." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -134,16 +135,17 @@ for each coefficient. The penalty term looks like" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Generalized Linear Models Penalized with the SLOPE (OWL) Norm</h1>
+    <h1>Generalized linear models regularized with the SLOPE (OWL) norm</h1>
     <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/owl.R'><code>R/owl.R</code></a></small>
     <div class="hidden name"><code>owl.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
-Unlike the latter, however, SLOPE uses a non-increasing
-sequence of \(\lambda\)---one
-for each coefficient. The penalty term looks like</p>
+    <p>Fit a generalized linear model regularized with the
+SLOPE (Sorted L-One Penalized Estimation) norm, which applies a
+decreasing \(\lambda\) (penalty sequence) to the
+coefficient vector (\(\beta\)) after having sorted it
+in decreasing order according  to its absolute values.</p>
     </div>
 
     <pre class="usage"><span class='fu'>owl</span>(
@@ -238,7 +240,7 @@ is above this threshold</p></td>
     </tr>
     <tr>
       <th>max_variables</th>
-      <td><p>criterion for stoping the path in terms of the
+      <td><p>criterion for stopping the path in terms of the
 maximum number of unique, nonzero
 coefficients in absolute value in model</p></td>
     </tr>
@@ -262,8 +264,9 @@ primal and dual objectives, and infeasibility)</p></td>
     <tr>
       <th>verbosity</th>
       <td><p>level of verbosity for displaying output from the
-program. Setting this to 1 displays information on the path level,
-while setting it to 2 displays information also from inside the solver.</p></td>
+program. Setting this to 1 displays basic information on the path level,
+2 a little bit more information on the path level, and 3 displays
+information from the solver.</p></td>
     </tr>
     </table>
 
@@ -287,6 +290,10 @@ multinomial families</p></dd>
 <dt>violations</dt><dd><p>the number of violations of the screening rule</p></dd>
 <dt>active_sets</dt><dd><p>a list where each element indicates the indices of the
 coefficients that were active at that point in the regularization path</p></dd>
+<dt>unique</dt><dd><p>the number of unique predictors (in absolute value)</p></dd>
+<dt>deviance_ratio</dt><dd><p>the deviance ratio (as a fraction of 1)</p></dd>
+<dt>null_deviance</dt><dd><p>the deviance of the null (intercept-only) model</p></dd>
+<dt>family</dt><dd><p>the name of the family used in the model fit</p></dd>
 <dt>diagnostics</dt><dd><p>a <code>data.frame</code> of objective values for the primal and dual problems, as
 well as a measure of the infeasibility, time, and iteration. Only
 available if <code>diagnostics = TRUE</code> in the call to <code>owl()</code>.</p></dd>
@@ -294,11 +301,25 @@ available if <code>diagnostics = TRUE</code> in the call to <code>owl()</code>.<
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>$$
-  \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
-$$</p>
-<p>The objective for each model is simply the loss function for
-each family plus a penalty term.</p>
+    <p><code>owl()</code> tries to minimize the following composite objective, given
+in Lagrangian form.
+$$
+  f(\beta) + \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)},
+$$
+where \(f(\beta)\) is a smooth, convex function of \(\beta\), whereas
+the second part is the SLOPE norm, which is convex but non-smooth.
+In ordinary least-squares regression, fro instance,
+\(f(\beta)\) is simply the squared norm of the least-squares residuals.
+See section <strong>Families</strong> for specifics regarding the various types of
+\(f(\beta)\) (model families) that are allowed in <code>owl()</code>.</p>
+<p>By default, <code>owl()</code> fits a path of <code>lambda</code> sequences, starting from
+the null (intercept-only) model to an almost completely unregularized
+model. The path will end prematurely, however, if the criteria
+related to <em>any</em> of the
+arguments <code>tol_dev_change</code>, <code>tol_dev_ratio</code>, or <code>max_variables</code>
+are reached before the path is complete. This means that unless these
+arguments are modified, the path is not guaranteed to be of
+length <code>n_sigma</code>.</p>
     <h2 class="hasAnchor" id="families"><a class="anchor" href="#families"></a>Families</h2>
 
     
@@ -326,10 +347,25 @@ $$</p>
   -\sum_{i=1}^n\left( \sum_{k=1}^m y_{ik}(x_i^T\beta_k + \alpha_k)
                      - \log\sum_{k=1}^m \exp(x_i^T\beta_k + \alpha_k) \right)
 $$</p>
+    <h2 class="hasAnchor" id="lambda-sequences"><a class="anchor" href="#lambda-sequences"></a>lambda sequences</h2>
+
+    
+
+<p>There are multiple ways of specifying the <code>lambda</code> sequence
+in <code>owl()</code>.</p>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+
+    <p>Bogdan, M., van den Berg, E., Sabatti, C., Su, W., &amp; Candès, E. J. (2015).
+SLOPE -- adaptive variable selection via convex optimization. The Annals of
+Applied Statistics, 9(3), 1103–1140. <a href='https://doi.org/10/gfgwzt'>https://doi.org/10/gfgwzt</a></p>
+<p>Bondell, H. D., &amp; Reich, B. J. (2008). Simultaneous Regression Shrinkage,
+Variable Selection, and Supervised Clustering of Predictors with OSCAR.
+Biometrics, 64(1), 115–123. JSTOR.
+<a href='https://doi.org/10.1111/j.1541-0420.2007.00843.x'>https://doi.org/10.1111/j.1541-0420.2007.00843.x</a></p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='plot.Owl.html'>plot.Owl()</a></code>, <code><a href='plotDiagnostics.html'>plotDiagnostics()</a></code>, <code><a href='score.html'>score()</a></code>, <code><a href='predict.Owl.html'>predict.Owl()</a></code>,
-<code><a href='trainOwl.html'>trainOwl()</a></code></p></div>
+<code><a href='trainOwl.html'>trainOwl()</a></code>, <code><a href='coef.Owl.html'>coef.Owl()</a></code>, <code><a href='print.Owl.html'>print.Owl()</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -356,6 +392,8 @@ $$</p>
       <li><a href="#value">Value</a></li>
       <li><a href="#details">Details</a></li>
       <li><a href="#families">Families</a></li>
+      <li><a href="#lambda-sequences">lambda sequences</a></li>
+      <li><a href="#references">References</a></li>
       <li><a href="#see-also">See also</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>

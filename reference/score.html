@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Return the loss of a owl model — score • owl</title>
+<title>Compute one of several loss metrics on a new data set — score • owl</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,7 +42,7 @@
 
 
 
-<meta property="og:title" content="Return the loss of a owl model — score" />
+<meta property="og:title" content="Compute one of several loss metrics on a new data set — score" />
 <meta property="og:description" content="This function is a unified interface to return various types of loss for a
 model fit with owl()." />
 <meta property="og:image" content="/logo.png" />
@@ -132,7 +132,7 @@ model fit with owl()." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Return the loss of a owl model</h1>
+    <h1>Compute one of several loss metrics on a new data set</h1>
     <small class="dont-index">Source: <a href='https://github.com/jolars/owl/blob/master/R/score.R'><code>R/score.R</code></a></small>
     <div class="hidden name"><code>score.Rd</code></div>
     </div>
@@ -176,7 +176,7 @@ model fit with <code><a href='owl.html'>owl()</a></code>.</p>
       <td><p>type of target measure. The default, <code>"deviance"</code>,
 returns mean squared error for Gaussian models and deviance for
 Binomial models. <code>"mse"</code> returns mean squared error. <code>"mae"</code> returns
-mean absolute error, <code>"accuracy"</code> returns classification rate accuracy,
+mean absolute error, <code>"misclass"</code> returns misclassification rate,
 and <code>"auc"</code> returns area under the ROC curve.</p></td>
     </tr>
     </table>
