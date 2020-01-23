@@ -54,7 +54,7 @@
 #'   Statistics and Probability Letters, 33 (1997) 291-297.
 "abalone"
 
-#' Heart Disease
+#' Heart disease
 #'
 #' Diagnostic attributes of patients classified as having heart disease or not.
 #'
@@ -100,7 +100,7 @@
 #' @source <https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html#heart>
 "heart"
 
-#' Wine Cultivars
+#' Wine cultivars
 #'
 #' A data set of results from chemical analysis of wines grown in Italy
 #' from three different cultivars.
@@ -133,7 +133,7 @@
 #' @source <https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass.html#wine>
 "wine"
 
-#' Student Performance
+#' Student performance
 #'
 #' A data set of the attributes of 382 students in secondary education
 #' collected from two schools. The goal is to predict the

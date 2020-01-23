@@ -66,7 +66,7 @@ deviance ratio
 \eqn{1 - \mathrm{deviance}/\mathrm{(null-deviance)}}{1 - deviance/(null deviance)}
 is above this threshold}
 
-\item{max_variables}{criterion for stoping the path in terms of the
+\item{max_variables}{criterion for stopping the path in terms of the
 maximum number of unique, nonzero
 coefficients in absolute value in model}
 
@@ -215,5 +215,5 @@ fit <- owl(wine$x, wine$y, family = "multinomial")
 }
 \seealso{
 \code{\link[=plot.Owl]{plot.Owl()}}, \code{\link[=plotDiagnostics]{plotDiagnostics()}}, \code{\link[=score]{score()}}, \code{\link[=predict.Owl]{predict.Owl()}},
-\code{\link[=trainOwl]{trainOwl()}}, \code{\link[=coef.Owl]{coef.Owl()}}, \code{\link[=score.Owl]{score.Owl()}}, \code{\link[=print.Owl]{print.Owl()}}
+\code{\link[=trainOwl]{trainOwl()}}, \code{\link[=coef.Owl]{coef.Owl()}}, \code{\link[=print.Owl]{print.Owl()}}
 }

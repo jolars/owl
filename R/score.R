@@ -1,35 +1,4 @@
-auc <- function(y, prob, weights = rep.int(1, nrow(y))) {
-  if (is.matrix(y) || is.data.frame(y)) {
-
-    ny <- nrow(y)
-    auc(rep(c(0, 1), c(ny, ny)), c(prob,prob), as.vector(weights*y))
-
-  } else {
-
-    if (is.null(weights)) {
-      rprob <- rank(prob)
-      n1 <- sum(y)
-      n0 <- length(y) - n1
-      u <- sum(rprob[y == 1]) - n1*(n1 + 1)/2
-      exp(log(u) - log(n1) - log(n0))
-    } else {
-      # randomize ties
-      rprob <- stats::runif(length(prob))
-      op <- order(prob, rprob)
-      y <- y[op]
-      weights <- weights[op]
-      cw <- cumsum(weights)
-      w1 <- weights[y == 1]
-      cw1 <- cumsum(w1)
-      wauc <- log(sum(w1 * (cw[y == 1] - cw1)))
-      sumw1 <- cw1[length(cw1)]
-      sumw2 <- cw[length(cw)] - sumw1
-      exp(wauc - log(sumw1) - log(sumw2))
-    }
-  }
-}
-
-#' Return the loss of a owl model
+#' Compute one of several loss metrics on a new data set
 #'
 #' This function is a unified interface to return various types of loss for a
 #' model fit with [owl()].
@@ -40,7 +9,7 @@ auc <- function(y, prob, weights = rep.int(1, nrow(y))) {
 #' @param measure type of target measure. The default, `"deviance"`,
 #'   returns mean squared error for Gaussian models and deviance for
 #'   Binomial models. `"mse"` returns mean squared error. `"mae"` returns
-#'   mean absolute error, `"accuracy"` returns classification rate accuracy,
+#'   mean absolute error, `"misclass"` returns misclassification rate,
 #'   and `"auc"` returns area under the ROC curve.
 #'
 #' @return The measure along the regularization path depending on the
@@ -167,4 +136,35 @@ score.OwlPoisson <- function(object,
          deviance = apply((y_hat - y)^2, 3, mean),
          mse = apply((y_hat - y)^2, 3, mean),
          mae = apply(abs(y_hat - y), 3, mean))
+}
+
+auc <- function(y, prob, weights = rep.int(1, nrow(y))) {
+  if (is.matrix(y) || is.data.frame(y)) {
+
+    ny <- nrow(y)
+    auc(rep(c(0, 1), c(ny, ny)), c(prob,prob), as.vector(weights*y))
+
+  } else {
+
+    if (is.null(weights)) {
+      rprob <- rank(prob)
+      n1 <- sum(y)
+      n0 <- length(y) - n1
+      u <- sum(rprob[y == 1]) - n1*(n1 + 1)/2
+      exp(log(u) - log(n1) - log(n0))
+    } else {
+      # randomize ties
+      rprob <- stats::runif(length(prob))
+      op <- order(prob, rprob)
+      y <- y[op]
+      weights <- weights[op]
+      cw <- cumsum(weights)
+      w1 <- weights[y == 1]
+      cw1 <- cumsum(w1)
+      wauc <- log(sum(w1 * (cw[y == 1] - cw1)))
+      sumw1 <- cw1[length(cw1)]
+      sumw2 <- cw[length(cw)] - sumw1
+      exp(wauc - log(sumw1) - log(sumw2))
+    }
+  }
 }

@@ -32,7 +32,7 @@ randomProblem <-
   }
 
   if (rho > 0)
-    x <- x + sqrt(rho/(1 - rho)) * matrix(rnorm(n), n, p)
+    x <- x + sqrt(rho/(1 - rho)) * matrix(stats::rnorm(n), n, p)
 
   if (!is.null(n_groups)) {
     groups <- rep(seq_len(n_groups), each = ceiling(m*p/n_groups),

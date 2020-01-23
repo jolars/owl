@@ -52,7 +52,7 @@ and 0.95 confidence levels}
 }
 \description{
 This function trains a model fit by \code{\link[=owl]{owl()}} by tuning its parameters
-through the resampling method chosen by the \code{method} argument.
+through cross-validation.
 }
 \details{
 Note that by default this method matches all of the available metrics

@@ -92,7 +92,7 @@
 #'   deviance ratio
 #'   \eqn{1 - \mathrm{deviance}/\mathrm{(null-deviance)}}{1 - deviance/(null deviance)}
 #'   is above this threshold
-#' @param max_variables criterion for stoping the path in terms of the
+#' @param max_variables criterion for stopping the path in terms of the
 #'   maximum number of unique, nonzero
 #'   coefficients in absolute value in model
 #' @param tol_rel_gap stopping criterion for the duality gap
@@ -147,7 +147,7 @@
 #' @export
 #'
 #' @seealso [plot.Owl()], [plotDiagnostics()], [score()], [predict.Owl()],
-#'   [trainOwl()], [coef.Owl()], [score.Owl()], [print.Owl()]
+#'   [trainOwl()], [coef.Owl()], [print.Owl()]
 #'
 #' @examples
 #'

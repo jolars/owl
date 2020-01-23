@@ -13,7 +13,6 @@
 \method{predict}{OwlGaussian}(
   object,
   x,
-  lambda = NULL,
   sigma = NULL,
   type = c("link", "response"),
   simplify = TRUE,
@@ -23,7 +22,6 @@
 \method{predict}{OwlBinomial}(
   object,
   x,
-  lambda = NULL,
   sigma = NULL,
   type = c("link", "response", "class"),
   simplify = TRUE,

@@ -3,7 +3,7 @@
 \docType{data}
 \name{heart}
 \alias{heart}
-\title{Heart Disease}
+\title{Heart disease}
 \format{270 observations from 17 variables represented as a list consisting
 of a binary factor response vector \code{y},
 with levels 'absence' and 'presence' indicating the absence or presence of

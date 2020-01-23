@@ -1,7 +1,7 @@
 #' Train a owl model
 #'
 #' This function trains a model fit by [owl()] by tuning its parameters
-#' through the resampling method chosen by the `method` argument.
+#' through cross-validation.
 #'
 #' Note that by default this method matches all of the available metrics
 #' for the given model family against those provided in the argument

@@ -6,7 +6,7 @@
 \alias{score.OwlBinomial}
 \alias{score.OwlMultinomial}
 \alias{score.OwlPoisson}
-\title{Return the loss of a owl model}
+\title{Compute one of several loss metrics on a new data set}
 \usage{
 score(object, x, y, measure)
 
@@ -28,7 +28,7 @@ score(object, x, y, measure)
 \item{measure}{type of target measure. The default, \code{"deviance"},
 returns mean squared error for Gaussian models and deviance for
 Binomial models. \code{"mse"} returns mean squared error. \code{"mae"} returns
-mean absolute error, \code{"accuracy"} returns classification rate accuracy,
+mean absolute error, \code{"misclass"} returns misclassification rate,
 and \code{"auc"} returns area under the ROC curve.}
 }
 \value{
