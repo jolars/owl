@@ -133,20 +133,35 @@ available if \code{diagnostics = TRUE} in the call to \code{\link[=owl]{owl()}}.
 \item{call}{the call used for fitting the model}
 }
 \description{
-SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
-Unlike the latter, however, SLOPE uses a non-increasing
-sequence of \eqn{\lambda}---one
-for each coefficient. The penalty term looks like
+Fit a generalized linear model regularized with the
+SLOPE (Sorted L-One Penalized Estimation) norm, which applies a
+decreasing \eqn{\lambda} (penalty sequence) to the
+coefficient vector (\eqn{\beta}) after having sorted it
+in decreasing order according  to its absolute values.
 }
 \details{
+\code{owl()} tries to minimize the following composite objective, given
+in Lagrangian form.
 \deqn{
-  \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
+  f(\beta) + \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)},
 }{
-  \sigma \sum \lambda |\beta|(j)
+  f(\beta) + \sigma \sum \lambda |\beta|(j),
 }
+where \eqn{f(\beta)} is a smooth, convex function of \eqn{\beta}, whereas
+the second part is the SLOPE norm, which is convex but non-smooth.
+In ordinary least-squares regression, fro instance,
+\eqn{f(\beta)} is simply the squared norm of the least-squares residuals.
+See section \strong{Families} for specifics regarding the various types of
+\eqn{f(\beta)} (model families) that are allowed in \code{owl()}.
 
-The objective for each model is simply the loss function for
-each family plus a penalty term.
+By default, \code{owl()} fits a path of \code{lambda} sequences, starting from
+the null (intercept-only) model to an almost completely unregularized
+model. The path will end prematurely, however, if the criteria
+related to \emph{any} of the
+arguments \code{tol_dev_change}, \code{tol_dev_ratio}, or \code{max_variables}
+are reached before the path is complete. This means that unless these
+arguments are modified, the path is not guaranteed to be of
+length \code{n_sigma}.
 }
 \section{Families}{
 
@@ -194,6 +209,12 @@ In multinomial regression, we use the following objective.
 }
 }
 
+\section{lambda sequences}{
+
+There are multiple ways of specifying the \code{lambda} sequence
+in \code{owl()}.
+}
+
 \examples{
 
 # Gaussian response
@@ -212,6 +233,16 @@ fit <- owl(abalone$x, abalone$y, family = "poisson")
 
 fit <- owl(wine$x, wine$y, family = "multinomial")
 
+}
+\references{
+Bogdan, M., van den Berg, E., Sabatti, C., Su, W., & Candès, E. J. (2015).
+SLOPE -- adaptive variable selection via convex optimization. The Annals of
+Applied Statistics, 9(3), 1103–1140. \url{https://doi.org/10/gfgwzt}
+
+Bondell, H. D., & Reich, B. J. (2008). Simultaneous Regression Shrinkage,
+Variable Selection, and Supervised Clustering of Predictors with OSCAR.
+Biometrics, 64(1), 115–123. JSTOR.
+\url{https://doi.org/10.1111/j.1541-0420.2007.00843.x}
 }
 \seealso{
 \code{\link[=plot.Owl]{plot.Owl()}}, \code{\link[=plotDiagnostics]{plotDiagnostics()}}, \code{\link[=score]{score()}}, \code{\link[=predict.Owl]{predict.Owl()}},

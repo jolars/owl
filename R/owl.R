@@ -1,18 +1,33 @@
 #' Generalized linear models regularized with the SLOPE (OWL) norm
 #'
-#' SLOPE (Sorted L-One Penalized Estimation) is an extension of the Lasso.
-#' Unlike the latter, however, SLOPE uses a non-increasing
-#' sequence of \eqn{\lambda}---one
-#' for each coefficient. The penalty term looks like
+#' Fit a generalized linear model regularized with the
+#' SLOPE (Sorted L-One Penalized Estimation) norm, which applies a
+#' decreasing \eqn{\lambda} (penalty sequence) to the
+#' coefficient vector (\eqn{\beta}) after having sorted it
+#' in decreasing order according  to its absolute values.
 #'
+#' `owl()` tries to minimize the following composite objective, given
+#' in Lagrangian form.
 #' \deqn{
-#'   \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)}
+#'   f(\beta) + \sigma \sum_{i=j}^p \lambda_j |\beta|_{(j)},
 #' }{
-#'   \sigma \sum \lambda |\beta|(j)
+#'   f(\beta) + \sigma \sum \lambda |\beta|(j),
 #' }
+#' where \eqn{f(\beta)} is a smooth, convex function of \eqn{\beta}, whereas
+#' the second part is the SLOPE norm, which is convex but non-smooth.
+#' In ordinary least-squares regression, fro instance,
+#' \eqn{f(\beta)} is simply the squared norm of the least-squares residuals.
+#' See section **Families** for specifics regarding the various types of
+#' \eqn{f(\beta)} (model families) that are allowed in `owl()`.
 #'
-#' The objective for each model is simply the loss function for
-#' each family plus a penalty term.
+#' By default, `owl()` fits a path of `lambda` sequences, starting from
+#' the null (intercept-only) model to an almost completely unregularized
+#' model. The path will end prematurely, however, if the criteria
+#' related to *any* of the
+#' arguments `tol_dev_change`, `tol_dev_ratio`, or `max_variables`
+#' are reached before the path is complete. This means that unless these
+#' arguments are modified, the path is not guaranteed to be of
+#' length `n_sigma`.
 #'
 #' @section Families:
 #'
@@ -47,7 +62,6 @@
 #'   -\sum (y_i(x_i^T\beta + \alpha) - exp(x_i^T\beta + \alpha))
 #' }
 #'
-#'
 #' **Multinomial**
 #'
 #' In multinomial regression, we use the following objective.
@@ -58,6 +72,10 @@
 #' }{
 #'   -\sum(y_ik(x_i^T\beta_k + \alpha_k) - log(\sum exp(x_i^T\beta_k + \alpha_k)))
 #' }
+#'
+#' @section lambda sequences:
+#' There are multiple ways of specifying the `lambda` sequence
+#' in `owl()`.
 #'
 #' @param x the feature matrix, which can be either a dense
 #'   matrix of the standard *matrix* class, or a sparse matrix
@@ -148,6 +166,17 @@
 #'
 #' @seealso [plot.Owl()], [plotDiagnostics()], [score()], [predict.Owl()],
 #'   [trainOwl()], [coef.Owl()], [print.Owl()]
+#'
+#' @references
+#' Bogdan, M., van den Berg, E., Sabatti, C., Su, W., & Candès, E. J. (2015).
+#' SLOPE -- adaptive variable selection via convex optimization. The Annals of
+#' Applied Statistics, 9(3), 1103–1140. <https://doi.org/10/gfgwzt>
+#'
+#' Bondell, H. D., & Reich, B. J. (2008). Simultaneous Regression Shrinkage,
+#' Variable Selection, and Supervised Clustering of Predictors with OSCAR.
+#' Biometrics, 64(1), 115–123. JSTOR.
+#' <https://doi.org/10.1111/j.1541-0420.2007.00843.x>
+#'
 #'
 #' @examples
 #'
