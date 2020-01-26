@@ -266,21 +266,35 @@ sequence such that
 
 \examples{
 
-# Gaussian response
+# Gaussian response, default lambda sequence
 
 fit <- owl(bodyfat$x, bodyfat$y)
 
-# Binomial response
+# Binomial response, BH-type lambda sequence
 
-fit <- owl(heart$x, heart$y, family = "binomial")
+fit <- owl(heart$x, heart$y, family = "binomial", lambda = "bh")
 
-# Poisson response
+# Poisson response, OSCAR-type lambda sequence
 
-fit <- owl(abalone$x, abalone$y, family = "poisson")
+fit <- owl(abalone$x,
+           abalone$y,
+           family = "poisson",
+           lambda = "oscar",
+           q = 0.4)
 
-# Multinomial response
+# Multinomial response, custom sigma and lambda
 
-fit <- owl(wine$x, wine$y, family = "multinomial")
+m <- length(unique(wine$y)) - 1
+p <- ncol(wine$x)
+
+sigma <- 0.005
+lambda <- exp(seq(log(2), log(1.8), length.out = p*m))
+
+fit <- owl(wine$x,
+           wine$y,
+           family = "multinomial",
+           lambda = lambda,
+           sigma = sigma)
 
 }
 \references{
