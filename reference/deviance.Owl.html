@@ -162,9 +162,16 @@
 all other models, two times the negative loglikelihood is returned.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='owl.html'>owl</a></span>(<span class='no'>wine</span>$<span class='no'>x</span>, <span class='no'>wine</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"multinomial"</span>, <span class='kw'>n_sigma</span> <span class='kw'>=</span> <span class='fl'>10</span>)
-<span class='fu'><a href='https://rdrr.io/r/stats/deviance.html'>deviance</a></span>(<span class='no'>fit</span>)</div><div class='output co'>#&gt; [1] 386.6296860 173.2536977  72.8365432  32.4242273  14.9506847   6.3920267
-#&gt; [7]   2.5674595   0.9814745</div></pre>
+    <pre class="examples"><div class='input'><span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='owl.html'>owl</a></span>(<span class='no'>heart</span>$<span class='no'>x</span>, <span class='no'>heart</span>$<span class='no'>y</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>)
+<span class='fu'><a href='https://rdrr.io/r/stats/deviance.html'>deviance</a></span>(<span class='no'>fit</span>)</div><div class='output co'>#&gt;  [1] 370.9593 352.9908 333.8938 317.7167 303.8756 291.8126 281.0661 270.5324
+#&gt;  [9] 260.9091 252.4471 244.9932 238.4299 232.6748 227.6071 222.8242 217.4378
+#&gt; [17] 212.5163 207.8711 203.7203 199.6878 196.2031 192.9188 189.9912 187.4567
+#&gt; [25] 185.2710 183.2485 181.5044 179.9265 178.5430 177.3053 176.1985 175.2377
+#&gt; [33] 174.4021 173.6924 173.0818 172.5474 172.0739 171.6674 171.2815 170.9316
+#&gt; [41] 170.6394 170.3815 170.1597 169.9700 169.8087 169.6730 169.5569 169.4587
+#&gt; [49] 169.3712 169.2973 169.2350 169.1812 169.1352 169.0959 169.0633 169.0359
+#&gt; [57] 169.0128 168.9936 168.9775 168.9640 168.9527 168.9433 168.9354 168.9289
+#&gt; [65] 168.9234 168.9189 168.9150 168.9119 168.9092 168.9070 168.9052 168.9037</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
