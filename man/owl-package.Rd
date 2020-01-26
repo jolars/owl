@@ -18,7 +18,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Johan Larsson \email{mail@larssonjohan.com} (\href{https://orcid.org/0000-0002-4029-5945}{ORCID})
+\strong{Maintainer}: Johan Larsson \email{johan.larsson@stat.lu.se} (\href{https://orcid.org/0000-0002-4029-5945}{ORCID})
 
 Other contributors:
 \itemize{
