@@ -28,7 +28,7 @@ void regularizationPath(vec& sigma,
   const uword n_lambda = lambda.n_elem;
   const uword n_sigma = sigma.n_elem;
 
-  if (lambda_type == "gaussian" || lambda_type == "bhq") {
+  if (lambda_type == "gaussian" || lambda_type == "bh") {
     lambda = regspace(1, n_lambda)*q/(2*n_lambda);
 
     lambda.transform([](double val) {

@@ -15,7 +15,7 @@
 #' }
 #' where \eqn{f(\beta)} is a smooth, convex function of \eqn{\beta}, whereas
 #' the second part is the SLOPE norm, which is convex but non-smooth.
-#' In ordinary least-squares regression, fro instance,
+#' In ordinary least-squares regression, for instance,
 #' \eqn{f(\beta)} is simply the squared norm of the least-squares residuals.
 #' See section **Families** for specifics regarding the various types of
 #' \eqn{f(\beta)} (model families) that are allowed in `owl()`.
@@ -35,22 +35,19 @@
 #'
 #' The Gaussian model (Ordinary Least Squares) minimizes the following
 #' objective.
-#'
 #' \deqn{
-#'   ||y - X\beta||_2^2
-#' }{
 #'   ||y - X\beta||_2^2
 #' }
 #'
 #' **Binomial**
 #'
 #' The binomial model (logistic regression) has the following objective.
-#'
 #' \deqn{
 #'   \sum_{i=1}^n \log\left(1+ \exp\left(- y_i \left(x_i^T\beta + \alpha \right) \right) \right)
 #' }{
 #'   \sum log(1+ exp(- y_i x_i^T \beta))
 #' }
+#' with \eqn{y \in \{-1, 1\}}{y in {-1, 1}}.
 #'
 #' **Poisson**
 #'
@@ -64,18 +61,70 @@
 #'
 #' **Multinomial**
 #'
-#' In multinomial regression, we use the following objective.
-#'
+#' In multinomial regression, we minimize the full-rank objective
 #' \deqn{
-#'   -\sum_{i=1}^n\left( \sum_{k=1}^m y_{ik}(x_i^T\beta_k + \alpha_k)
-#'                      - \log\sum_{k=1}^m \exp(x_i^T\beta_k + \alpha_k) \right)
+#'   -\sum_{i=1}^n\left( \sum_{k=1}^{m-1} y_{ik}(x_i^T\beta_k + \alpha_k)
+#'                      - \log\sum_{k=1}^{m-1} \exp(x_i^T\beta_k + \alpha_k) \right)
 #' }{
 #'   -\sum(y_ik(x_i^T\beta_k + \alpha_k) - log(\sum exp(x_i^T\beta_k + \alpha_k)))
 #' }
+#' with \eqn{y_{ik}} being the element in a \eqn{n} by \eqn{(m-1)} matrix, where
+#' \eqn{m} is the number of classes in the response.
 #'
-#' @section lambda sequences:
+#' @section Regularization sequences:
 #' There are multiple ways of specifying the `lambda` sequence
-#' in `owl()`.
+#' in `owl()`. It is, first of all, possible to select the sequence manually by
+#' using a non-increasing
+#' numeric vector as argument instead of a character.
+#' If all `lambda` are the same value, this will
+#' lead to the ordinary lasso penalty. The greater the differences are between
+#' consecutive values along the sequence, the more clustering behavior
+#' will the model exhibit. Note, also, that the scale of the \eqn{\lambda}
+#' vector makes no difference if `sigma = NULL`, since `sigma` will be
+#' selected automatically to ensure that the model is completely sparse at the
+#' beginning and almost unregularized at the end. If, however, both
+#' `sigma` and `lambda` are manually specified, both of the scales will
+#' matter.
+#'
+#' Instead of choosing the sequence manually, one of the following
+#' automatically generated sequences may be chosen.
+#'
+#' **BH (Benjamini--Hochberg)**
+#'
+#' If `lambda = "bh"`, the sequence used is that referred to
+#' as \eqn{\lambda^{(\mathrm{BH})}}{\lambda^(BH)} by Bogdan et al, which sets
+#' \eqn{\lambda} according to
+#' \deqn{
+#'   \lambda_i = \Phi^{-1}(1 - iq/(2p)),
+#' }{
+#'   \lambda_i = \Phi^-1(1 - iq/(2p)),
+#' }
+#' where \eqn{\Phi^{-1}}{\Phi^-1} is the quantile function for the standard
+#' normal distribution and \eqn{q} is a parameter that can be
+#' set by the user in the call to `owl()`.
+#'
+#' **Gaussian**
+#'
+#' This penalty sequence is related to BH, such that
+#' \deqn{
+#'   \lambda_i = \lambda^{(\mathrm{BH})}_i \sqrt{1 + w(i-1)\cdot \mathrm{cumsum}(\lambda^2)_i},
+#' }{
+#'   \lambda_i = \lambda^(BH)_i \sqrt{1 + w(i-1) * cumsum(\lambda^2)_i},
+#' }
+#' where \eqn{w(k) = 1/(n-k-1)}. We let
+#' \eqn{\lambda_1 = \lambda^{(\mathrm{BH})}_1}{\lambda_1 = \lambda^(BH)_1} and
+#' adjust the sequence to make sure that it's non-increasing.
+#' Note that if \eqn{p} is large relative
+#' to \eqn{n}, this option will result in a constant sequence, which is
+#' usually not what you would want.
+#'
+#' **OSCAR**
+#'
+#' This sequence comes from Bondell and Reich and is a linearly non-increasing
+#' sequence such that
+#' \deqn{
+#'   \lambda_i = q(p - i) + 1.
+#' }
 #'
 #' @param x the feature matrix, which can be either a dense
 #'   matrix of the standard *matrix* class, or a sparse matrix
@@ -202,7 +251,7 @@ owl <- function(x,
                 intercept = TRUE,
                 standardize_features = TRUE,
                 sigma = NULL,
-                lambda = c("gaussian", "bhq", "oscar"),
+                lambda = c("gaussian", "bh", "oscar"),
                 lambda_min_ratio = if (n < p) 1e-2 else 1e-4,
                 n_sigma = 100,
                 q = 0.1*min(1, n/p),
@@ -297,7 +346,7 @@ owl <- function(x,
   n_lambda <- m*p
 
   if (is.null(lambda)) {
-    lambda_type <- "bhq"
+    lambda_type <- "bh"
     lambda <- double(n_lambda)
   } else if (is.character(lambda)) {
     lambda_type <- match.arg(lambda)

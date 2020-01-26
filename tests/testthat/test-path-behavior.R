@@ -7,7 +7,7 @@ test_that("regularization path correctly stops if max_variables reached", {
              family = "binomial",
              max_variables = 10,
              intercept = FALSE,
-             lambda = "bhq",
+             lambda = "bh",
              standardize_features = FALSE)
 
   n_var <- max(apply(coef(fit), 2, function(x) {
