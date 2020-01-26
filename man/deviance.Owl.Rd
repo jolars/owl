@@ -19,6 +19,6 @@ all other models, two times the negative loglikelihood is returned.
 Model deviance
 }
 \examples{
-fit <- owl(wine$x, wine$y, family = "multinomial", n_sigma = 10)
+fit <- owl(heart$x, heart$y, family = "binomial")
 deviance(fit)
 }

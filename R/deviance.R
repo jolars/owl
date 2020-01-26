@@ -8,7 +8,7 @@
 #' @export
 #'
 #' @examples
-#' fit <- owl(wine$x, wine$y, family = "multinomial", n_sigma = 10)
+#' fit <- owl(heart$x, heart$y, family = "binomial")
 #' deviance(fit)
 deviance.Owl <- function(object, ...) {
   deviance_ratio <- object$deviance_ratio
