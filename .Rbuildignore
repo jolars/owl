@@ -11,3 +11,4 @@
 ^owl\.Rproj$
 ^\.Rproj\.user$
 ^pkgdown$
+^cran-comments\.md$
