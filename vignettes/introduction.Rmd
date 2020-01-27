@@ -61,13 +61,13 @@ the more clustering behavior SLOPE exhibits.
 
 In the following example, we will use the heart data set, for which the
 response is a cardiac event. (The package contains several data sets 
-to examplify modelling. Please see the examples in `owl()`.) The main
+to exemplify modeling. Please see the examples in `owl()`.) The main
 function of the package is `owl()`, which, more or less, serves as an
 interface for code written in C++. There are many arguments in the 
 function and most of them relate to either the construction of the 
 regularization path or the penalty ($\lambda$) sequence used. Here we
 will use the option `lambda = "bh"`, which used the BH method detailed
-in @bogdan2015 to select the sequence. (Note that it is also posssible
+in @bogdan2015 to select the sequence. (Note that it is also possible
 to manually insert a sequence.)
 
 ```{r}
@@ -123,7 +123,7 @@ tune
 ```
 
 
-## False disovery rate
+## False discovery rate
 
 Under assumptions of orthonormality, SLOPE has been shown to control
 false discovery rate (FDR) of non-zero coefficients (feature weights)
@@ -132,8 +132,8 @@ Benjamini--Hochberg procedure for multiple comparisons.
 
 Let's set up a simple experiment to see how SLOPE controls the FDR.
 We randomly generate data sets with various proportions of
-true signals. Under this gaussian design with indetically
-and independently distributed columns in $X$, SLOPE should asymptotically
+true signals. Under this gaussian design with independently and identically
+distributed columns in $X$, SLOPE should asymptotically
 control FDR at the level given by the shape parameter $q$, which
 we set to 0.1 in this example.
 
