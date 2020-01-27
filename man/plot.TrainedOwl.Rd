@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{TrainedOwl}(
   x,
-  measure = x$measure$measure[1],
+  measure = c("auto", "mse", "mae", "deviance", "auc", "misclass"),
   plot_min = TRUE,
   ci_alpha = 0.2,
   ci_border = FALSE,
@@ -18,7 +18,10 @@
 \item{x}{an object of class \code{'TrainedOwl'}, typically from a call
 to \code{\link[=trainOwl]{trainOwl()}}}
 
-\item{measure}{any of the measures used in the call to \code{\link[=trainOwl]{trainOwl()}}}
+\item{measure}{any of the measures used in the call to \code{\link[=trainOwl]{trainOwl()}}. If
+\code{measure = "auto"} then deviance will be used for binomial and multinomial
+models, whilst mean-squared error will be used for Gaussian and Poisson
+models.}
 
 \item{plot_min}{whether to mark the location of the penalty corresponding
 to the best prediction score}
@@ -45,9 +48,9 @@ Plot results from cross-validation
 # Cross-validation for a SLOPE binomial model
 set.seed(123)
 tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
-                   mtcars$hp,
-                   q = c(0.1, 0.2),
-                   number = 10)
+                 mtcars$hp,
+                 q = c(0.1, 0.2),
+                 number = 10)
 plot(tune, ci_col = "salmon", col = "black")
 }
 \seealso{

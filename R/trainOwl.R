@@ -37,18 +37,18 @@
 #' @examples
 #' # 8-fold cross-validation repeated 5 times
 #' tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
-#'                    mtcars$hp,
-#'                    q = c(0.1, 0.2),
-#'                    number = 8,
-#'                    repeats = 5)
+#'                  mtcars$hp,
+#'                  q = c(0.1, 0.2),
+#'                  number = 8,
+#'                  repeats = 5)
 trainOwl <- function(x,
                      y,
                      q = 0.2,
                      number = 10,
                      repeats = 1,
-                     measure = c("deviance",
-                                 "mse",
+                     measure = c("mse",
                                  "mae",
+                                 "deviance",
                                  "missclass",
                                  "auc"),
                      cl = NULL,
@@ -72,10 +72,10 @@ trainOwl <- function(x,
   family <- fit$family
 
   ok <- switch(family,
-               gaussian = c("deviance", "mse", "mae"),
-               binomial = c("deviance", "mse", "mae", "misclass", "auc"),
-               poisson = c("deviance", "mse", "mae"),
-               multinomial = c("deviance", "mse", "mae"))
+               gaussian = c("mse", "mae"),
+               binomial = c("mse", "mae", "deviance", "misclass", "auc"),
+               poisson = c("mse", "mae"),
+               multinomial = c("mse", "mae", "deviance"))
   measure <- measure[measure %in% ok]
 
   if (length(measure) == 0)
@@ -160,8 +160,10 @@ trainOwl <- function(x,
                         lo = lo,
                         hi = hi)
 
-  best <- tapply(summary$mean, list(as.factor(summary$measure)), which.min)
-  optima <- summary[best, ]
+  optima <- do.call(
+    rbind,
+    by(summary, as.factor(summary$measure), function(x) x[which.min(x$mean), ])
+  )
 
   labels <- vapply(measure, function(m) {
     switch(
@@ -182,6 +184,9 @@ trainOwl <- function(x,
       auc = "AUC"
     )
   }, FUN.VALUE = character(1))
+
+  rownames(summary) <- NULL
+  rownames(optima) <- NULL
 
   structure(list(summary = summary,
                  data = d,

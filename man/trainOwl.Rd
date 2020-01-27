@@ -10,7 +10,7 @@ trainOwl(
   q = 0.2,
   number = 10,
   repeats = 1,
-  measure = c("deviance", "mse", "mae", "missclass", "auc"),
+  measure = c("mse", "mae", "deviance", "missclass", "auc"),
   cl = NULL,
   ...
 )
@@ -65,10 +65,10 @@ to \code{\link[=plot.TrainedOwl]{plot.TrainedOwl()}}.
 \examples{
 # 8-fold cross-validation repeated 5 times
 tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
-                   mtcars$hp,
-                   q = c(0.1, 0.2),
-                   number = 8,
-                   repeats = 5)
+                 mtcars$hp,
+                 q = c(0.1, 0.2),
+                 number = 8,
+                 repeats = 5)
 }
 \seealso{
 \link[parallel:parallel]{parallel::parallel}, \code{\link[=plot.TrainedOwl]{plot.TrainedOwl()}}

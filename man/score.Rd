@@ -10,13 +10,13 @@
 \usage{
 score(object, x, y, measure)
 
-\method{score}{OwlGaussian}(object, x, y, measure = c("deviance", "mse", "mae"))
+\method{score}{OwlGaussian}(object, x, y, measure = c("mse", "mae"))
 
-\method{score}{OwlBinomial}(object, x, y, measure = c("deviance", "mse", "mae", "misclass", "auc"))
+\method{score}{OwlBinomial}(object, x, y, measure = c("mse", "mae", "deviance", "misclass", "auc"))
 
-\method{score}{OwlMultinomial}(object, x, y, measure = c("deviance", "mse", "mae", "misclass"))
+\method{score}{OwlMultinomial}(object, x, y, measure = c("mse", "mae", "deviance", "misclass"))
 
-\method{score}{OwlPoisson}(object, x, y, measure = c("deviance", "mse", "mae"))
+\method{score}{OwlPoisson}(object, x, y, measure = c("mse", "mae"))
 }
 \arguments{
 \item{object}{an object of class \code{"Owl"}}
@@ -25,11 +25,9 @@ score(object, x, y, measure)
 
 \item{y}{response}
 
-\item{measure}{type of target measure. The default, \code{"deviance"},
-returns mean squared error for Gaussian models and deviance for
-Binomial models. \code{"mse"} returns mean squared error. \code{"mae"} returns
-mean absolute error, \code{"misclass"} returns misclassification rate,
-and \code{"auc"} returns area under the ROC curve.}
+\item{measure}{type of target measure. \code{"mse"} returns mean squared error.
+\code{"mae"} returns mean absolute error, \code{"misclass"} returns
+misclassification rate, and \code{"auc"} returns area under the ROC curve.}
 }
 \value{
 The measure along the regularization path depending on the

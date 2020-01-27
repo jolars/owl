@@ -6,11 +6,9 @@
 #' @param object an object of class `"Owl"`
 #' @param x feature matrix
 #' @param y response
-#' @param measure type of target measure. The default, `"deviance"`,
-#'   returns mean squared error for Gaussian models and deviance for
-#'   Binomial models. `"mse"` returns mean squared error. `"mae"` returns
-#'   mean absolute error, `"misclass"` returns misclassification rate,
-#'   and `"auc"` returns area under the ROC curve.
+#' @param measure type of target measure. `"mse"` returns mean squared error.
+#'   `"mae"` returns mean absolute error, `"misclass"` returns
+#'   misclassification rate, and `"auc"` returns area under the ROC curve.
 #'
 #' @return The measure along the regularization path depending on the
 #'   value in `measure`.
@@ -31,14 +29,13 @@ score <- function(object, x, y, measure)
 score.OwlGaussian <- function(object,
                               x,
                               y,
-                              measure = c("deviance", "mse", "mae")) {
+                              measure = c("mse", "mae")) {
   measure <- match.arg(measure)
 
   y <- as.vector(y)
   y_hat <- stats::predict(object, x, simplify = FALSE)
 
   switch(measure,
-         deviance = apply((y_hat - y)^2, 3, mean),
          mse = apply((y_hat - y)^2, 3, mean),
          mae = apply(abs(y_hat - y), 3, mean))
 }
@@ -48,9 +45,9 @@ score.OwlGaussian <- function(object,
 score.OwlBinomial <- function(object,
                               x,
                               y,
-                              measure = c("deviance",
-                                          "mse",
+                              measure = c("mse",
                                           "mae",
+                                          "deviance",
                                           "misclass",
                                           "auc")) {
   measure <- match.arg(measure)
@@ -85,9 +82,9 @@ score.OwlBinomial <- function(object,
 score.OwlMultinomial <- function(object,
                                  x,
                                  y,
-                                 measure = c("deviance",
-                                             "mse",
+                                 measure = c("mse",
                                              "mae",
+                                             "deviance",
                                              "misclass")) {
   measure <- match.arg(measure)
 
@@ -125,7 +122,7 @@ score.OwlMultinomial <- function(object,
 score.OwlPoisson <- function(object,
                              x,
                              y,
-                             measure = c("deviance", "mse", "mae")) {
+                             measure = c("mse", "mae")) {
 
   measure <- match.arg(measure)
 
@@ -133,7 +130,6 @@ score.OwlPoisson <- function(object,
   y_hat <- stats::predict(object, x, simplify = FALSE)
 
   switch(measure,
-         deviance = apply((y_hat - y)^2, 3, mean),
          mse = apply((y_hat - y)^2, 3, mean),
          mae = apply(abs(y_hat - y), 3, mean))
 }
