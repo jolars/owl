@@ -13,7 +13,14 @@ status](https://ci.appveyor.com/api/projects/status/github/jolars/owl?branch=mas
 status](https://codecov.io/gh/jolars/owl/branch/master/graph/badge.svg)](https://codecov.io/github/jolars/owl?branch=master)
 <!-- badges: end -->
 
-Fast glms for big data
+Efficient implementations for Sorted L-One Penalized Estimation (SLOPE):
+generalized linear models regularized with the sorted L1-norm or,
+equivalently, ordered weighted L1-norm (OWL). There is support for
+ordinary least-squares regression, binomial regression, multinomial
+regression, and poisson regression, as well as both dense and sparse
+predictor matrices. In addition, the package features predictor
+screening rules that enable efficient solutions to high-dimensional
+problems.
 
 ## Installation
 
@@ -24,6 +31,15 @@ You can install the development version from
 # install.packages("remotes")
 remotes::install_github("jolars/owl")
 ```
+
+## License
+
+owl is open source software, licensed under
+[GPL-3](https://github.com/jolars/owl/blob/master/LICENSE).
+
+## Versioning
+
+owl uses [semantic versioning](http://semver.org).
 
 ## Code of conduct
 
