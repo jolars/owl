@@ -29,7 +29,7 @@ Useful links:
 
 Other contributors:
 \itemize{
-  \item Jonas Wallin \email{jonas.wallin@stat.lu.se} [contributor]
+  \item Jonas Wallin \email{jonas.wallin@stat.lu.se} (\href{https://orcid.org/0000-0003-0381-6593}{ORCID}) [contributor]
   \item Malgorzata Bogdan (code adapted from 'SLOPE') [contributor, copyright holder]
   \item Ewout van den Berg (code adapted from 'SLOPE') [contributor, copyright holder]
   \item Chiara Sabatti (code adapted from 'SLOPE') [contributor]
