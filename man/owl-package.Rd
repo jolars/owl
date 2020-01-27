@@ -19,6 +19,7 @@ Efficient implementations for Sorted L-One Penalized Estimation
 Useful links:
 \itemize{
   \item \url{https://github.com/jolars/owl}
+  \item \url{https://jolars.github.io/owl}
   \item Report bugs at \url{https://github.com/jolars/owl/issues}
 }
 
@@ -28,14 +29,13 @@ Useful links:
 
 Other contributors:
 \itemize{
-  \item Malgorzata Bogdan (code adapted from SLOPE and grpSLOPE) [contributor, copyright holder]
-  \item Ewout van den Berg (code adapted from SLOPE) [contributor, copyright holder]
-  \item Chiara Sabatti (code adapted from SLOPE) [contributor]
-  \item Emmanuel Candes (code adapted from SLOPE) [contributor, copyright holder]
-  \item Evan Patterson (code adapted from SLOPE) [contributor]
-  \item Weijie Su (code adapted from SLOPE and grpSLOPE) [contributor, copyright holder]
-  \item Damian Brzyski (code adapted from grpSLOPE) [contributor, copyright holder]
-  \item Alexej Gossmann (code adapted from grpSLOPE) [contributor, copyright holder]
+  \item Jonas Wallin \email{jonas.wallin@stat.lu.se} [contributor]
+  \item Malgorzata Bogdan (code adapted from 'SLOPE') [contributor, copyright holder]
+  \item Ewout van den Berg (code adapted from 'SLOPE') [contributor, copyright holder]
+  \item Chiara Sabatti (code adapted from 'SLOPE') [contributor]
+  \item Emmanuel Candes (code adapted from 'SLOPE') [contributor, copyright holder]
+  \item Evan Patterson (code adapted from 'SLOPE') [contributor]
+  \item Weijie Su (code adapted from 'SLOPE') [contributor, copyright holder]
 }
 
 }

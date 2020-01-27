@@ -7,38 +7,34 @@ Authors@R:
              role = c("aut", "cre"),
              email = "johan.larsson@stat.lu.se",
              comment = c(ORCID = "0000-0002-4029-5945")),
+      person("Jonas", 
+             "Wallin",
+             role = "ctb",
+             email = "jonas.wallin@stat.lu.se"),
       person("Malgorzata",
              "Bogdan",
              role = c("ctb", "cph"),
-             comment = "code adapted from SLOPE and grpSLOPE"),
+             comment = "code adapted from 'SLOPE'"),
       person("Ewout",
              "van den Berg",
              role = c("ctb", "cph"),
-             comment = "code adapted from SLOPE"),
+             comment = "code adapted from 'SLOPE'"),
       person("Chiara",
              "Sabatti",
-             role = c("ctb"),
-             comment = "code adapted from SLOPE"),
+             role = "ctb",
+             comment = "code adapted from 'SLOPE'"),
       person("Emmanuel",
              "Candes",
              role = c("ctb", "cph"),
-             comment = "code adapted from SLOPE"),
+             comment = "code adapted from 'SLOPE'"),
       person("Evan",
              "Patterson",
-             role = c("ctb"),
-             comment = "code adapted from SLOPE"),
+             role = "ctb",
+             comment = "code adapted from 'SLOPE'"),
       person("Weijie",
              "Su",
              role = c("ctb", "cph"),
-             comment = "code adapted from SLOPE and grpSLOPE"),
-      person("Damian",
-             "Brzyski",
-             role = c("ctb", "cph"),
-             comment = "code adapted from grpSLOPE"),
-      person("Alexej",
-             "Gossmann",
-             role = c("ctb", "cph"),
-             comment = "code adapted from grpSLOPE"))
+             comment = "code adapted from 'SLOPE'"))
 Description: Efficient implementations for Sorted L-One Penalized Estimation
     (SLOPE): generalized linear models regularized with the sorted L1-norm
     or, equivalently, ordered weighted L1-norm (OWL). Supported models include
@@ -63,7 +59,6 @@ Suggests:
     caret,
     covr,
     glmnet,
-    grpSLOPE,
     knitr,
     rmarkdown,
     SLOPE,
@@ -73,6 +68,6 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.0.2
 Language: en-US
 Encoding: UTF-8
-URL: https://github.com/jolars/owl
+URL: https://github.com/jolars/owl, https://jolars.github.io/owl
 BugReports: https://github.com/jolars/owl/issues
 VignetteBuilder: knitr
