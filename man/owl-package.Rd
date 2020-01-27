@@ -4,10 +4,15 @@
 \name{owl-package}
 \alias{owl-package}
 \alias{_PACKAGE}
-\title{owl: Generalized Linear Models for Big Data}
+\title{owl: Generalized Linear Models Regularized with the Sorted L1-Norm}
 \description{
-Fast implementations of penalized Generalized Linear Models (GLM)
-    suited to big data.
+Efficient implementations for Sorted L-One Penalized Estimation
+    (SLOPE): generalized linear models regularized with the sorted L1-norm
+    or, equivalently, ordered weighted L1-norm (OWL). There is support for
+    ordinary least-squares regression, binomial regression, multinomial
+    regression, and poisson regression, as well as both dense and sparse 
+    predictor matrices. In addition, the package features predictor screening
+    rules that enable efficient solutions to high-dimensional problems.
 }
 \seealso{
 Useful links:

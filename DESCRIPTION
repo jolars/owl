@@ -1,5 +1,5 @@
 Package: owl
-Title: Generalized Linear Models for Big Data
+Title: Generalized Linear Models Regularized with the Sorted L1-Norm
 Version: 0.0.0.9000
 Authors@R: 
     c(person("Johan",
@@ -39,8 +39,13 @@ Authors@R:
              "Gossmann",
              role = c("ctb", "cph"),
              comment = "code adapted from grpSLOPE"))
-Description: Fast implementations of penalized Generalized Linear Models (GLM)
-    suited to big data.
+Description: Efficient implementations for Sorted L-One Penalized Estimation
+    (SLOPE): generalized linear models regularized with the sorted L1-norm
+    or, equivalently, ordered weighted L1-norm (OWL). There is support for
+    ordinary least-squares regression, binomial regression, multinomial
+    regression, and poisson regression, as well as both dense and sparse 
+    predictor matrices. In addition, the package features predictor screening
+    rules that enable efficient solutions to high-dimensional problems.
 License: GPL-3
 LazyData: true
 Depends:
