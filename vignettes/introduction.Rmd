@@ -135,9 +135,9 @@ We randomly generate data sets with various proportions of
 true signals. Under this gaussian design with indetically
 and independently distributed columns in $X$, SLOPE should asymptotically
 control FDR at the level given by the shape parameter $q$, which
-we set to 0.2 in this example.
+we set to 0.1 in this example.
 
-```{r, fig.cap = "Control of false discovery rate using SLOPE."}
+```{r, fig.cap = "Control of false discovery rate using SLOPE.", fig.width = 4}
 # proportion of real signals
 q <- seq(0.05, 0.5, length.out = 20)
 fdr <- double(length(q))
@@ -156,11 +156,10 @@ for (i in seq_along(q)) {
   fit <- owl(x,
              y,
              lambda = "gaussian",
-             q = 0.2,
-             sigma = sigma,
-             intercept = FALSE)
+             q = 0.1,
+             sigma = sigma)
   
-  selected_owl <- which(abs(coef(fit)) > 0)
+  selected_owl <- which(fit$nonzeros)
   V <- length(setdiff(selected_owl, signals))
   R <- length(selected_owl)
   fdr[i] <- V/R
@@ -169,12 +168,11 @@ for (i in seq_along(q)) {
 library(lattice)
 xyplot(fdr ~ q, type = "b", ylab = "FDR",
        panel = function(...) {
-         panel.refline(h = 0.2)
+         panel.refline(h = 0.1)
          panel.xyplot(...)
        })
 ```
 
-SLOPE seems to accomplish its target very well, although it is too conservative
-when the number of true signals is high.
+SLOPE seems to control FDR at roughly the specified level.
 
 ## References
