@@ -123,7 +123,7 @@ J(\beta; \sigma,\lambda) = \sigma \sum_{j=1}^p \lambda_j \lvert \beta \rvert_{(j
 <div id="an-example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#an-example" class="anchor"></a>An example</h2>
-<p>In the following example, we will use the heart data set, for which the response is a cardiac event. (The package contains several data sets to examplify modelling. Please see the examples in <code><a href="../reference/owl.html">owl()</a></code>.) The main function of the package is <code><a href="../reference/owl.html">owl()</a></code>, which, more or less, serves as an interface for code written in C++. There are many arguments in the function and most of them relate to either the construction of the regularization path or the penalty (<span class="math inline">\(\lambda\)</span>) sequence used. Here we will use the option <code>lambda = "bh"</code>, which used the BH method detailed in <span class="citation">Bogdan et al. (2015)</span> to select the sequence. (Note that it is also posssible to manually insert a sequence.)</p>
+<p>In the following example, we will use the heart data set, for which the response is a cardiac event. (The package contains several data sets to exemplify modeling. Please see the examples in <code><a href="../reference/owl.html">owl()</a></code>.) The main function of the package is <code><a href="../reference/owl.html">owl()</a></code>, which, more or less, serves as an interface for code written in C++. There are many arguments in the function and most of them relate to either the construction of the regularization path or the penalty (<span class="math inline">\(\lambda\)</span>) sequence used. Here we will use the option <code>lambda = "bh"</code>, which used the BH method detailed in <span class="citation">Bogdan et al. (2015)</span> to select the sequence. (Note that it is also possible to manually insert a sequence.)</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(owl)</a>
 <a class="sourceLine" id="cb1-2" data-line-number="2"></a>
 <a class="sourceLine" id="cb1-3" data-line-number="3">x &lt;-<span class="st"> </span>heart<span class="op">$</span>x</a>
@@ -170,11 +170,11 @@ Model tuning results from Gaussian SLOPE on the bodyfat dataset.
 <a class="sourceLine" id="cb5-8" data-line-number="8"><span class="co">#&gt; 1 0.2 0.2921868     mae  3.631942 0.08095267  3.466376  3.797509</span></a>
 <a class="sourceLine" id="cb5-9" data-line-number="9"><span class="co">#&gt; 2 0.2 0.2210286     mse 19.910971 0.86685852 18.138046 21.683895</span></a></code></pre></div>
 </div>
-<div id="false-disovery-rate" class="section level2">
+<div id="false-discovery-rate" class="section level2">
 <h2 class="hasAnchor">
-<a href="#false-disovery-rate" class="anchor"></a>False disovery rate</h2>
+<a href="#false-discovery-rate" class="anchor"></a>False discovery rate</h2>
 <p>Under assumptions of orthonormality, SLOPE has been shown to control false discovery rate (FDR) of non-zero coefficients (feature weights) in the model <span class="citation">(Bogdan et al. 2015)</span>. It is in many ways analogous to the Benjamini–Hochberg procedure for multiple comparisons.</p>
-<p>Let’s set up a simple experiment to see how SLOPE controls the FDR. We randomly generate data sets with various proportions of true signals. Under this gaussian design with indetically and independently distributed columns in <span class="math inline">\(X\)</span>, SLOPE should asymptotically control FDR at the level given by the shape parameter <span class="math inline">\(q\)</span>, which we set to 0.1 in this example.</p>
+<p>Let’s set up a simple experiment to see how SLOPE controls the FDR. We randomly generate data sets with various proportions of true signals. Under this gaussian design with independently and identically distributed columns in <span class="math inline">\(X\)</span>, SLOPE should asymptotically control FDR at the level given by the shape parameter <span class="math inline">\(q\)</span>, which we set to 0.1 in this example.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># proportion of real signals</span></a>
 <a class="sourceLine" id="cb6-2" data-line-number="2">q &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/seq.html">seq</a></span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="dt">length.out =</span> <span class="dv">20</span>)</a>
 <a class="sourceLine" id="cb6-3" data-line-number="3">fdr &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/double.html">double</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(q))</a>
@@ -244,7 +244,7 @@ Control of false discovery rate using SLOPE.
 <li><a href="#background">Background</a></li>
       <li><a href="#an-example">An example</a></li>
       <li><a href="#cross-validation">Cross-validation</a></li>
-      <li><a href="#false-disovery-rate">False disovery rate</a></li>
+      <li><a href="#false-discovery-rate">False discovery rate</a></li>
       <li><a href="#references">References</a></li>
       </ul>
 </div>
