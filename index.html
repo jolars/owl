@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generalized Linear Models for Big Data • owl</title>
+<title>Generalized Linear Models Regularized with the Sorted L1-Norm • owl</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
@@ -16,9 +16,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Generalized Linear Models for Big Data">
-<meta property="og:description" content="Fast implementations of penalized Generalized Linear Models (GLM)
-    suited to big data.">
+<script src="pkgdown.js"></script><meta property="og:title" content="Generalized Linear Models Regularized with the Sorted L1-Norm">
+<meta property="og:description" content="Efficient implementations for Sorted L-One Penalized Estimation
+    (SLOPE): generalized linear models regularized with the sorted L1-norm
+    or, equivalently, ordered weighted L1-norm (OWL). There is support for
+    ordinary least-squares regression, binomial regression, multinomial
+    regression, and poisson regression, as well as both dense and sparse 
+    predictor matrices. In addition, the package features predictor screening
+    rules that enable efficient solutions to high-dimensional problems.">
 <meta property="og:image" content="/logo.png">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -62,10 +67,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/benchmarks.html">Benchmarks</a>
-    </li>
-    <li>
-      <a href="articles/penalties.html">Regularization penalties in owl</a>
+      <a href="articles/introduction.html">An introduction to owl</a>
     </li>
   </ul>
 </li>
@@ -98,13 +100,23 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>Fast glms for big data</p>
+<p>Efficient implementations for Sorted L-One Penalized Estimation (SLOPE): generalized linear models regularized with the sorted L1-norm or, equivalently, ordered weighted L1-norm (OWL). There is support for ordinary least-squares regression, binomial regression, multinomial regression, and poisson regression, as well as both dense and sparse predictor matrices. In addition, the package features predictor screening rules that enable efficient solutions to high-dimensional problems.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p>You can install the development version from <a href="https://github.com/">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># install.packages("remotes")</span></a>
 <a class="sourceLine" id="cb1-2" data-line-number="2">remotes<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/remotes/man/install_github.html">install_github</a></span>(<span class="st">"jolars/owl"</span>)</a></code></pre></div>
+</div>
+<div id="license" class="section level2">
+<h2 class="hasAnchor">
+<a href="#license" class="anchor"></a>License</h2>
+<p>owl is open source software, licensed under <a href="https://github.com/jolars/owl/blob/master/LICENSE">GPL-3</a>.</p>
+</div>
+<div id="versioning" class="section level2">
+<h2 class="hasAnchor">
+<a href="#versioning" class="anchor"></a>Versioning</h2>
+<p>owl uses <a href="http://semver.org">semantic versioning</a>.</p>
 </div>
 <div id="code-of-conduct" class="section level2">
 <h2 class="hasAnchor">

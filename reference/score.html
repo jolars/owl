@@ -101,10 +101,7 @@ model fit with owl()." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/benchmarks.html">Benchmarks</a>
-    </li>
-    <li>
-      <a href="../articles/penalties.html">Regularization penalties in owl</a>
+      <a href="../articles/introduction.html">An introduction to owl</a>
     </li>
   </ul>
 </li>
@@ -145,16 +142,16 @@ model fit with <code><a href='owl.html'>owl()</a></code>.</p>
     <pre class="usage"><span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='no'>measure</span>)
 
 <span class='co'># S3 method for OwlGaussian</span>
-<span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>))
+<span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"mse"</span>, <span class='st'>"mae"</span>))
 
 <span class='co'># S3 method for OwlBinomial</span>
-<span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"misclass"</span>, <span class='st'>"auc"</span>))
+<span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"deviance"</span>, <span class='st'>"misclass"</span>, <span class='st'>"auc"</span>))
 
 <span class='co'># S3 method for OwlMultinomial</span>
-<span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"misclass"</span>))
+<span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"deviance"</span>, <span class='st'>"misclass"</span>))
 
 <span class='co'># S3 method for OwlPoisson</span>
-<span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"deviance"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>))</pre>
+<span class='fu'>score</span>(<span class='no'>object</span>, <span class='no'>x</span>, <span class='no'>y</span>, <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"mse"</span>, <span class='st'>"mae"</span>))</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -173,11 +170,9 @@ model fit with <code><a href='owl.html'>owl()</a></code>.</p>
     </tr>
     <tr>
       <th>measure</th>
-      <td><p>type of target measure. The default, <code>"deviance"</code>,
-returns mean squared error for Gaussian models and deviance for
-Binomial models. <code>"mse"</code> returns mean squared error. <code>"mae"</code> returns
-mean absolute error, <code>"misclass"</code> returns misclassification rate,
-and <code>"auc"</code> returns area under the ROC curve.</p></td>
+      <td><p>type of target measure. <code>"mse"</code> returns mean squared error.
+<code>"mae"</code> returns mean absolute error, <code>"misclass"</code> returns
+misclassification rate, and <code>"auc"</code> returns area under the ROC curve.</p></td>
     </tr>
     </table>
 

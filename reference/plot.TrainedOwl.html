@@ -100,10 +100,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/benchmarks.html">Benchmarks</a>
-    </li>
-    <li>
-      <a href="../articles/penalties.html">Regularization penalties in owl</a>
+      <a href="../articles/introduction.html">An introduction to owl</a>
     </li>
   </ul>
 </li>
@@ -143,7 +140,7 @@
     <pre class="usage"><span class='co'># S3 method for TrainedOwl</span>
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(
   <span class='no'>x</span>,
-  <span class='kw'>measure</span> <span class='kw'>=</span> <span class='no'>x</span>$<span class='no'>measure</span>$<span class='no'>measure</span>[<span class='fl'>1</span>],
+  <span class='kw'>measure</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"auto"</span>, <span class='st'>"mse"</span>, <span class='st'>"mae"</span>, <span class='st'>"deviance"</span>, <span class='st'>"auc"</span>, <span class='st'>"misclass"</span>),
   <span class='kw'>plot_min</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>ci_alpha</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
   <span class='kw'>ci_border</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
@@ -161,7 +158,10 @@ to <code><a href='trainOwl.html'>trainOwl()</a></code></p></td>
     </tr>
     <tr>
       <th>measure</th>
-      <td><p>any of the measures used in the call to <code><a href='trainOwl.html'>trainOwl()</a></code></p></td>
+      <td><p>any of the measures used in the call to <code><a href='trainOwl.html'>trainOwl()</a></code>. If
+<code>measure = "auto"</code> then deviance will be used for binomial and multinomial
+models, whilst mean-squared error will be used for Gaussian and Poisson
+models.</p></td>
     </tr>
     <tr>
       <th>plot_min</th>
@@ -201,9 +201,9 @@ current display device.</p>
     <pre class="examples"><div class='input'><span class='co'># Cross-validation for a SLOPE binomial model</span>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>123</span>)
 <span class='no'>tune</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='trainOwl.html'>trainOwl</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span>(<span class='no'>mtcars</span>, <span class='kw'>select</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"mpg"</span>, <span class='st'>"drat"</span>, <span class='st'>"wt"</span>)),
-                   <span class='no'>mtcars</span>$<span class='no'>hp</span>,
-                   <span class='kw'>q</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>),
-                   <span class='kw'>number</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+                 <span class='no'>mtcars</span>$<span class='no'>hp</span>,
+                 <span class='kw'>q</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>),
+                 <span class='kw'>number</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>tune</span>, <span class='kw'>ci_col</span> <span class='kw'>=</span> <span class='st'>"salmon"</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"black"</span>)</div><div class='img'><img src='plot.TrainedOwl-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
