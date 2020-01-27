@@ -112,7 +112,10 @@ plot.Owl = function(x, intercept = FALSE, ...) {
 #'
 #' @param x an object of class `'TrainedOwl'`, typically from a call
 #'   to [trainOwl()]
-#' @param measure any of the measures used in the call to [trainOwl()]
+#' @param measure any of the measures used in the call to [trainOwl()]. If
+#'   `measure = "auto"` then deviance will be used for binomial and multinomial
+#'   models, whilst mean-squared error will be used for Gaussian and Poisson
+#'   models.
 #' @param ci_alpha alpha (opacity) for fill in confidence limits
 #' @param ci_col color for border of confidence limits
 #' @param ... other arguments that are passed on to [lattice::xyplot()]
@@ -134,13 +137,13 @@ plot.Owl = function(x, intercept = FALSE, ...) {
 #' # Cross-validation for a SLOPE binomial model
 #' set.seed(123)
 #' tune <- trainOwl(subset(mtcars, select = c("mpg", "drat", "wt")),
-#'                    mtcars$hp,
-#'                    q = c(0.1, 0.2),
-#'                    number = 10)
+#'                  mtcars$hp,
+#'                  q = c(0.1, 0.2),
+#'                  number = 10)
 #' plot(tune, ci_col = "salmon", col = "black")
 plot.TrainedOwl <-
   function(x,
-           measure = x$measure$measure[1],
+           measure = c("auto", "mse", "mae", "deviance", "auc", "misclass"),
            plot_min = TRUE,
            ci_alpha = 0.2,
            ci_border = FALSE,
@@ -148,6 +151,24 @@ plot.TrainedOwl <-
            ...) {
 
   object <- x
+  family <- object$model$family
+
+  measure <- match.arg(measure)
+
+  if (measure == "auto") {
+    measure <- switch(
+      family,
+      gaussian = "mse",
+      binomial = "deviance",
+      multinomial = "deviance",
+      poisson = "mse"
+    )
+
+    ind <- match(measure, object$measure$measure)
+
+    if (is.na(ind))
+      measure <- object$measure$measure[1]
+  }
 
   ind <- match(measure, object$measure$measure)
 
