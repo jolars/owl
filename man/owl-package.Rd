@@ -8,11 +8,12 @@
 \description{
 Efficient implementations for Sorted L-One Penalized Estimation
     (SLOPE): generalized linear models regularized with the sorted L1-norm
-    or, equivalently, ordered weighted L1-norm (OWL). There is support for
+    or, equivalently, ordered weighted L1-norm (OWL). Supported models include
     ordinary least-squares regression, binomial regression, multinomial
-    regression, and poisson regression, as well as both dense and sparse 
-    predictor matrices. In addition, the package features predictor screening
-    rules that enable efficient solutions to high-dimensional problems.
+    regression, and Poisson regression. Both dense and sparse 
+    predictor matrices are supported. In addition, the package features
+    predictor screening rules that enable fast and efficient solutions to 
+    high-dimensional problems.
 }
 \seealso{
 Useful links:
