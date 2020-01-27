@@ -32,11 +32,6 @@ You can install the development version from
 remotes::install_github("jolars/owl")
 ```
 
-## License
-
-owl is open source software, licensed under
-[GPL-3](https://github.com/jolars/owl/blob/master/LICENSE).
-
 ## Versioning
 
 owl uses [semantic versioning](http://semver.org).
