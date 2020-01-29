@@ -1,7 +1,7 @@
 Files: *
 
-golem: Efficient Regularized Generalized Linear Models for Big Data
-Copyright (C) 2019 Johan Larsson
+owl: Generalized Linear Models Regularized with the Sorted L1-Norm
+Copyright (C) 2020 Johan Larsson
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,11 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 --------------------------------------------------------------------------------
 
-Files: R/penalties.R
-       R/golem.R
+Files: R/owl.R
        R/utils.R
-       src/solvers.cpp
-       src/penalties.cpp
+       src/solver.cpp
+       src/prox.cpp
 
 contain modified code from
 the SLOPE package, which comes with the following copyright notice:
@@ -46,24 +45,26 @@ This file is part of SLOPE Toolbox.
   along with the SLOPE Toolbox. If not, see
   <http://www.gnu.org/licenses/>.
 
-
 --------------------------------------------------------------------------------
 
-Files: R/penalties.R
-       R/golem.R
-       R/utils.R
-       R/lambda.R
-       src/slope.cpp
+Files: R/utils.R
+       R/trainOwl.R
+       R/score.R
+       R/predict.R
+       R/deviance.R
+       R/interpolateCoefficients.R
+       R/interpolatePenalty.R
 
 contain modified code from
-the grpSLOPE package, which comes with the following copyright notice:
+the glmnet package, which is licened under GPL-2.
 
-    grpSLOPE: Group SLOPE (Group Sorted L1 Penalized Estimation)
-    Copyright (C) 2016 Alexej Gossmann
+    glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models
+    Copyright (C) 2020 Jerome Friedman, Trevor Hastie, Rob Tibshirani,
+    Balasubramanian Narasimhan, Noah Simon
 
-    This program is free software: you can redistribute it and/or modify
+    This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
+    the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -72,4 +73,5 @@ the grpSLOPE package, which comes with the following copyright notice:
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA

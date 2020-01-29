@@ -27,15 +27,25 @@ Useful links:
 \author{
 \strong{Maintainer}: Johan Larsson \email{johan.larsson@stat.lu.se} (\href{https://orcid.org/0000-0002-4029-5945}{ORCID})
 
+Authors:
+\itemize{
+  \item Jonas Wallin \email{jonas.wallin@stat.lu.se} (\href{https://orcid.org/0000-0003-0381-6593}{ORCID})
+}
+
 Other contributors:
 \itemize{
-  \item Jonas Wallin \email{jonas.wallin@stat.lu.se} (\href{https://orcid.org/0000-0003-0381-6593}{ORCID}) [contributor]
-  \item Malgorzata Bogdan (code adapted from 'SLOPE') [contributor, copyright holder]
-  \item Ewout van den Berg (code adapted from 'SLOPE') [contributor, copyright holder]
+  \item Malgorzata Bogdan (code adapted from 'SLOPE') [contributor]
+  \item Ewout van den Berg (code adapted from 'SLOPE') [contributor]
   \item Chiara Sabatti (code adapted from 'SLOPE') [contributor]
-  \item Emmanuel Candes (code adapted from 'SLOPE') [contributor, copyright holder]
+  \item Emmanuel Candes (code adapted from 'SLOPE') [contributor]
   \item Evan Patterson (code adapted from 'SLOPE') [contributor]
-  \item Weijie Su (code adapted from 'SLOPE') [contributor, copyright holder]
+  \item Weijie Su (code adapted from 'SLOPE') [contributor]
+  \item Jerome Friedman (code adapted from 'glmnet') [contributor]
+  \item Trevor Hastie (code adapted from 'glmnet') [contributor]
+  \item Rob Tibshirani (code adapted from 'glmnet') [contributor]
+  \item Balasubramanian Narasimhan (code adapted from 'glmnet') [contributor]
+  \item Noah Simon (code adapted from 'glmnet') [contributor]
+  \item Junyang Qian (code adapted from 'glmnet') [contributor]
 }
 
 }
