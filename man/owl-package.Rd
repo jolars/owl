@@ -7,7 +7,8 @@
 \title{owl: Generalized Linear Models Regularized with the Sorted L1-Norm}
 \description{
 Efficient implementations for Sorted L-One Penalized Estimation
-    (SLOPE): generalized linear models regularized with the sorted L1-norm
+    (SLOPE): generalized linear models regularized with the 
+    sorted L1-norm (Bogdan et al. (2015) <doi:10/gfgwzt>)
     or, equivalently, ordered weighted L1-norm (OWL). Supported models include
     ordinary least-squares regression, binomial regression, multinomial
     regression, and Poisson regression. Both dense and sparse 
