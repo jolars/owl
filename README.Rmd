@@ -45,6 +45,6 @@ owl uses [semantic versioning](http://semver.org).
 ## Code of conduct
 
 Please note that the 'owl' project is released with a
-[Contributor Code of Conduct](CODE_OF_CONDUCT.md).
+[Contributor Code of Conduct](https://jolars.github.io/owl/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.
 
