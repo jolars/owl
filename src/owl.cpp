@@ -1,7 +1,8 @@
 #include <RcppArmadillo.h>
 #include <memory>
 #include "solver.h"
-#include "families.h"
+#include "results.h"
+#include "families/families.h"
 #include "screening.h"
 #include "standardize.h"
 #include "rescale.h"
