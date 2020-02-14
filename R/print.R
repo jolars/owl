@@ -28,10 +28,6 @@ print.Owl <- function(x, ...) {
   # print path summary
   cat("\nPath summary:\n")
   print(out, ...)
-
-  # print lambda path
-  cat("\nLambda sequence:\n")
-  print(as.vector(x$lambda), ...)
 }
 
 #' @rdname print.Owl
