@@ -9,6 +9,7 @@ owl(
   y,
   family = c("gaussian", "binomial", "multinomial", "poisson"),
   intercept = TRUE,
+  standardize_features,
   center = !inherits(x, "sparseMatrix"),
   scale = c("l2", "l1", "sd", "none"),
   sigma = NULL,
@@ -41,6 +42,8 @@ binomial models, it can be a factor.}
 \item{family}{response type. See \strong{Families} for details.}
 
 \item{intercept}{whether to fit an intercept}
+
+\item{standardize_features}{(deprecated)}
 
 \item{center}{whether to center predictors or not by their mean. Defaults
 to true if dense matrix, false otherwise.}

@@ -134,6 +134,7 @@
 #'   binomial models, it can be a factor.
 #' @param family response type. See **Families** for details.
 #' @param intercept whether to fit an intercept
+#' @param standardize_features (deprecated)
 #' @param center whether to center predictors or not by their mean. Defaults
 #'   to true if dense matrix, false otherwise.
 #' @param scale type of scaling to apply to predictors, `"l1"` scales
@@ -271,6 +272,7 @@ owl <- function(x,
                 y,
                 family = c("gaussian", "binomial", "multinomial", "poisson"),
                 intercept = TRUE,
+                standardize_features,
                 center = !inherits(x, "sparseMatrix"),
                 scale = c("l2", "l1", "sd", "none"),
                 sigma = NULL,
@@ -300,6 +302,13 @@ owl <- function(x,
     scale <- ifelse(scale, "l2", "none")
   } else {
     stop("'scale' must be logical or a character")
+  }
+
+  if (!missing(standardize_features)) {
+    warning("`standardize_features` is deprectated, setting scale = 'l2'",
+            "and center = TRUE.")
+    scale <- "l2"
+    center <- TRUE
   }
 
   n <- NROW(x)
