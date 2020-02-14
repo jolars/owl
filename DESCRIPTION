@@ -1,6 +1,6 @@
 Package: owl
 Title: Generalized Linear Models Regularized with the Sorted L1-Norm
-Version: 0.1.1
+Version: 0.1.1.9000
 Authors@R: 
     c(person("Johan", "Larsson", role = c("aut", "cre"),
              email = "johan.larsson@stat.lu.se",
