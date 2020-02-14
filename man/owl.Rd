@@ -9,7 +9,8 @@ owl(
   y,
   family = c("gaussian", "binomial", "multinomial", "poisson"),
   intercept = TRUE,
-  standardize_features = TRUE,
+  center = !inherits(x, "sparseMatrix"),
+  scale = c("l2", "l1", "sd", "none"),
   sigma = NULL,
   lambda = c("gaussian", "bh", "oscar"),
   lambda_min_ratio = if (n < p) 0.01 else 1e-04,
@@ -18,10 +19,12 @@ owl(
   screening = TRUE,
   tol_dev_change = 1e-05,
   tol_dev_ratio = 0.995,
+  tol_abs = 1e-05,
+  tol_rel = 1e-04,
   max_variables = n * m,
   max_passes = 1e+06,
   tol_rel_gap = 1e-05,
-  tol_infeas = 1e-04,
+  tol_infeas = 0.001,
   diagnostics = FALSE,
   verbosity = 0
 )
@@ -39,7 +42,12 @@ binomial models, it can be a factor.}
 
 \item{intercept}{whether to fit an intercept}
 
-\item{standardize_features}{whether to standardize features (predictors)}
+\item{center}{whether to center predictors or not by their mean. Defaults
+to true if dense matrix, false otherwise.}
+
+\item{scale}{type of scaling to apply to predictors, \code{"l1"} scales
+predictors to have L1-norm of one, \code{"l2"} scales predictors to have
+L2-norm one, \code{"sd"} scales predictors to have standard deviation one.}
 
 \item{sigma}{scale of lambda sequence}
 
@@ -65,6 +73,12 @@ automatically set to 0 if a sigma is manually entered}
 deviance ratio
 \eqn{1 - \mathrm{deviance}/\mathrm{(null-deviance)}}{1 - deviance/(null deviance)}
 is above this threshold}
+
+\item{tol_abs}{absolute tolerance criterion for ADMM solver (used for
+Gaussian dense designs)}
+
+\item{tol_rel}{relative tolerance criterion for ADMM solver (used for
+Gaussian dense designs)}
 
 \item{max_variables}{criterion for stopping the path in terms of the
 maximum number of unique, nonzero

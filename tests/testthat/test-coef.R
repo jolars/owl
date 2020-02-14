@@ -1,4 +1,5 @@
 test_that("intepolating coefficients works properly", {
+  set.seed(3)
   xy <- owl:::randomProblem(100, 10)
 
   # check for slope
@@ -18,6 +19,7 @@ test_that("intepolating coefficients works properly", {
 })
 
 test_that("simplify argument in coef() works as expected", {
+  set.seed(1623)
   xy <- owl:::randomProblem(100, 10)
 
   # check for slope
@@ -32,6 +34,7 @@ test_that("simplify argument in coef() works as expected", {
 })
 
 test_that("refitting works if exact = TRUE", {
+  set.seed(1624)
   xy <- owl:::randomProblem(100, 10)
 
   # check for slope

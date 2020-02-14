@@ -1,6 +1,5 @@
 #include <RcppArmadillo.h>
 #include <memory>
-#include "solver.h"
 #include "results.h"
 #include "families/families.h"
 #include "screening.h"
@@ -15,10 +14,6 @@ using namespace arma;
 template <typename T>
 List owlCpp(T& x, mat& y, const List control)
 {
-  auto p = x.n_cols;
-  auto n = x.n_rows;
-  auto m = y.n_cols;
-
   auto tol_dev_ratio = as<double>(control["tol_dev_ratio"]);
   auto tol_dev_change = as<double>(control["tol_dev_change"]);
   auto max_variables = as<uword>(control["max_variables"]);
@@ -27,24 +22,29 @@ List owlCpp(T& x, mat& y, const List control)
   auto verbosity = as<uword>(control["verbosity"]);
 
   // solver arguments
-  auto max_passes = as<uword>(control["max_passes"]);
+  auto max_passes  = as<uword>(control["max_passes"]);
   auto tol_rel_gap = as<double>(control["tol_rel_gap"]);
-  auto tol_infeas = as<double>(control["tol_infeas"]);
+  auto tol_infeas  = as<double>(control["tol_infeas"]);
+  auto tol_abs     = as<double>(control["tol_abs"]);
+  auto tol_rel     = as<double>(control["tol_rel"]);
 
   auto family_choice = as<std::string>(control["family"]);
-  auto fit_intercept = as<bool>(control["fit_intercept"]);
+  auto intercept = as<bool>(control["fit_intercept"]);
   auto screening = as<bool>(control["screening"]);
 
-  auto standardize_features = as<bool>(control["standardize_features"]);
-  auto is_sparse = as<bool>(control["is_sparse"]);
+  auto n = x.n_rows;
+  auto p = x.n_cols;
+  auto m = y.n_cols;
+
+  auto center = as<bool>(control["center"]);
+  auto scale = as<std::string>(control["scale"]);
 
   auto y_center = as<rowvec>(control["y_center"]);
   auto y_scale = as<rowvec>(control["y_scale"]);
   rowvec x_center(p, fill::zeros);
   rowvec x_scale(p, fill::ones);
 
-  if (standardize_features)
-    standardize(x, x_center, x_scale);
+  standardize(x, x_center, x_scale, intercept, center, scale);
 
   auto lambda = as<vec>(control["lambda"]);
   auto sigma  = as<vec>(control["sigma"]);
@@ -60,56 +60,46 @@ List owlCpp(T& x, mat& y, const List control)
                      sigma_max,
                      x,
                      y,
-                     x_center,
-                     x_scale,
                      y_scale,
-                     standardize_features,
                      lambda_type,
                      sigma_type,
                      lambda_min_ratio,
                      q,
                      family_choice,
-                     is_sparse);
+                     intercept);
 
-  auto family = setupFamily(family_choice);
+  auto family = setupFamily(family_choice,
+                            intercept,
+                            diagnostics,
+                            max_passes,
+                            tol_rel_gap,
+                            tol_infeas,
+                            tol_abs,
+                            tol_rel,
+                            verbosity);
 
   cube betas(p, m, n_sigma, fill::zeros);
-  cube intercepts(1, m, n_sigma);
-
-  rowvec intercept(m, fill::zeros);
   mat beta(p, m, fill::zeros);
 
-  uword n_variables = static_cast<uword>(fit_intercept);
+  uword n_variables = 0;
   uvec n_unique(n_sigma);
 
-  if (fit_intercept)
-    intercept = family->fitNullModel(y, m);
+  if (intercept)
+    beta.row(0) = family->fitNullModel(y, m);
 
-  mat linear_predictor(n, m);
-
-  linearPredictor(linear_predictor,
-                  x,
-                  beta,
-                  intercept,
-                  x_center,
-                  x_scale,
-                  fit_intercept,
-                  standardize_features);
+  mat linear_predictor = x*beta;
 
   double null_deviance = 2*family->primal(y, linear_predictor);
   std::vector<double> deviances;
   std::vector<double> deviance_ratios;
   double deviance_change{0};
 
-  rowvec intercept_prev(m, fill::zeros);
   mat beta_prev(p, m, fill::zeros);
 
   uvec passes(n_sigma);
   std::vector<std::vector<double>> primals;
   std::vector<std::vector<double>> duals;
   std::vector<std::vector<double>> timings;
-  std::vector<std::vector<double>> infeasibilities;
-  std::vector<std::vector<unsigned>> line_searches;
   std::vector<unsigned> violations;
   std::vector<std::vector<unsigned>> violation_list;
 
@@ -121,13 +111,42 @@ List owlCpp(T& x, mat& y, const List control)
   field<uvec> active_sets(n_sigma);
   uvec active_set = regspace<uvec>(0, p-1);
 
-  Solver solver{standardize_features,
-                is_sparse,
-                diagnostics,
-                max_passes,
-                tol_rel_gap,
-                tol_infeas,
-                verbosity};
+  // object for use in ADMM
+  double rho = 0.0;
+  vec z(p);
+  vec u(p);
+  vec z_subset(z);
+  vec u_subset(u);
+  // for gaussian case
+  mat xx, xx_subset, L, U, L_subset, U_subset;
+  vec xTy, xTy_subset;
+
+  // factorize xx if gaussian
+  if (family->name() == "gaussian") {
+    // initialize auxiliary variables
+    z.zeros();
+    u.zeros();
+
+    // precompute x^Ty
+    xTy = x.t() * y;
+
+    // precompute X^tX or XX^t (if wide) and factorize
+    if (n >= p) {
+      xx = x.t() * x;
+    } else {
+      xx = x*x.t();
+    }
+
+    vec eigval = eig_sym(xx);
+    rho = std::pow(eigval.max(), 1/3) * std::pow(lambda.max(), 2/3);
+
+    if (n < p)
+      xx /= rho;
+
+    xx.diag() += rho;
+  }
+
+  bool factorized = false;
 
   Results res;
 
@@ -137,73 +156,37 @@ List owlCpp(T& x, mat& y, const List control)
 
     violations.clear();
 
-    if (verbosity >= 1)
-      Rcout << "penalty: " << k + 1 << std::endl;
-
     if (screening) {
       // NOTE(JL): the screening rules should probably not be used if
       // the coefficients from the previous fit are already very dense
 
-      linearPredictor(linear_predictor_prev,
-                      x,
-                      beta_prev,
-                      intercept_prev,
-                      x_center,
-                      x_scale,
-                      fit_intercept,
-                      standardize_features);
-
-      pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
-      gradient_prev = x.t() * pseudo_gradient_prev;
+      gradient_prev = family->gradient(x, y, x*beta_prev);
 
       double sigma_prev = k == 0 ? sigma_max : sigma(k-1);
 
       active_set = activeSet(gradient_prev,
                              lambda*sigma(k),
-                             lambda*sigma_prev);
+                             lambda*sigma_prev,
+                             intercept);
     }
 
-    if (active_set.n_elem == 0) {
-      // null (intercept only) model
-
-      if (fit_intercept)
-        intercept = family->fitNullModel(y, m);
-
-      beta.zeros();
-      passes(k) = 0;
-
-      if (diagnostics) {
-        primals.emplace_back(0);
-        duals.emplace_back(0);
-        infeasibilities.emplace_back(0);
-        timings.emplace_back(0);
-        line_searches.emplace_back(0);
-        violation_list.push_back(violations);
+    if (active_set.n_elem == p/m || !screening) {
+      // all features active
+      // factorize once if fitting all
+      if (!factorized && family->name() == "gaussian") {
+        L = chol(xx, "lower");
+        U = L.t();
+        factorized = true;
       }
 
-    } else if (active_set.n_elem == p) {
-      // all features active
-
-      res = solver.fit(x,
-                       y,
-                       family,
-                       intercept,
-                       beta,
-                       fit_intercept,
-                       lambda*sigma(k),
-                       x_center,
-                       x_scale);
-
+      res = family->fit(x, y, beta, z, u, L, U, xTy, lambda*sigma(k), rho);
       passes(k) = res.passes;
       beta = res.beta;
-      intercept = res.intercept;
 
       if (diagnostics) {
         primals.push_back(res.primals);
         duals.push_back(res.duals);
-        infeasibilities.push_back(res.infeasibilities);
         timings.push_back(res.time);
-        line_searches.emplace_back(res.line_searches);
         violation_list.push_back(violations);
       }
 
@@ -214,34 +197,60 @@ List owlCpp(T& x, mat& y, const List control)
       do {
         T x_subset = matrixSubset(x, active_set);
 
-        res = solver.fit(x_subset,
-                         y,
-                         family,
-                         intercept,
-                         beta.rows(active_set),
-                         fit_intercept,
-                         lambda.head(active_set.n_elem*m)*sigma(k),
-                         x_center.cols(active_set),
-                         x_scale.cols(active_set));
+        if (active_set.n_elem == static_cast<uword>(intercept)) {
+          // null model
+          beta.zeros();
 
-        beta.rows(active_set) = res.beta;
-        intercept = res.intercept;
-        passes(k) = res.passes;
+          if (intercept) {
+            // intercept-only model
+            beta.row(0) = family->fitNullModel(y, m);
+          }
 
-        linearPredictor(linear_predictor_prev,
-                        x,
-                        beta,
-                        intercept,
-                        x_center,
-                        x_scale,
-                        fit_intercept,
-                        standardize_features);
+          passes(k) = 0;
 
-        pseudo_gradient_prev = family->pseudoGradient(y, linear_predictor_prev);
-        gradient_prev = x.t() * pseudo_gradient_prev;
+        } else {
+
+          if (family->name() == "gaussian") {
+            if (n >= p) {
+              xx_subset = xx(active_set, active_set);
+            } else if (n >= active_set.n_elem) {
+              xx_subset = x_subset.t()*x_subset;
+              xx_subset.diag() += rho;
+            } else {
+              xx_subset = x_subset*x_subset.t();
+              xx_subset /= rho;
+              xx_subset.diag() += rho;
+            }
+
+            L_subset = chol(xx_subset, "lower");
+            U_subset = L_subset.t();
+
+            z_subset = z(active_set);
+            u_subset = u(active_set);
+            xTy_subset = xTy(active_set);
+          }
+
+          uword n_active = (active_set.n_elem - static_cast<uword>(intercept))*m;
+
+          res = family->fit(x_subset,
+                            y,
+                            beta.rows(active_set),
+                            z_subset,
+                            u_subset,
+                            L_subset,
+                            U_subset,
+                            xTy_subset,
+                            lambda.head(n_active)*sigma(k),
+                            rho);
+
+          beta.rows(active_set) = res.beta;
+          passes(k) = res.passes;
+        }
+
+        gradient_prev = family->gradient(x, y, x*beta);
 
         uvec possible_failures =
-          kktCheck(gradient_prev, beta, lambda*sigma(k), tol_infeas);
+          kktCheck(gradient_prev, beta, lambda*sigma(k), tol_infeas, intercept);
         uvec check_failures = setDiff(possible_failures, active_set);
 
         if (verbosity >= 2) {
@@ -264,9 +273,7 @@ List owlCpp(T& x, mat& y, const List control)
       if (diagnostics) {
         primals.push_back(res.primals);
         duals.push_back(res.duals);
-        infeasibilities.push_back(res.infeasibilities);
         timings.push_back(res.time);
-        line_searches.push_back(res.line_searches);
         violation_list.push_back(violations);
       }
     }
@@ -279,24 +286,25 @@ List owlCpp(T& x, mat& y, const List control)
 
     if (k > 0) {
       deviance_change =
-        std::abs((deviances[k-1] - deviances[k])/deviances[k-1]);
+        std::abs((deviances[k-1] - deviance)/deviances[k-1]);
     }
 
     betas.slice(k) = beta;
-    intercepts.slice(k) = intercept;
-    intercept_prev = intercept;
     beta_prev = beta;
 
     active_sets(k) = active_set;
-
-    if (verbosity >= 1)
-      Rcout << "deviance: "        << deviance        << "\t"
-            << "deviance ratio: "  << deviance_ratio  << "\t"
-            << "deviance change: " << deviance_change << std::endl;
-
     uword n_coefs = accu(any(beta != 0, 1));
     n_variables = n_coefs;
     n_unique(k) = unique(abs(nonzeros(beta))).eval().n_elem;
+
+    if (verbosity >= 1)
+      Rcout << "penalty: "      << k
+            << ", dev: "        << deviance
+            << ", dev ratio: "  << deviance_ratio
+            << ", dev change: " << deviance_change
+            << ", n var: "      << n_variables
+            << ", n unique: "   << n_unique(k)
+            << std::endl;
 
     if (n_coefs > 0 && k > 0) {
       // stop path if fractional deviance change is small
@@ -306,50 +314,37 @@ List owlCpp(T& x, mat& y, const List control)
       }
     }
 
-    if (verbosity >= 1) {
-      Rcout <<
-        "n_var: "      << n_variables <<
-        ", n_unique: " << n_unique(k) <<
-      std::endl;
-    }
-
-    if (n_unique(k) > max_variables) {
+    if (n_unique(k) > max_variables)
       break;
-    }
 
     k++;
 
     checkUserInterrupt();
   }
 
-  intercepts.resize(1, m, k);
   betas.resize(p, m, k);
   passes.resize(k);
   sigma.resize(k);
   n_unique.resize(k);
   active_sets = active_sets.rows(0, std::max(static_cast<int>(k-1), 0));
 
-  rescale(intercepts,
-          betas,
+  rescale(betas,
           x_center,
           x_scale,
           y_center,
           y_scale,
-          fit_intercept);
+          intercept);
 
   // standardize lambda
   lambda /= n;
 
   return List::create(
-    Named("intercepts")          = wrap(intercepts),
     Named("betas")               = wrap(betas),
     Named("active_sets")         = wrap(active_sets),
     Named("passes")              = wrap(passes),
     Named("primals")             = wrap(primals),
     Named("duals")               = wrap(duals),
-    Named("infeasibilities")     = wrap(infeasibilities),
     Named("time")                = wrap(timings),
-    Named("line_searches")       = wrap(line_searches),
     Named("n_unique")            = wrap(n_unique),
     Named("violations")          = wrap(violation_list),
     Named("deviance_ratio")      = wrap(deviance_ratios),
@@ -374,3 +369,4 @@ Rcpp::List owlDense(arma::mat x,
 {
   return owlCpp(x, y, control);
 }
+

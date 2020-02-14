@@ -134,7 +134,11 @@
 #'   binomial models, it can be a factor.
 #' @param family response type. See **Families** for details.
 #' @param intercept whether to fit an intercept
-#' @param standardize_features whether to standardize features (predictors)
+#' @param center whether to center predictors or not by their mean. Defaults
+#'   to true if dense matrix, false otherwise.
+#' @param scale type of scaling to apply to predictors, `"l1"` scales
+#'   predictors to have L1-norm of one, `"l2"` scales predictors to have
+#'   L2-norm one, `"sd"` scales predictors to have standard deviation one.
 #' @param sigma scale of lambda sequence
 #' @param n_sigma length of regularization path
 #' @param lambda either a character vector indicating the method used
@@ -164,6 +168,10 @@
 #'   coefficients in absolute value in model
 #' @param tol_rel_gap stopping criterion for the duality gap
 #' @param tol_infeas stopping criterion for the level of infeasibility
+#' @param tol_abs absolute tolerance criterion for ADMM solver (used for
+#'   Gaussian dense designs)
+#' @param tol_rel relative tolerance criterion for ADMM solver (used for
+#'   Gaussian dense designs)
 #'
 #' @return An object of class `"Owl"` with the following slots:
 #' \item{coefficients}{
@@ -263,7 +271,8 @@ owl <- function(x,
                 y,
                 family = c("gaussian", "binomial", "multinomial", "poisson"),
                 intercept = TRUE,
-                standardize_features = TRUE,
+                center = !inherits(x, "sparseMatrix"),
+                scale = c("l2", "l1", "sd", "none"),
                 sigma = NULL,
                 lambda = c("gaussian", "bh", "oscar"),
                 lambda_min_ratio = if (n < p) 1e-2 else 1e-4,
@@ -272,16 +281,26 @@ owl <- function(x,
                 screening = TRUE,
                 tol_dev_change = 1e-5,
                 tol_dev_ratio = 0.995,
+                tol_abs = 1e-5,
+                tol_rel = 1e-4,
                 max_variables = n*m,
                 max_passes = 1e6,
                 tol_rel_gap = 1e-5,
-                tol_infeas = 1e-4,
+                tol_infeas = 1e-3,
                 diagnostics = FALSE,
                 verbosity = 0) {
 
   ocall <- match.call()
 
   family <- match.arg(family)
+
+  if (is.character(scale)) {
+    scale <- match.arg(scale)
+  } else if (is.logical(scale) && length(scale) == 1L) {
+    scale <- ifelse(scale, "l2", "none")
+  } else {
+    stop("'scale' must be logical or a character")
+  }
 
   n <- NROW(x)
   p <- NCOL(x)
@@ -298,9 +317,11 @@ owl <- function(x,
     is.finite(max_passes),
     is.logical(diagnostics),
     is.logical(intercept),
-    is.logical(standardize_features),
     tol_rel_gap >= 0,
-    tol_infeas >= 0
+    tol_infeas >= 0,
+    tol_abs >= 0,
+    tol_rel >= 0,
+    is.logical(center)
   )
 
   fit_intercept <- intercept
@@ -325,6 +346,9 @@ owl <- function(x,
   } else {
     x <- as.matrix(x)
   }
+
+  if (is_sparse && center)
+    stop("centering would destroy sparsity in x (predictors)")
 
   res <- preprocessResponse(family, y)
   y <- as.matrix(res$y)
@@ -382,7 +406,8 @@ owl <- function(x,
   control <- list(family = family,
                   fit_intercept = fit_intercept,
                   is_sparse = is_sparse,
-                  standardize_features = standardize_features,
+                  scale = scale,
+                  center = center,
                   n_sigma = n_sigma,
                   n_targets = n_targets,
                   screening = screening,
@@ -401,32 +426,32 @@ owl <- function(x,
                   tol_dev_change = tol_dev_change,
                   tol_dev_ratio = tol_dev_ratio,
                   tol_rel_gap = tol_rel_gap,
-                  tol_infeas = tol_infeas)
+                  tol_infeas = tol_infeas,
+                  tol_abs = tol_abs,
+                  tol_rel = tol_rel)
 
   owlFit <- if (is_sparse) owlSparse else owlDense
 
-  fit <- owlFit(x, y, control)
+  if (intercept) {
+    fit <- owlFit(cbind(1, x), y, control)
+  } else {
+    fit <- owlFit(x, y, control)
+  }
 
   lambda <- fit$lambda
   sigma <- fit$sigma
   n_sigma <- length(sigma)
   active_sets <- lapply(drop(fit$active_sets), function(x) drop(x) + 1)
-  intercept <- fit$intercepts
   beta <- fit$betas
   nonzeros <- apply(beta, c(2, 3), function(x) abs(x) > 0)
+  coefficients <- beta
 
   if (fit_intercept) {
-    coefficients <- array(NA, dim = c(p + 1, m, n_sigma))
-
-    for (i in seq_len(n_sigma)) {
-      coefficients[1, , i] <- intercept[, , i]
-      coefficients[-1, , i] <- beta[, , i]
-    }
+    nonzeros <- nonzeros[-1, , , drop = FALSE]
     dimnames(coefficients) <- list(c("(Intercept)", variable_names),
                                    response_names[1:n_targets],
                                    paste0("p", seq_len(n_sigma)))
   } else {
-    coefficients <- beta
     dimnames(coefficients) <- list(variable_names,
                                    response_names[1:n_targets],
                                    paste0("p", seq_len(n_sigma)))

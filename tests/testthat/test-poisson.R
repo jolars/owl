@@ -13,7 +13,8 @@ test_that("output from unregularized poisson model matches glm", {
                    family = "poisson",
                    sigma = 1e-8,
                    intercept = intercept,
-                   standardize_features = FALSE)
+                   center = FALSE,
+                   scale = "none")
 
     glm_fit <- if (intercept)
       glm(y ~ 1 + ., data = data.frame(y = y, x), family = "poisson")
@@ -40,15 +41,15 @@ test_that("owl reproduces lasoso fit when all lambda are equal", {
 
   library(glmnet)
 
-  gnt_fit <- glmnet(x, y, family = "poisson",
-                    standardize = FALSE,
-                    lambda = 1)
+  sigma <- 1
 
+  gnt_fit <- glmnet(x, y, family = "poisson", lambda = sigma, standardize = FALSE)
   owl_fit <- owl(x, y,
                  family = "poisson",
-                 sigma = 1,
+                 sigma = sigma,
                  lambda = rep(1, p),
-                 standardize_features = FALSE)
+                 scale = "none",
+                 center = FALSE)
 
   expect_equivalent(as.double(coef(gnt_fit)), coef(owl_fit), tol = 1e-3)
 })

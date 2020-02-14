@@ -3,7 +3,7 @@ test_that("glmnet and owl return same unpenalized model", {
 
   set.seed(-329)
 
-  n <- 1000
+  n <- 100
   x1 <- rnorm(n)
   x2 <- rnorm(n)
   prob <- matrix(c(rep(1, n),
@@ -27,8 +27,7 @@ test_that("glmnet and owl return same unpenalized model", {
   g_coef[,] <- g_coef[,] - g_coef[, 3]
   g_coef <- g_coef[, 1:2]
 
-  ofit <- owl(x, y, family = "multinomial", sigma = 1e-9,
-              standardize_features = FALSE)
+  ofit <- owl(x, y, family = "multinomial", sigma = 1e-6)
 
   expect_equivalent(g_coef, coef(ofit), tol = 1e-4)
 })

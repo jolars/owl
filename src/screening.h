@@ -6,10 +6,12 @@ using namespace arma;
 
 uvec activeSet(const mat& gradient_prev,
                const vec& lambda,
-               const vec& lambda_prev)
+               const vec& lambda_prev,
+               const bool intercept)
 {
-  const uword p = gradient_prev.n_elem;
-  const vec abs_grad = abs(vectorise(gradient_prev));
+  const uword m = gradient_prev.n_cols;
+  const uword p = lambda.n_elem;
+  const vec abs_grad = abs(vectorise(gradient_prev.tail_rows(p/m)));
   const uvec ord = sort_index(abs_grad, "descend");
   const vec tmp = abs_grad(ord) + lambda_prev - 2*lambda;
 
@@ -36,7 +38,16 @@ uvec activeSet(const mat& gradient_prev,
   // reset order
   active_set(ord) = active_set;
 
-  umat active_set_mat = reshape(active_set, size(gradient_prev));
+  umat active_set_mat = reshape(active_set, p/m, m);
 
-  return find(any(active_set_mat, 1));
+  uvec out = find(any(active_set_mat, 1));
+
+  if (intercept) {
+    // shuffle all orders by one and add an index for the intercept
+    out += 1;
+    urowvec top = {0};
+    out.insert_rows(0, top);
+  }
+
+  return out;
 }

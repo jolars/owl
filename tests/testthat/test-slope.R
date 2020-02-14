@@ -15,7 +15,8 @@ test_that("SLOPE and owl agree for gaussian designs", {
            sigma = 1,
            lambda = "gaussian",
            diagnostics = TRUE,
-           standardize_features = FALSE,
+           center = FALSE,
+           scale = FALSE,
            q = 0.25)
 
   expect_equivalent(res_slope$beta, coef(g), tol = 1e-5)

@@ -11,7 +11,8 @@ test_that("lasso and slope fits are equivalent if all lambda are equal", {
   lambda <- lasso$lambda
 
   slope <- owl(x, y,
-               standardize_features = FALSE,
+               center = FALSE,
+               scale = FALSE,
                lambda = rep(lambda[1], ncol(x)),
                sigma = exp(seq(log(1), log(1e-4), length.out = 100)))
 

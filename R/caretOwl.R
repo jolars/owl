@@ -38,7 +38,8 @@ caretSlopeOwl <- function() {
                       y,
                       family = fam,
                       n_sigma = len + 2,
-                      standardize_features = FALSE)
+                      scale = FALSE,
+                      center = FALSE)
 
       sigma <- fit$sigma
       sigma <- sigma[-c(1, length(sigma))]
@@ -100,7 +101,8 @@ caretSlopeOwl <- function() {
       dots$x <- x
       dots$y <- y
       dots$q <- param$q
-      dots$standardize_features <- FALSE
+      dots$scale <- FALSE
+      dots$center <- FALSE
       dots$tol_dev_change <- 0
       dots$tol_dev_ratio <- 1
 

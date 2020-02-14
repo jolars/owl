@@ -2,12 +2,16 @@
 
 #include <RcppArmadillo.h>
 #include "family.h"
+#include "../results.h"
 
 using namespace Rcpp;
 using namespace arma;
 
 class Poisson : public Family {
 public:
+  template <typename... Ts>
+  Poisson(Ts... args) : Family(std::forward<Ts>(args)...) {}
+
   double primal(const mat& y, const mat& lin_pred)
   {
     return -accu(y % lin_pred - trunc_exp(lin_pred) - lgamma(y + 1));

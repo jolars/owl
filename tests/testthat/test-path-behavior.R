@@ -7,12 +7,11 @@ test_that("regularization path correctly stops if max_variables reached", {
              family = "binomial",
              max_variables = 10,
              intercept = FALSE,
-             lambda = "bh",
-             standardize_features = FALSE)
+             lambda = "bh")
 
-  n_var <- max(apply(coef(fit), 2, function(x) {
-    length(unique(abs(x[x != 0])))
-  }))
+  n_sigma <- length(fit$sigma)
+
+  n_var <- sum(unique(coef(fit)[, n_sigma - 1]) != 0)
 
   expect_lte(n_var, 10)
 })
