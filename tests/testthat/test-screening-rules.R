@@ -7,7 +7,7 @@ test_that("screening rules return correct results for instances with known viola
     coefs <- coef(owl(d$x, d$y, family = family, screening = FALSE))
     fit <- owl(d$x, d$y, family = family, screening = TRUE)
 
-    expect_equivalent(coefs, coef(fit), 1e-5)
+    expect_equivalent(coefs, coef(fit), 1e-4)
   }
 })
 
