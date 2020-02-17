@@ -8,9 +8,9 @@
 * Just-in-time centering (for sparse predictor matrices) is no longer supported.
   As a result, `center` cannot be set to false when the predictor matrix
   is sparse in the call to `owl()`. 
-* The FISTA solver has been replaced with an ADMM solver for dense
-  matrices when `family = "gaussian"`. Two new arguments were added to 
-  control tolerance for the stopping criterion: `tol_rel` and `tol_abs`.
+* The FISTA solver has been replaced with an ADMM solver for
+  OLS (`family = "gaussian"`). Two new arguments were added to 
+  control stopping criterion for the ADMM solver: `tol_rel` and `tol_abs`.
   
 ## Minor changes
 
