@@ -11,7 +11,7 @@ test_that("regularization path correctly stops if max_variables reached", {
 
   n_sigma <- length(fit$sigma)
 
-  n_var <- sum(unique(coef(fit)[, n_sigma - 1]) != 0)
+  n_var <- sum(unique(abs(signif(coef(fit)[, n_sigma - 1])), 4) != 0)
 
   expect_lte(n_var, 10)
 })
