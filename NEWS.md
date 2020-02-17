@@ -20,7 +20,7 @@
 
 * Lambda sequences when `lambda = "gaussian"` are now computed properly
   when the number of features is larger than the number of observations.
-
+  
 # owl 0.1.1
 
 ## Minor changes

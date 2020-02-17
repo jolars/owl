@@ -11,6 +11,10 @@ status](https://travis-ci.org/jolars/owl.svg?branch=master)](https://travis-ci.o
 status](https://ci.appveyor.com/api/projects/status/github/jolars/owl?branch=master&svg=true)](https://ci.appveyor.com/project/jolars/owl)
 [![Coverage
 status](https://codecov.io/gh/jolars/owl/branch/master/graph/badge.svg)](https://codecov.io/github/jolars/owl?branch=master)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/owl)](https://CRAN.R-project.org/package=owl)
+[![Lifecycle:
+maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 <!-- badges: end -->
 
 Efficient implementations for Sorted L-One Penalized Estimation (SLOPE):
@@ -24,8 +28,14 @@ problems.
 
 ## Installation
 
-You can install the development version from
-[GitHub](https://github.com/) with:
+You can install the current stable release from
+[CRAN](https://cran.r-project.org/) with
+
+``` r
+install.packages("owl")
+```
+
+or the development version from [GitHub](https://github.com/) with
 
 ``` r
 # install.packages("remotes")
