@@ -171,6 +171,10 @@ List owlCpp(T& x, mat& y, const List control)
     }
 
     if (active_set.n_elem == p/m || !screening) {
+
+      // stop screening
+      screening = false;
+
       // all features active
       // factorize once if fitting all
       if (!factorized && family->name() == "gaussian") {
