@@ -14,6 +14,13 @@ using namespace arma;
 template <typename T>
 List owlCpp(T& x, mat& y, const List control)
 {
+  using std::endl;
+  using std::setw;
+  using std::showpoint;
+
+  // significant digits
+  Rcout.precision(4);
+
   auto tol_dev_ratio = as<double>(control["tol_dev_ratio"]);
   auto tol_dev_change = as<double>(control["tol_dev_change"]);
   auto max_variables = as<uword>(control["max_variables"]);
@@ -110,6 +117,10 @@ List owlCpp(T& x, mat& y, const List control)
   // sets of active predictors
   field<uvec> active_sets(n_sigma);
   uvec active_set = regspace<uvec>(0, p-1);
+  uvec strong_set;
+  uvec ever_active_set;
+  if (intercept)
+    ever_active_set.insert_rows(0, 1);
 
   // object for use in ADMM
   double rho = 0.0;
@@ -120,6 +131,7 @@ List owlCpp(T& x, mat& y, const List control)
   // for gaussian case
   mat xx, xx_subset, L, U, L_subset, U_subset;
   vec xTy, xTy_subset;
+  T x_subset;
 
   // factorize xx if gaussian
   if (family->name() == "gaussian") {
@@ -160,14 +172,21 @@ List owlCpp(T& x, mat& y, const List control)
       // NOTE(JL): the screening rules should probably not be used if
       // the coefficients from the previous fit are already very dense
 
+      // step 1: compute strong set
       gradient_prev = family->gradient(x, y, x*beta_prev);
 
       double sigma_prev = k == 0 ? sigma_max : sigma(k-1);
 
-      active_set = activeSet(gradient_prev,
+      strong_set = activeSet(gradient_prev,
                              lambda*sigma(k),
                              lambda*sigma_prev,
                              intercept);
+
+      // step 2: start by fitting for ever active set
+      uvec prev_active = find(any(beta_prev != 0, 1));
+
+      ever_active_set = setUnion(ever_active_set, prev_active);
+      active_set = ever_active_set;
     }
 
     if (active_set.n_elem == p/m || !screening) {
@@ -199,18 +218,18 @@ List owlCpp(T& x, mat& y, const List control)
       bool kkt_violation = true;
 
       do {
-        T x_subset = matrixSubset(x, active_set);
+        x_subset = matrixSubset(x, active_set);
 
-        if (active_set.n_elem == static_cast<uword>(intercept)) {
+        if (active_set.n_elem == 0) {
           // null model
           beta.zeros();
 
-          if (intercept) {
-            // intercept-only model
-            beta.row(0) = family->fitNullModel(y, m);
-          }
-
-          passes(k) = 0;
+          // if (intercept) {
+          //   // intercept-only model
+          //   beta.row(0) = family->fitNullModel(y, m);
+          // }
+          //
+          // passes(k) = 0;
 
         } else {
 
@@ -255,7 +274,10 @@ List owlCpp(T& x, mat& y, const List control)
 
         uvec possible_failures =
           kktCheck(gradient_prev, beta, lambda*sigma(k), tol_infeas, intercept);
-        uvec check_failures = setDiff(possible_failures, active_set);
+
+        uvec strong_failures = intersect(possible_failures, strong_set);
+
+        uvec check_failures = setDiff(strong_failures, active_set);
 
         if (verbosity >= 2) {
           Rcout << "kkt-failures at: " << std::endl;
@@ -267,6 +289,16 @@ List owlCpp(T& x, mat& y, const List control)
 
         if (diagnostics)
           violations.push_back(check_failures.n_elem);
+
+        if (!kkt_violation) {
+          // check against whole set
+          check_failures = setDiff(possible_failures, active_set);
+
+          kkt_violation = check_failures.n_elem > 0;
+
+          if (diagnostics)
+            violations.push_back(check_failures.n_elem);
+        }
 
         active_set = setUnion(check_failures, active_set);
 
@@ -302,13 +334,14 @@ List owlCpp(T& x, mat& y, const List control)
     n_unique(k) = unique(abs(nonzeros(beta))).eval().n_elem;
 
     if (verbosity >= 1)
-      Rcout << "penalty: "      << k
-            << ", dev: "        << deviance
-            << ", dev ratio: "  << deviance_ratio
-            << ", dev change: " << deviance_change
-            << ", n var: "      << n_variables
-            << ", n unique: "   << n_unique(k)
-            << std::endl;
+      Rcout << showpoint
+            << "penalty: "      << setw(2) << k
+            << ", dev: "        << setw(7) << deviance
+            << ", dev ratio: "  << setw(7) << deviance_ratio
+            << ", dev change: " << setw(7) << deviance_change
+            << ", n var: "      << setw(5) << n_variables
+            << ", n unique: "   << setw(5) << n_unique(k)
+            << endl;
 
     if (n_coefs > 0 && k > 0) {
       // stop path if fractional deviance change is small

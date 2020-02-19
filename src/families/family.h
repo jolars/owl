@@ -116,8 +116,6 @@ public:
     // FISTA parameters
     double t = 1;
 
-    bool accepted = false;
-
     // diagnostics
     wall_clock timer;
     std::vector<double> primals;
@@ -143,8 +141,8 @@ public:
       double G = dual(y, lin_pred);
 
       grad = gradient(x, y, lin_pred);
-      double infeas = infeasibility(grad.tail_rows(p_rows), lambda);
-
+      double infeas = lambda.n_elem > 0 ? infeasibility(grad.tail_rows(p_rows), lambda)
+                                        : 0.0;
       if (verbosity >= 3) {
         Rcout << "pass: "            << passes
               << ", duality-gap: "   << std::abs(f - G)/std::abs(f)
@@ -154,9 +152,12 @@ public:
 
       double small = std::sqrt(datum::eps);
 
-      accepted =
-        (std::abs(f - G)/std::max(small, std::abs(f)) < tol_rel_gap)
-      && (infeas <= std::max(small, tol_infeas*lambda(0)));
+      bool optimal =
+        (std::abs(f - G)/std::max(small, std::abs(f)) < tol_rel_gap);
+
+      bool feasible =
+        lambda.n_elem > 0 ? infeas <= std::max(small, tol_infeas*lambda(0))
+                          : true;
 
       if (diagnostics) {
         time.push_back(timer.toc());
@@ -164,7 +165,7 @@ public:
         duals.push_back(G);
       }
 
-      if (accepted)
+      if (optimal && feasible)
         break;
 
       beta_tilde_old = beta_tilde;

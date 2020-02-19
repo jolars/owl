@@ -120,14 +120,8 @@ public:
               << std::endl;
       }
 
-      if (r_norm < eps_primal && s_norm < eps_dual) {
-        // start checking infeasibility
-        grad = x.t()*(x*z - y);
-        double infeas = infeasibility(grad.tail_rows(lambda.n_elem), lambda);
-
-        if (infeas <= std::max(std::sqrt(datum::eps), tol_infeas*lambda.max()))
-          break;
-      }
+      if (r_norm < eps_primal && s_norm < eps_dual)
+        break;
 
       checkUserInterrupt();
     }
@@ -220,9 +214,8 @@ public:
               << std::endl;
       }
 
-      if (r_norm < eps_primal && s_norm < eps_dual) {
+      if (r_norm < eps_primal && s_norm < eps_dual)
         break;
-      }
 
       checkUserInterrupt();
     }
