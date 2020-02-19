@@ -19,7 +19,7 @@ test_that("SLOPE and owl agree for gaussian designs", {
            scale = FALSE,
            q = 0.25)
 
-  expect_equivalent(res_slope$beta, coef(g), tol = 1e-5)
+  expect_equivalent(res_slope$beta, coef(g), tol = 1e-4)
 })
 
 test_that("SLOPE and owl agree when computing lambda sequences", {
