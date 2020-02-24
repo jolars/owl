@@ -91,9 +91,6 @@ List owlCpp(T& x, mat& y, const List control)
   uword n_variables = 0;
   uvec n_unique(n_sigma);
 
-  if (intercept)
-    beta.row(0) = family->fitNullModel(y, m);
-
   mat linear_predictor = x*beta;
 
   double null_deviance = 2*family->primal(y, linear_predictor);
@@ -129,8 +126,8 @@ List owlCpp(T& x, mat& y, const List control)
   vec z_subset(z);
   vec u_subset(u);
   // for gaussian case
-  mat xx, xx_subset, L, U, L_subset, U_subset;
-  vec xTy, xTy_subset;
+  mat xx, L, U;
+  vec xTy;
   T x_subset;
 
   // factorize xx if gaussian
@@ -138,24 +135,6 @@ List owlCpp(T& x, mat& y, const List control)
     // initialize auxiliary variables
     z.zeros();
     u.zeros();
-
-    // precompute x^Ty
-    xTy = x.t() * y;
-
-    // precompute X^tX or XX^t (if wide) and factorize
-    if (n >= p) {
-      xx = x.t() * x;
-    } else {
-      xx = x*x.t();
-    }
-
-    vec eigval = eig_sym(xx);
-    rho = std::pow(eigval.max(), 1/3) * std::pow(lambda.max(), 2/3);
-
-    if (n < p)
-      xx /= rho;
-
-    xx.diag() += rho;
   }
 
   bool factorized = false;
@@ -197,6 +176,24 @@ List owlCpp(T& x, mat& y, const List control)
       // all features active
       // factorize once if fitting all
       if (!factorized && family->name() == "gaussian") {
+        // precompute x^Ty
+        xTy = x.t() * y;
+
+        // precompute X^tX or XX^t (if wide) and factorize
+        if (n >= p) {
+          xx = x.t() * x;
+        } else {
+          xx = x*x.t();
+        }
+
+        vec eigval = eig_sym(xx);
+        rho = std::pow(eigval.max(), 1/3) * std::pow(lambda.max(), 2/3);
+
+        if (n < p)
+          xx /= rho;
+
+        xx.diag() += rho;
+
         L = chol(xx, "lower");
         U = L.t();
         factorized = true;
@@ -223,34 +220,30 @@ List owlCpp(T& x, mat& y, const List control)
         if (active_set.n_elem == 0) {
           // null model
           beta.zeros();
-
-          // if (intercept) {
-          //   // intercept-only model
-          //   beta.row(0) = family->fitNullModel(y, m);
-          // }
-          //
-          // passes(k) = 0;
+          passes(k) = 0;
 
         } else {
 
           if (family->name() == "gaussian") {
-            if (n >= p) {
-              xx_subset = xx(active_set, active_set);
-            } else if (n >= active_set.n_elem) {
-              xx_subset = x_subset.t()*x_subset;
-              xx_subset.diag() += rho;
+            if (n >= active_set.n_elem) {
+              xx = x_subset.t()*x_subset;
+              xx.diag() += rho;
             } else {
-              xx_subset = x_subset*x_subset.t();
-              xx_subset /= rho;
-              xx_subset.diag() += rho;
+              xx = x_subset*x_subset.t();
+              xx /= rho;
+              xx.diag() += rho;
             }
 
-            L_subset = chol(xx_subset, "lower");
-            U_subset = L_subset.t();
+            L = chol(xx, "lower");
+            U = L.t();
+
+            vec eigval = eig_sym(xx);
+            rho = std::pow(eigval.max(), 1/3) * std::pow(lambda.max(), 2/3);
+
+            xTy = x_subset.t() * y;
 
             z_subset = z(active_set);
             u_subset = u(active_set);
-            xTy_subset = xTy(active_set);
           }
 
           uword n_active = (active_set.n_elem - static_cast<uword>(intercept))*m;
@@ -260,11 +253,16 @@ List owlCpp(T& x, mat& y, const List control)
                             beta.rows(active_set),
                             z_subset,
                             u_subset,
-                            L_subset,
-                            U_subset,
-                            xTy_subset,
+                            L,
+                            U,
+                            xTy,
                             lambda.head(n_active)*sigma(k),
                             rho);
+
+          if (family->name() == "gaussian") {
+            z(active_set) = z_subset;
+            u(active_set) = u_subset;
+          }
 
           beta.rows(active_set) = res.beta;
           passes(k) = res.passes;
@@ -406,4 +404,3 @@ Rcpp::List owlDense(arma::mat x,
 {
   return owlCpp(x, y, control);
 }
-
