@@ -8,7 +8,7 @@ plotDiagnostics(
   object,
   ind = max(object$diagnostics$penalty),
   xvar = c("time", "iteration"),
-  yvar = c("objectives", "infeasibility"),
+  yvar,
   ...
 )
 }
@@ -17,12 +17,10 @@ plotDiagnostics(
 
 \item{ind}{either "last"}
 
-\item{xvar}{what to place on the x axis. \code{iteration} plots each iteration, \code{time}
-plots the wall-clock time.}
+\item{xvar}{what to place on the x axis. \code{iteration} plots each iteration,
+\code{time} plots the wall-clock time.}
 
-\item{yvar}{what to place on the y axis. \code{objectives} returns the
-primal and dual objectives whereas \code{infeasibility} returns
-the infeasibility metric.}
+\item{yvar}{deprecated (and ignored)}
 
 \item{...}{other arguments that will be used to modify the call to
 \code{\link[lattice:xyplot]{lattice::xyplot()}}}

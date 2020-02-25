@@ -15,6 +15,9 @@
 ## Minor changes
 
 * `print.Owl()` no longer prints the regularization path when called.
+* infeasibility estimates are no longer collected when `diagnostics = TRUE`
+  in the call to `owl()` and hence the argument `yvar` in `plotDiagnostics()`
+  has been deprecated.
 
 ## Bug fixes
 

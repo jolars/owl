@@ -186,8 +186,10 @@ List owlCpp(T& x, mat& y, const List control)
           xx = x*x.t();
         }
 
+        // TODO(jolars): should rho be updated for each new run?
         vec eigval = eig_sym(xx);
-        rho = std::pow(eigval.max(), 1/3) * std::pow(lambda.max(), 2/3);
+        rho =
+          std::pow(eigval.max(), 1/3)*std::pow(lambda.max()*sigma(k), 2/3);
 
         if (n < p)
           xx /= rho;
@@ -196,6 +198,7 @@ List owlCpp(T& x, mat& y, const List control)
 
         L = chol(xx, "lower");
         U = L.t();
+
         factorized = true;
       }
 
@@ -225,20 +228,23 @@ List owlCpp(T& x, mat& y, const List control)
         } else {
 
           if (family->name() == "gaussian") {
-            if (n >= active_set.n_elem) {
+            if (x_subset.n_rows >= x_subset.n_cols) {
               xx = x_subset.t()*x_subset;
-              xx.diag() += rho;
             } else {
               xx = x_subset*x_subset.t();
-              xx /= rho;
-              xx.diag() += rho;
             }
+
+            vec eigval = eig_sym(xx);
+            rho =
+              std::pow(eigval.max(), 1/3)*std::pow(lambda.max()*sigma(k), 2/3);
+
+            if (x_subset.n_rows < x_subset.n_cols)
+              xx /= rho;
+
+            xx.diag() += rho;
 
             L = chol(xx, "lower");
             U = L.t();
-
-            vec eigval = eig_sym(xx);
-            rho = std::pow(eigval.max(), 1/3) * std::pow(lambda.max(), 2/3);
 
             xTy = x_subset.t() * y;
 

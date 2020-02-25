@@ -6,11 +6,9 @@
 #'
 #' @param object an object of class `"Owl"`.
 #' @param ind either "last"
-#' @param xvar what to place on the x axis. `iteration` plots each iteration, `time`
-#'   plots the wall-clock time.
-#' @param yvar what to place on the y axis. `objectives` returns the
-#'   primal and dual objectives whereas `infeasibility` returns
-#'   the infeasibility metric.
+#' @param xvar what to place on the x axis. `iteration` plots each iteration,
+#'   `time` plots the wall-clock time.
+#' @param yvar deprecated (and ignored)
 #' @param ... other arguments that will be used to modify the call to
 #'   [lattice::xyplot()]
 #'
@@ -24,15 +22,17 @@
 plotDiagnostics <- function(object,
                             ind = max(object$diagnostics$penalty),
                             xvar = c("time", "iteration"),
-                            yvar = c("objectives", "infeasibility"),
+                            yvar,
                             ...) {
 
   stopifnot(inherits(object, "Owl"),
             is.numeric(ind),
             length(ind) == 1)
 
+  if (!missing(yvar))
+    warning("'yvar' is deprecated and will be ignored")
+
   xvar <- match.arg(xvar)
-  yvar <- match.arg(yvar)
 
   if (is.null(object$diagnostics))
     stop("no diagnostics found in fit;",
@@ -48,18 +48,13 @@ plotDiagnostics <- function(object,
   if (nrow(d) > 1)
     args$grid <- TRUE
 
-  if (yvar == "objectives") {
-    args$x <- "primal + dual"
-    args$ylab <- "Objective"
-    args$auto.key <- list(space = "inside",
-                          corner = c(0.95, 0.95),
-                          lines = TRUE,
-                          points = FALSE)
 
-  } else if (yvar == "infeasibility") {
-    args$x <- "infeasibility"
-    args$ylab <- "Infeasibility"
-  }
+  args$x <- "primal + dual"
+  args$ylab <- "Objective"
+  args$auto.key <- list(space = "inside",
+                        corner = c(0.95, 0.95),
+                        lines = TRUE,
+                        points = FALSE)
 
   if (xvar == "time") {
     args$x <- paste(args$x, "~ time")
