@@ -4,51 +4,17 @@
 
 using namespace arma;
 
-inline void linearPredictor(mat& linear_predictor,
-                            const mat& x,
-                            const mat& beta,
-                            const rowvec& intercept,
-                            const rowvec& x_center,
-                            const rowvec& x_scale,
-                            const bool fit_intercept,
-                            const bool standardize_features)
+mat matrixSubset(const mat& x, const uvec& active_set)
 {
-  linear_predictor = x*beta;
-
-  if (fit_intercept) {
-    for (uword k = 0; k < linear_predictor.n_cols; ++k)
-      linear_predictor.col(k) += as_scalar(intercept(k));
-  }
+  return x.cols(active_set);
 }
 
-inline void linearPredictor(mat& linear_predictor,
-                            const sp_mat& x,
-                            const mat& beta,
-                            const rowvec& intercept,
-                            const rowvec& x_center,
-                            const rowvec& x_scale,
-                            const bool fit_intercept,
-                            const bool standardize_features)
-{
-  linear_predictor = x*beta;
-
-  for (uword k = 0; k < beta.n_cols; ++k) {
-    if (fit_intercept)
-      linear_predictor.col(k) += as_scalar(intercept(k));
-
-    if (standardize_features)
-      linear_predictor.col(k) -= dot(x_center/x_scale, beta.col(k));
-  }
-}
-
-template <typename T>
-T matrixSubset(const T& x,
-               const uvec& active_set)
+sp_mat matrixSubset(const sp_mat& x, const uvec& active_set)
 {
   const uword p = active_set.n_elem;
   const uword n = x.n_rows;
 
-  T x_subset(n, p);
+  sp_mat x_subset(n, p);
 
   for (uword j = 0; j < p; ++j) {
     uword k = active_set(j);
@@ -89,4 +55,3 @@ inline bool isSparse(SEXP x)
 
   return is_sparse;
 }
-

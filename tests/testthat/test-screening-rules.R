@@ -4,10 +4,10 @@ test_that("screening rules return correct results for instances with known viola
   for (family in c("gaussian", "binomial", "poisson", "multinomial")) {
     d <- owl:::randomProblem(100, 10, q = 0.1, response = family)
 
-    coefs <- coef(owl(d$x, d$y, family = family, screening = FALSE))
-    fit <- owl(d$x, d$y, family = family, screening = TRUE)
+    fit0 <- owl(d$x, d$y, family = family, screening = FALSE)
+    fit1 <- owl(d$x, d$y, family = family, screening = TRUE)
 
-    expect_equivalent(coefs, coef(fit), 1e-5)
+    expect_equivalent(coef(fit0), coef(fit1), 1e-4)
   }
 })
 

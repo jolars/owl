@@ -14,11 +14,11 @@ test_that("unregularized logistic regression matches output from glm()", {
   g_model <- owl(cbind(x1, x2, x3), y,
                  family = "binomial",
                  diagnostics = TRUE,
-                 sigma = 0)
+                 sigma = 1e-5)
 
   expect_equivalent(coef(glm_fit),
                     coef(g_model),
-                    tol = 0.01)
+                    tol = 1e-3)
 })
 
 test_that("regularized slope logistic regression picks out correct features", {

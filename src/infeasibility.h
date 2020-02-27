@@ -5,8 +5,8 @@
 using namespace arma;
 using namespace Rcpp;
 
-inline double Infeasibility(const mat& gradient, const vec& lambda)
+inline double infeasibility(const mat& gradient, const vec& lambda)
 {
-  return std::max(cumsum(sort(abs(vectorise(gradient)),
-                              "descending") - lambda).max(), 0.0);
+  vec infeas = cumsum(sort(abs(vectorise(gradient)), "descending") - lambda);
+  return std::max(infeas.max(), 0.0);
 }

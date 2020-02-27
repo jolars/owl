@@ -8,13 +8,10 @@ using namespace Rcpp;
 template <typename T>
 vec lambdaMax(const T& x,
               const mat& y,
-              const rowvec& x_center,
-              const rowvec& x_scale,
               const rowvec& y_scale,
               const uword n_targets,
               const std::string& family,
-              const bool standardize_features,
-              const bool is_sparse)
+              const bool intercept)
 {
   const uword p = x.n_cols;
   mat lambda_max(p, n_targets);
@@ -27,11 +24,6 @@ vec lambdaMax(const T& x,
     y_new -= y_center;
 
     lambda_max = x.t() * y_new;
-
-    if (is_sparse && standardize_features) {
-      for (uword j = 0; j < p; ++j)
-        lambda_max(j) -= accu(y_new * x_center(j)/x_scale(j));
-    }
 
   } else if (family == "multinomial") {
 
@@ -55,20 +47,14 @@ vec lambdaMax(const T& x,
 
     lambda_max = x.t() * (1 - y);
 
-    if (is_sparse && standardize_features) {
-      for (uword j = 0; j < p; ++j)
-        lambda_max(j) -= accu((1 - y) * x_center(j)/x_scale(j));
-    }
-
   } else {
 
     lambda_max = x.t() * y;
 
-    if (is_sparse && standardize_features) {
-      for (uword j = 0; j < p; ++j)
-        lambda_max(j) -= accu(y * x_center(j)/x_scale(j));
-    }
   }
+
+  if (intercept)
+    lambda_max.shed_row(0);
 
   return abs(vectorise(lambda_max));
 }

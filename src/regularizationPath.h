@@ -12,20 +12,17 @@ void regularizationPath(vec& sigma,
                         double& sigma_max,
                         const T& x,
                         const mat& y,
-                        const rowvec& x_center,
-                        const rowvec& x_scale,
                         const rowvec& y_scale,
-                        const bool standardize_features,
                         const std::string lambda_type,
                         const std::string sigma_type,
                         const double lambda_min_ratio,
                         const double q,
                         const std::string family,
-                        const bool is_sparse)
+                        const bool intercept)
 {
-  const uword n = x.n_rows;
+  const sword n = x.n_rows;
   const uword m = y.n_cols;
-  const uword n_lambda = lambda.n_elem;
+  const sword n_lambda = lambda.n_elem;
   const uword n_sigma = sigma.n_elem;
 
   if (lambda_type == "gaussian" || lambda_type == "bh") {
@@ -38,7 +35,7 @@ void regularizationPath(vec& sigma,
     if (lambda_type == "gaussian" && n_lambda > 1) {
       double sum_sq = 0.0;
 
-      for (uword i = 1; i < n_lambda; ++i) {
+      for (sword i = 1; i < n_lambda; ++i) {
         sum_sq += std::pow(lambda(i - 1), 2);
         double w = std::max(1.0, static_cast<double>(n - i - 1));
         lambda(i) *= std::sqrt(1.0 + sum_sq/w);
@@ -59,13 +56,10 @@ void regularizationPath(vec& sigma,
 
   vec lambda_max = lambdaMax(x,
                              y,
-                             x_center,
-                             x_scale,
                              y_scale,
                              m,
                              family,
-                             standardize_features,
-                             is_sparse);
+                             intercept);
 
   sigma_max =
     (cumsum(sort(abs(lambda_max), "descending"))/cumsum(lambda)).max();
