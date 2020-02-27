@@ -145,7 +145,7 @@ the model fitting resulting from a call to <code><a href='owl.html'>owl()</a></c
   <span class='no'>object</span>,
   <span class='kw'>ind</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span>(<span class='no'>object</span>$<span class='no'>diagnostics</span>$<span class='no'>penalty</span>),
   <span class='kw'>xvar</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"time"</span>, <span class='st'>"iteration"</span>),
-  <span class='kw'>yvar</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"objectives"</span>, <span class='st'>"infeasibility"</span>),
+  <span class='no'>yvar</span>,
   <span class='no'>...</span>
 )</pre>
 
@@ -162,14 +162,12 @@ the model fitting resulting from a call to <code><a href='owl.html'>owl()</a></c
     </tr>
     <tr>
       <th>xvar</th>
-      <td><p>what to place on the x axis. <code>iteration</code> plots each iteration, <code>time</code>
-plots the wall-clock time.</p></td>
+      <td><p>what to place on the x axis. <code>iteration</code> plots each iteration,
+<code>time</code> plots the wall-clock time.</p></td>
     </tr>
     <tr>
       <th>yvar</th>
-      <td><p>what to place on the y axis. <code>objectives</code> returns the
-primal and dual objectives whereas <code>infeasibility</code> returns
-the infeasibility metric.</p></td>
+      <td><p>deprecated (and ignored)</p></td>
     </tr>
     <tr>
       <th>...</th>

@@ -135,21 +135,46 @@
 <h1 class="page-header">
 <a href="#owl-development-version" class="anchor"></a>owl (development version)<small> Unreleased </small>
 </h1>
+<div id="major-changes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#major-changes" class="anchor"></a>Major changes</h2>
+<ul>
+<li>The <code>standardize_features</code> argument in <code><a href="../reference/owl.html">owl()</a></code> has been deprecated in favor of two new arguments: <code>scale</code> and <code>center</code> in order to provide fine-grained control of normalization.</li>
+<li>Just-in-time centering (for sparse predictor matrices) is no longer supported. As a result, <code>center</code> cannot be set to false when the predictor matrix is sparse in the call to <code><a href="../reference/owl.html">owl()</a></code>.</li>
+<li>The FISTA solver has been replaced with an ADMM solver for OLS (<code>family = "gaussian"</code>). Two new arguments were added to control stopping criterion for the ADMM solver: <code>tol_rel</code> and <code>tol_abs</code>.</li>
+</ul>
 </div>
-    <div id="owl-0-1-1" class="section level1">
-<h1 class="page-header">
-<a href="#owl-0-1-1" class="anchor"></a>owl 0.1.1<small> 2020-02-11 </small>
-</h1>
 <div id="minor-changes" class="section level2">
 <h2 class="hasAnchor">
 <a href="#minor-changes" class="anchor"></a>Minor changes</h2>
 <ul>
-<li>A reference to Bogdan et al. (2015) has been added to the description of the package.</li>
+<li>
+<code><a href="../reference/print.Owl.html">print.Owl()</a></code> no longer prints the regularization path when called.</li>
+<li>infeasibility estimates are no longer collected when <code>diagnostics = TRUE</code> in the call to <code><a href="../reference/owl.html">owl()</a></code> and hence the argument <code>yvar</code> in <code><a href="../reference/plotDiagnostics.html">plotDiagnostics()</a></code> has been deprecated.</li>
 </ul>
 </div>
 <div id="bug-fixes" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bug-fixes" class="anchor"></a>Bug fixes</h2>
+<ul>
+<li>Lambda sequences when <code>lambda = "gaussian"</code> are now computed properly when the number of features is larger than the number of observations.</li>
+</ul>
+</div>
+</div>
+    <div id="owl-0-1-1" class="section level1">
+<h1 class="page-header">
+<a href="#owl-0-1-1" class="anchor"></a>owl 0.1.1<small> 2020-02-11 </small>
+</h1>
+<div id="minor-changes-1" class="section level2">
+<h2 class="hasAnchor">
+<a href="#minor-changes-1" class="anchor"></a>Minor changes</h2>
+<ul>
+<li>A reference to Bogdan et al. (2015) has been added to the description of the package.</li>
+</ul>
+</div>
+<div id="bug-fixes-1" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bug-fixes-1" class="anchor"></a>Bug fixes</h2>
 <ul>
 <li>The URL in the readme pointing to the code of conduct is now absolute.</li>
 </ul>

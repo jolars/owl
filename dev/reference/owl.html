@@ -150,7 +150,9 @@ in decreasing order according  to its absolute values.</p>
   <span class='no'>y</span>,
   <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"binomial"</span>, <span class='st'>"multinomial"</span>, <span class='st'>"poisson"</span>),
   <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>standardize_features</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='no'>standardize_features</span>,
+  <span class='kw'>center</span> <span class='kw'>=</span> !<span class='fu'><a href='https://rdrr.io/r/base/class.html'>inherits</a></span>(<span class='no'>x</span>, <span class='st'>"sparseMatrix"</span>),
+  <span class='kw'>scale</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"l2"</span>, <span class='st'>"l1"</span>, <span class='st'>"sd"</span>, <span class='st'>"none"</span>),
   <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"gaussian"</span>, <span class='st'>"bh"</span>, <span class='st'>"oscar"</span>),
   <span class='kw'>lambda_min_ratio</span> <span class='kw'>=</span> <span class='kw'>if</span> (<span class='no'>n</span> <span class='kw'>&lt;</span> <span class='no'>p</span>) <span class='fl'>0.01</span> <span class='kw'>else</span> <span class='fl'>1e-04</span>,
@@ -159,10 +161,12 @@ in decreasing order according  to its absolute values.</p>
   <span class='kw'>screening</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>tol_dev_change</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
   <span class='kw'>tol_dev_ratio</span> <span class='kw'>=</span> <span class='fl'>0.995</span>,
+  <span class='kw'>tol_abs</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
+  <span class='kw'>tol_rel</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>,
   <span class='kw'>max_variables</span> <span class='kw'>=</span> <span class='no'>n</span> * <span class='no'>m</span>,
   <span class='kw'>max_passes</span> <span class='kw'>=</span> <span class='fl'>1e+06</span>,
   <span class='kw'>tol_rel_gap</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
-  <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>,
+  <span class='kw'>tol_infeas</span> <span class='kw'>=</span> <span class='fl'>0.001</span>,
   <span class='kw'>diagnostics</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>verbosity</span> <span class='kw'>=</span> <span class='fl'>0</span>
 )</pre>
@@ -192,7 +196,18 @@ binomial models, it can be a factor.</p></td>
     </tr>
     <tr>
       <th>standardize_features</th>
-      <td><p>whether to standardize features (predictors)</p></td>
+      <td><p>(deprecated)</p></td>
+    </tr>
+    <tr>
+      <th>center</th>
+      <td><p>whether to center predictors or not by their mean. Defaults
+to true if dense matrix, false otherwise.</p></td>
+    </tr>
+    <tr>
+      <th>scale</th>
+      <td><p>type of scaling to apply to predictors, <code>"l1"</code> scales
+predictors to have L1-norm of one, <code>"l2"</code> scales predictors to have
+L2-norm one, <code>"sd"</code> scales predictors to have standard deviation one.</p></td>
     </tr>
     <tr>
       <th>sigma</th>
@@ -234,6 +249,16 @@ automatically set to 0 if a sigma is manually entered</p></td>
 deviance ratio
 \(1 - \mathrm{deviance}/\mathrm{(null-deviance)}\)
 is above this threshold</p></td>
+    </tr>
+    <tr>
+      <th>tol_abs</th>
+      <td><p>absolute tolerance criterion for ADMM solver (used for
+Gaussian dense designs)</p></td>
+    </tr>
+    <tr>
+      <th>tol_rel</th>
+      <td><p>relative tolerance criterion for ADMM solver (used for
+Gaussian dense designs)</p></td>
     </tr>
     <tr>
       <th>max_variables</th>
